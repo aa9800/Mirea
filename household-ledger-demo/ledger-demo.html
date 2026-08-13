@@ -1,0 +1,334 @@
+<title>2026년 8월 가계부</title>
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --surface: #ffffff;
+    --surface-2: #eef0f3;
+    --text: #1d2433;
+    --text-muted: #6b7280;
+    --border: #e2e5ea;
+    --accent: #a8792c;
+    --accent-soft: #f1e4cd;
+    --bar-track: #ecebe6;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12151a;
+      --surface: #1b1f26;
+      --surface-2: #21262e;
+      --text: #e7e9ee;
+      --text-muted: #9aa3b2;
+      --border: #2a2f38;
+      --accent: #d9a54a;
+      --accent-soft: #3a3120;
+      --bar-track: #2d323b;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #12151a;
+    --surface: #1b1f26;
+    --surface-2: #21262e;
+    --text: #e7e9ee;
+    --text-muted: #9aa3b2;
+    --border: #2a2f38;
+    --accent: #d9a54a;
+    --accent-soft: #3a3120;
+    --bar-track: #2d323b;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 48px 20px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, "Segoe UI", "Malgun Gothic", system-ui, sans-serif;
+    display: flex;
+    justify-content: center;
+  }
+
+  .page {
+    width: 100%;
+    max-width: 720px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 40px;
+  }
+
+  header {
+    margin-bottom: 8px;
+  }
+
+  .eyebrow {
+    font-size: 12.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  h1 {
+    font-family: Georgia, "Nanum Myeongjo", "Times New Roman", serif;
+    font-size: 30px;
+    font-weight: 600;
+    margin: 6px 0 4px;
+    text-wrap: balance;
+  }
+
+  .subtitle {
+    color: var(--text-muted);
+    font-size: 14.5px;
+    margin: 0 0 32px;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 36px;
+  }
+
+  .stat {
+    background: var(--surface-2);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  .stat-value {
+    font-family: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, monospace;
+    font-size: 19px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stat-value.accent { color: var(--accent); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+  }
+
+  thead th {
+    text-align: left;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    font-weight: 600;
+    padding: 0 0 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  th.num, td.num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  tbody td {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14.5px;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .cat-name {
+    font-weight: 500;
+  }
+
+  .amount {
+    font-family: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, monospace;
+  }
+
+  .share-cell {
+    width: 42%;
+  }
+
+  .share-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .share-track {
+    flex: 1;
+    height: 7px;
+    background: var(--bar-track);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .share-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 4px;
+  }
+
+  .share-pct {
+    font-family: ui-monospace, "SF Mono", "Cascadia Mono", Consolas, monospace;
+    font-size: 13px;
+    color: var(--text-muted);
+    width: 38px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  tfoot td {
+    padding-top: 16px;
+    font-weight: 600;
+    font-size: 15px;
+  }
+
+  tfoot .amount {
+    font-size: 16px;
+    color: var(--accent);
+  }
+
+  .note {
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px dashed var(--border);
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  .note code {
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 12.5px;
+  }
+</style>
+
+<div class="page">
+  <div class="card">
+    <header>
+      <div class="eyebrow">가계부.csv 31건 실행 결과</div>
+      <h1>2026년 8월 가계부</h1>
+      <p class="subtitle">가상의 지출 내역 31건을 CSV로 만들고, 실제로 스크립트를 돌려 카테고리별 합계를 계산한 결과입니다.</p>
+    </header>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">총 지출</div>
+        <div class="stat-value">1,350,100원</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">최다 지출 카테고리</div>
+        <div class="stat-value accent">주거·공과금</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">거래 건수</div>
+        <div class="stat-value">31건</div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>카테고리</th>
+            <th class="num">금액</th>
+            <th class="share-cell">비중</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="cat-name">주거·공과금</td>
+            <td class="num amount">550,000원</td>
+            <td class="share-cell">
+              <div class="share-bar-row">
+                <div class="share-track"><div class="share-fill" style="width: 40.7%"></div></div>
+                <span class="share-pct">40.7%</span>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="cat-name">식비</td>
+            <td class="num amount">318,400원</td>
+            <td class="share-cell">
+              <div class="share-bar-row">
+                <div class="share-track"><div class="share-fill" style="width: 23.6%"></div></div>
+                <span class="share-pct">23.6%</span>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="cat-name">쇼핑</td>
+            <td class="num amount">298,700원</td>
+            <td class="share-cell">
+              <div class="share-bar-row">
+                <div class="share-track"><div class="share-fill" style="width: 22.1%"></div></div>
+                <span class="share-pct">22.1%</span>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="cat-name">여가·문화</td>
+            <td class="num amount">82,000원</td>
+            <td class="share-cell">
+              <div class="share-bar-row">
+                <div class="share-track"><div class="share-fill" style="width: 6.1%"></div></div>
+                <span class="share-pct">6.1%</span>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="cat-name">기타</td>
+            <td class="num amount">65,000원</td>
+            <td class="share-cell">
+              <div class="share-bar-row">
+                <div class="share-track"><div class="share-fill" style="width: 4.8%"></div></div>
+                <span class="share-pct">4.8%</span>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="cat-name">교통</td>
+            <td class="num amount">36,000원</td>
+            <td class="share-cell">
+              <div class="share-bar-row">
+                <div class="share-track"><div class="share-fill" style="width: 2.7%"></div></div>
+                <span class="share-pct">2.7%</span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td>합계 (31건)</td>
+            <td class="num amount">1,350,100원</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <p class="note">
+      실제로 <code>가계부.csv</code> 파일(가상 거래 31건)을 만들고, PowerShell 스크립트로 카테고리별
+      합계·건수·비중을 계산해서 이 표에 그대로 반영했습니다. 사용자님의 진짜 파일을 올려주시면
+      같은 방식으로 바로 처리해드려요.
+    </p>
+  </div>
+</div>
