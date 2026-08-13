@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>내 사진 분석기</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Malgun Gothic", "Segoe UI", sans-serif;
+    background: #1e1f24;
+    color: #eee;
+    margin: 0;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  h1 {
+    font-size: 22px;
+    margin-bottom: 4px;
+  }
+  p.desc {
+    color: #aaa;
+    margin-top: 0;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  #status {
+    margin-bottom: 16px;
+    font-size: 14px;
+    color: #7fd6ff;
+  }
+  #uploadBox {
+    border: 2px dashed #555;
+    border-radius: 10px;
+    padding: 30px;
+    text-align: center;
+    width: 100%;
+    max-width: 600px;
+    cursor: pointer;
+    background: #2a2b31;
+    transition: border-color .2s;
+  }
+  #uploadBox:hover { border-color: #7fd6ff; }
+  #fileInput { display: none; }
+  #canvasWrap {
+    margin-top: 20px;
+    max-width: 100%;
+    position: relative;
+  }
+  canvas {
+    max-width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,.4);
+  }
+  #legend {
+    margin-top: 14px;
+    display: flex;
+    gap: 20px;
+    font-size: 14px;
+  }
+  .legendItem { display: flex; align-items: center; gap: 6px; }
+  .swatch { width: 14px; height: 14px; border-radius: 3px; }
+  #resultText {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #ccc;
+  }
+</style>
+</head>
+<body>
+
+  <h1>📸 내 사진 분석기</h1>
+  <p class="desc">사진을 올리면 <b>사람</b>은 노란 박스, <b>강아지</b>는 주황 박스로 표시하고 인식 확률(%)을 알려드려요.</p>
+
+  <div id="status">모델을 불러오는 중입니다... 잠시만 기다려주세요.</div>
+
+  <div id="uploadBox">
+    <div>📁 여기를 클릭해서 사진을 선택하세요</div>
+    <div style="font-size:12px;color:#888;margin-top:6px;">(jpg, png 등 이미지 파일)</div>
+    <input type="file" id="fileInput" accept="image/*">
+  </div>
+
+  <div id="canvasWrap" style="display:none;">
+    <canvas id="canvas"></canvas>
+  </div>
+
+  <div id="legend" style="display:none;">
+    <div class="legendItem"><span class="swatch" style="background:#FFD600;"></span> 사람</div>
+    <div class="legendItem"><span class="swatch" style="background:#FF8C00;"></span> 강아지</div>
+  </div>
+
+  <div id="resultText"></div>
+
+<!-- TensorFlow.js + COCO-SSD 객체 인식 모델 (CDN) -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
+
+<script>
+  const statusEl = document.getElementById('status');
+  const uploadBox = document.getElementById('uploadBox');
+  const fileInput = document.getElementById('fileInput');
+  const canvasWrap = document.getElementById('canvasWrap');
+  const canvas = document.getElementById('canvas');
+  const legend = document.getElementById('legend');
+  const resultText = document.getElementById('resultText');
+  const ctx = canvas.getContext('2d');
+
+  let model = null;
+
+  // 우리가 찾고 싶은 물체와, 박스 색상 / 한글 이름 매핑
+  const TARGETS = {
+    person: { label: '사람', color: '#FFD600', textColor: '#1e1f24' },
+    dog:    { label: '강아지', color: '#FF8C00', textColor: '#1e1f24' },
+  };
+
+  async function loadModel() {
+    try {
+      model = await cocoSsd.load();
+      statusEl.textContent = '✅ 모델 준비 완료! 사진을 올려주세요.';
+    } catch (e) {
+      statusEl.textContent = '❌ 모델을 불러오지 못했어요. 인터넷 연결을 확인해주세요.';
+      console.error(e);
+    }
+  }
+  loadModel();
+
+  uploadBox.addEventListener('click', () => fileInput.click());
+
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const img = new Image();
+    img.onload = () => runDetection(img);
+    img.src = URL.createObjectURL(file);
+  });
+
+  async function runDetection(img) {
+    if (!model) {
+      resultText.textContent = '모델이 아직 준비되지 않았어요. 잠시 후 다시 시도해주세요.';
+      return;
+    }
+
+    canvasWrap.style.display = 'block';
+    legend.style.display = 'flex';
+    resultText.textContent = '🔍 분석 중...';
+
+    // 캔버스에 원본 이미지 그리기
+    canvas.width = img.width;
+    canvas.height = img.height;
+    ctx.drawImage(img, 0, 0, img.width, img.height);
+
+    const predictions = await model.detect(img);
+
+    let personCount = 0;
+    let dogCount = 0;
+
+    predictions.forEach(pred => {
+      const target = TARGETS[pred.class];
+      if (!target) return; // 사람, 강아지 외에는 표시하지 않음
+
+      if (pred.class === 'person') personCount++;
+      if (pred.class === 'dog') dogCount++;
+
+      const [x, y, w, h] = pred.bbox;
+      const percent = Math.round(pred.score * 100);
+      const label = `${target.label} ${percent}%`;
+
+      // 박스 그리기
+      ctx.lineWidth = Math.max(3, img.width / 250);
+      ctx.strokeStyle = target.color;
+      ctx.strokeRect(x, y, w, h);
+
+      // 라벨 배경 + 텍스트
+      ctx.font = `bold ${Math.max(16, img.width / 45)}px sans-serif`;
+      const textWidth = ctx.measureText(label).width;
+      const textHeight = Math.max(20, img.width / 35);
+      ctx.fillStyle = target.color;
+      ctx.fillRect(x, Math.max(0, y - textHeight), textWidth + 16, textHeight);
+
+      ctx.fillStyle = target.textColor;
+      ctx.fillText(label, x + 8, Math.max(textHeight - 6, y - 6));
+    });
+
+    if (personCount === 0 && dogCount === 0) {
+      resultText.textContent = '사진에서 사람이나 강아지를 찾지 못했어요.';
+    } else {
+      resultText.textContent = `✅ 분석 완료 — 사람 ${personCount}명, 강아지 ${dogCount}마리 발견!`;
+    }
+  }
+</script>
+
+</body>
+</html>
