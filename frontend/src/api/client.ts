@@ -74,6 +74,24 @@ export async function fetchGitStatus(): Promise<GitStatus> {
   return handle<GitStatus>(res);
 }
 
+// 로컬 프로젝트 폴더 경로를 실제로 실행(npm install/run dev)해서, 소스 코드에서
+// 자동으로 찾은 페이지 경로들을 각각 스크린샷 찍어온다. 시간이 꽤 걸릴 수 있다
+// (설치+서버 기동+페이지별 촬영). 저장하지 않는다 — 프론트가 반환된 이미지들을
+// "실행 결과 이미지" 칸에 넣어주고, 사용자가 저장해야 반영된다.
+export interface ScreenshotResult {
+  images: { path: string; image: string }[];
+  failed: { path: string; error: string }[];
+}
+
+export async function captureScreenshot(projectPath: string): Promise<ScreenshotResult> {
+  const res = await fetch('/api/screenshot', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ projectPath }),
+  });
+  return handle<ScreenshotResult>(res);
+}
+
 // 저장하지 않는다 — 결과로 폼 필드를 채우기만 하고, 사용자가 확인 후 직접 저장해야 반영된다.
 // content(붙여넣은 텍스트/단일 파일) 또는 files(폴더 선택 시 여러 파일) 중 하나를 채워서 호출한다.
 export async function analyzeContent(input: {

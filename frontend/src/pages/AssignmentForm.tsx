@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { createAssignment, updateAssignment, fetchAssignment, fileUrl, analyzeContent } from '../api/client';
+import { createAssignment, updateAssignment, fetchAssignment, fileUrl, analyzeContent, captureScreenshot } from '../api/client';
 import type { Assignment, CodeBlock, FileRef } from '../api/types';
 import TagInput from '../components/TagInput';
 
@@ -53,7 +53,11 @@ const CODE_EXT_LANGUAGE: Record<string, string> = {
 };
 // 코드 블록으로는 안 넣지만, 내용을 읽어서 AI 분석 참고 자료로는 쓸 수 있는 파일들.
 const TEXT_ONLY_EXT = /\.(md|txt|csv|ya?ml|xml|log|ini|cfg|env)$/i;
-const SKIP_DIR = /(^|[/\\])(node_modules|\.git|dist|build|__pycache__|\.ipynb_checkpoints)([/\\]|$)/i;
+const SKIP_DIR =
+  /(^|[/\\])(node_modules|\.git|dist|build|__pycache__|\.ipynb_checkpoints|\.claude|\.vscode|\.idea)([/\\]|$)/i;
+// 의존성 버전 해시만 잔뜩 든 락파일 — 몇십~몇백 KB짜리 순수 노이즈라 코드 블록은커녕
+// 첨부로도 의미가 없어서 폴더 분석에서 통째로 건너뛴다.
+const LOCKFILE_NAMES = new Set(['package-lock.json', 'yarn.lock', 'pnpm-lock.yaml', 'bun.lockb', 'composer.lock']);
 const MAX_FOLDER_FILES = 60;
 const MAX_TEXT_READ_SIZE = 300_000;
 
@@ -184,6 +188,11 @@ export default function AssignmentForm({ mode }: Props) {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
   const [aiNotice, setAiNotice] = useState<string | null>(null);
+
+  const [screenshotPath, setScreenshotPath] = useState('');
+  const [screenshotLoading, setScreenshotLoading] = useState(false);
+  const [screenshotError, setScreenshotError] = useState<string | null>(null);
+  const [screenshotNotice, setScreenshotNotice] = useState<string | null>(null);
 
   useEffect(() => {
     if (mode !== 'edit' || !id) return;
@@ -319,7 +328,9 @@ export default function AssignmentForm({ mode }: Props) {
     setAiError(null);
     setAiNotice(null);
 
-    const all = Array.from(fileList).filter((f) => !SKIP_DIR.test(relPath(f)) && f.size > 0);
+    const all = Array.from(fileList).filter(
+      (f) => !SKIP_DIR.test(relPath(f)) && !LOCKFILE_NAMES.has(f.name) && f.size > 0,
+    );
     if (all.length === 0) {
       setAiError('폴더에서 파일을 찾지 못했습니다.');
       return;
@@ -469,6 +480,44 @@ export default function AssignmentForm({ mode }: Props) {
 
   function removeNewExecutionImage(index: number) {
     setNewExecutionImages((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  // 로컬 프로젝트 폴더를 실제로 실행(npm install/run dev)해서 화면을 스크린샷 찍어온다.
+  // 노트북과 달리 일반 소스코드 폴더에는 "실행하면 이렇게 보인다"는 이미지가 어디에도
+  // 저장돼있지 않아서, 직접 실행해서 찍는 방법밖에 없다 — 그래서 시간이 꽤 걸릴 수 있다
+  // (의존성 설치 + 서버 기동 + 촬영). 브라우저는 폴더 선택으로 절대 경로를 안 주기 때문에
+  // 이 기능만 예외적으로 경로를 직접 입력받는다.
+  async function handleCaptureScreenshot() {
+    if (!screenshotPath.trim()) {
+      setScreenshotError('프로젝트 폴더의 전체 경로를 입력해주세요 (예: C:\\Users\\me\\my-app).');
+      return;
+    }
+    setScreenshotError(null);
+    setScreenshotNotice(null);
+    setScreenshotLoading(true);
+    try {
+      const { images, failed } = await captureScreenshot(screenshotPath.trim());
+      if (images.length === 0) {
+        setScreenshotError('스크린샷을 하나도 찍지 못했습니다.');
+        return;
+      }
+      const files = images.map(({ path: routePath, image }, i) => {
+        const base64 = image.split(',')[1] ?? '';
+        const safeName = routePath.replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-|-$/g, '') || 'root';
+        return base64ToFile(base64, 'image/png', `screenshot-${safeName || i}-${Date.now()}.png`);
+      });
+      setNewExecutionImages((prev) => [...prev, ...files]);
+
+      const notes: string[] = [`페이지 ${images.length}개 스크린샷 완료 (${images.map((i) => i.path).join(', ')}).`];
+      if (failed.length > 0) {
+        notes.push(`${failed.length}개는 촬영에 실패했어요 (${failed.map((f) => f.path).join(', ')}).`);
+      }
+      setScreenshotNotice(notes.join(' '));
+    } catch (err) {
+      setScreenshotError((err as Error).message);
+    } finally {
+      setScreenshotLoading(false);
+    }
   }
 
   // Ctrl+V로 클립보드의 이미지를 붙여넣을 수 있도록, 폼이 떠 있는 동안 전역으로 감지한다.
@@ -806,6 +855,22 @@ export default function AssignmentForm({ mode }: Props) {
           }}
         />
         <p className="hint">실행 결과 화면(그래프, 스크린샷 등)이 있다면 이미지로 첨부하세요. 폴더 분석 시 노트북 출력 이미지는 자동으로 여기 들어와요.</p>
+
+        <div className="screenshot-capture">
+          <input
+            className="screenshot-capture__input"
+            placeholder="또는 프로젝트 폴더 전체 경로 입력 (예: C:\Users\me\my-app)"
+            value={screenshotPath}
+            onChange={(e) => setScreenshotPath(e.target.value)}
+            disabled={screenshotLoading}
+          />
+          <button type="button" onClick={handleCaptureScreenshot} disabled={screenshotLoading}>
+            {screenshotLoading ? '실행 중... (설치+기동에 몇 분 걸릴 수 있어요)' : '📸 서버 실행 후 스크린샷'}
+          </button>
+        </div>
+        <p className="hint">소스 코드에서 페이지 경로를 자동으로 찾아 각각 스크린샷 찍어요 (React Router / Next.js 기준, 못 찾으면 첫 화면만).</p>
+        {screenshotNotice && <p className="hint">{screenshotNotice}</p>}
+        {screenshotError && <p className="error-text">{screenshotError}</p>}
 
         {newExecutionImages.length > 0 && (
           <div className="image-preview-grid">

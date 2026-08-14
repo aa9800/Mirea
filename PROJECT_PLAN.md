@@ -156,10 +156,12 @@ assignments/
         readme.js               # meta.json → README.md 렌더링
         git.js                 # 실제 저장소 루트 탐지 + git add/commit/push 자동화
         ai.js                  # Gemini(기본)/Claude API로 등록 폼 메타데이터 초안 제안
+        screenshot.js          # 로컬 프로젝트 폴더를 실행해 개발 서버 화면을 스크린샷
       routes/
         assignments.js         # /api/assignments 라우트
         git.js                 # /api/git/status 라우트 (읽기 전용)
         ai.js                  # /api/ai/analyze 라우트
+        screenshot.js          # /api/screenshot 라우트
   frontend/
     index.html
     package.json
@@ -279,6 +281,34 @@ assignments/
   (참고: 로컬 `claude` CLI를 서브프로세스로 불러 Claude Code 구독 인증을 재사용하는
   방법도 검토했으나, Windows에서 `.cmd` 스크립트 spawn이 Node 보안 정책상 막혀
   있어 포기했다.)
+
+### 개발 서버 스크린샷 — 일반 프로젝트 폴더의 "실행 결과" 이미지
+
+노트북(.ipynb)은 파일 안에 이미 실행됐던 결과 이미지가 base64로 저장돼있어 그냥
+꺼내오면 되지만, 일반 소스코드 프로젝트(예: React/Vite 앱)는 "실행하면 이렇게
+보인다"는 이미지가 어디에도 저장돼있지 않다 — AI가 코드를 읽고 설명은 할 수 있어도
+실제로 화면을 본 적은 없다. 그래서 실제로 실행해서 찍는 별도 기능을 만들었다
+(`backend/src/lib/screenshot.js`, `POST /api/screenshot`):
+
+1. 프론트 폼에 "프로젝트 폴더 전체 경로"를 직접 입력받는다 — 브라우저의 폴더 선택
+   (`webkitdirectory`)은 절대 경로를 안 주기 때문에, 이 기능만 예외적으로 경로
+   문자열 입력이 필요하다. 같은 컴퓨터에서 도는 백엔드이기 때문에 가능한 방식이다.
+2. 백엔드가 해당 경로에서 `package.json`의 `dev`/`start` 스크립트를 확인하고,
+   `node_modules`가 없으면 `npm install`부터 실행한다.
+3. `npm run dev`(또는 `start`)를 띄우고, stdout/stderr에서 `http://localhost:PORT`
+   형태의 URL이 찍히길 기다린다 (포트를 미리 가정하지 않음 — 이 앱 자신도 5173을
+   쓰므로 대상 프로젝트가 다른 포트로 뜰 수 있다).
+4. Puppeteer(헤드리스 Chromium)로 그 URL에 접속해 스크린샷을 찍고, 개발 서버
+   프로세스를 정리(kill)한다.
+5. 결과 이미지는 "실행 결과 이미지" 칸에 들어간다 — 다른 AI 제안과 마찬가지로
+   저장 전까지는 확정이 아니다.
+
+**이건 임의의 코드를 실제로 실행하는 기능이다** — 사용자가 직접 지정한 자기
+프로젝트 폴더에서만, 명시적으로 경로를 입력하고 버튼을 눌러야만 동작한다
+(터미널에서 직접 `npm run dev` 치는 것과 같은 신뢰 수준이지, 자동으로 아무 폴더나
+대상으로 삼지 않는다). Windows에서 `npm.cmd`를 spawn하려면 Node 보안 정책상
+`shell: true`가 필요한데, 여기서 shell에 넘어가는 인자는 `install`/`run`/`dev`/
+`start` 같은 고정 문자열뿐이라(사용자 입력이 섞이지 않음) 안전하다.
 
 ## 7. 프론트엔드 화면
 

@@ -455,6 +455,14 @@
     @apply text-[13px] font-mono;
   }
 
+  /* 로컬 프로젝트 경로 입력 + 스크린샷 실행 버튼 한 줄 */
+  .screenshot-capture {
+    @apply flex flex-wrap gap-2 mt-2;
+  }
+  .screenshot-capture__input {
+    @apply flex-1 min-w-[240px] px-3 py-2 border border-line rounded-lg text-xs font-mono bg-[#fafbfc];
+  }
+
   /* 코드 블록 여러 개 편집 — 과제 하나에 언어가 다른 코드가 여러 개 있을 수 있다. */
   .code-block-editor {
     @apply mb-3 pb-3 border-b border-line flex flex-col gap-1.5;

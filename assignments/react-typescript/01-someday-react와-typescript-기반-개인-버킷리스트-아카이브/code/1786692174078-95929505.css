@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+/*
+ * Someday 디자인 토큰.
+ * "따뜻하고 감성적이지만 과하지 않은 개인 라이프 아카이브" 톤을 위해
+ * 회색/보라 위주 팔레트 대신 종이 질감의 웜톤 + 테라코타 포인트를 사용한다.
+ * Tailwind v4의 CSS 기반 테마 방식(@theme)으로 선언하면
+ * bg-paper, text-ink, border-line 같은 유틸리티 클래스가 자동으로 생성된다.
+ */
+@theme {
+  --color-paper: #faf6ef; /* 페이지 배경 */
+  --color-surface: #ffffff; /* 등록 폼 · 카드 등 주요 콘텐츠 표면 */
+  --color-surface-soft: #f2ebdf; /* 요약 · 필터 등 보조 영역 표면 */
+  --color-ink: #2b241e; /* 기본 텍스트 */
+  --color-ink-soft: #77695c; /* 보조 텍스트 */
+  --color-ink-faint: #a89a8a; /* placeholder, 비활성 텍스트 */
+  --color-line: #e7dbc8; /* 테두리 */
+  --color-accent: #b5562f; /* 포인트 색상(등록 버튼, 강조) */
+  --color-accent-soft: #f3ddcb; /* 카테고리 배지 등 포인트 배경 */
+  --color-progress: #4f7585; /* "진행 중" 상태 */
+  --color-progress-soft: #e1e9ea;
+  --color-done: #5f7d4c; /* "완료" 상태 */
+  --color-done-soft: #e4ead9;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+}
