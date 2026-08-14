@@ -162,15 +162,23 @@ function schemaFor({ files }, forGemini) {
   return folder ? FOLDER_SUGGESTION_SCHEMA : SUGGESTION_SCHEMA;
 }
 
+// 폴더 전체에 배분할 문자 수 예산. 파일마다 고정 길이로 자르고 그 뒤에 합친 걸
+// 다시 통째로 자르면(예전 방식) 파일이 많을 때 뒤쪽 파일은 프롬프트에 아예 안 들어가
+// AI가 그 파일을 본 적조차 없어서 fileDescriptions에 설명이 안 생기는 문제가 있었다.
+// 그래서 파일 개수에 맞춰 파일당 몫을 나누고(적어도 MIN_PER_FILE은 보장), 다 합친
+// 뒤에 또 자르지 않는다 — 모든 파일이 최소한 일부라도 반드시 AI에게 전달된다.
+const FOLDER_TOTAL_BUDGET = 100_000;
+const FOLDER_MIN_PER_FILE = 800;
+
 // 붙여넣은 텍스트(content) 하나만 올 수도 있고, 폴더를 선택해 여러 파일(files)이
 // 올 수도 있다. 폴더인 경우 파일별로 표시를 붙여 하나의 분석 대상 텍스트로 합친다.
 function buildContentBlock({ content, filename, files }) {
   if (isFolderRequest({ files })) {
-    const perFileLimit = 4000;
+    const perFileLimit = Math.max(FOLDER_MIN_PER_FILE, Math.floor(FOLDER_TOTAL_BUDGET / files.length));
     const combined = files
       .map((f) => `### 파일: ${f.name}\n${String(f.content || '').slice(0, perFileLimit)}`)
       .join('\n\n');
-    return { text: combined.slice(0, 16000), label: `폴더 (${files.length}개 파일)` };
+    return { text: combined, label: `폴더 (${files.length}개 파일)` };
   }
   return { text: String(content || '').slice(0, 12000), label: filename || '붙여넣은 내용' };
 }
@@ -289,7 +297,9 @@ async function analyzeViaAnthropic({ content, filename, files }) {
   try {
     response = await getClient().messages.create({
       model: 'claude-opus-5',
-      max_tokens: 4096,
+      // 폴더 분석은 파일마다 fileDescriptions 항목이 하나씩 늘어나서, 파일이 많으면
+      // 4096으로는 응답이 중간에 잘릴 수 있다 — 넉넉하게 잡는다.
+      max_tokens: isFolderRequest({ files }) ? 8192 : 4096,
       output_config: {
         effort: 'medium',
         format: { type: 'json_schema', schema },
