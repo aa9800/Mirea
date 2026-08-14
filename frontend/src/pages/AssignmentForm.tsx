@@ -107,15 +107,20 @@ function extractNotebook(
       .filter((s: string) => s.trim())
       .join('\n\n');
 
-    const outputTexts: string[] = [];
+    // 출력은 셀 전체를 뭉쳐놓지 않고, "이 셀의 코드 → 이 셀의 출력"이 한눈에 짝지어
+    // 보이도록 셀 단위로 묶는다. 위쪽 "코드" 섹션엔 전체 코드를 그대로 두고, 여기
+    // outputText는 "실행 결과" 섹션 전용으로 코드 조각 + 그 결과를 나란히 담는다.
     const outputImages: File[] = [];
+    const steps: { code: string; output: string }[] = [];
     let imgIndex = 0;
     for (const cell of codeCells) {
+      const cellCode = joinSource(cell.source).trim();
+      const cellOutputTexts: string[] = [];
       for (const out of cell.outputs || []) {
         if (out.output_type === 'stream' && out.text) {
-          outputTexts.push(joinSource(out.text));
+          cellOutputTexts.push(joinSource(out.text));
         } else if (out.output_type === 'error') {
-          outputTexts.push(`[에러] ${out.ename}: ${out.evalue}`);
+          cellOutputTexts.push(`[에러] ${out.ename}: ${out.evalue}`);
         } else if ((out.output_type === 'execute_result' || out.output_type === 'display_data') && out.data) {
           const png = out.data['image/png'];
           const jpeg = out.data['image/jpeg'];
@@ -124,22 +129,32 @@ function extractNotebook(
           } else if (jpeg) {
             outputImages.push(base64ToFile(jpeg, 'image/jpeg', `${baseName}-output-${++imgIndex}.jpg`));
           } else if (out.data['text/plain']) {
-            outputTexts.push(joinSource(out.data['text/plain']));
+            cellOutputTexts.push(joinSource(out.data['text/plain']));
           }
         }
       }
+      // 출력이 없는 셀(import, 함수 정의 등)은 짝지을 결과가 없으니 건너뛴다.
+      if (cellCode && cellOutputTexts.length > 0) {
+        steps.push({ code: cellCode, output: cellOutputTexts.join('\n').trim() });
+      }
     }
 
-    if (!code.trim() && !markdown.trim() && outputImages.length === 0 && outputTexts.length === 0) return null;
+    if (!code.trim() && !markdown.trim() && outputImages.length === 0 && steps.length === 0) return null;
 
     const rawLanguage: string = nb.metadata?.language_info?.name || nb.metadata?.kernelspec?.language || 'python';
     const language = CODE_LANGUAGE_OPTIONS.some((opt) => opt.value === rawLanguage) ? rawLanguage : 'python';
+
+    const outputText = steps
+      .map((s) => `[코드]\n${s.code}\n[결과]\n${s.output}`)
+      .join('\n\n---\n\n')
+      .trim()
+      .slice(0, 6000);
 
     return {
       code: code.trim(),
       language,
       markdown: markdown.trim(),
-      outputText: outputTexts.join('\n').trim().slice(0, 4000),
+      outputText,
       outputImages,
     };
   } catch {

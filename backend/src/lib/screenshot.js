@@ -395,8 +395,13 @@ async function captureDevServerScreenshot(projectPath) {
   // HTML/CSS/JS 프로젝트일 수 있으니 .html 파일을 찾아서 정적으로 서빙해본다.
   const htmlFiles = findHtmlFiles(projectPath);
   if (htmlFiles.length === 0) {
+    // 흔한 오해: 주피터 노트북(.ipynb) 폴더를 여기 넣는 경우 — 노트북은 브라우저로
+    // 띄우는 웹 페이지가 아니라서 이 기능 대상이 아니다. "폴더로 분석" 쪽으로 안내한다.
+    const hasNotebook = walkFiles(projectPath, ['.ipynb']).length > 0;
     const e = new Error(
-      'package.json의 "dev"/"start" 스크립트도, .html 파일도 찾지 못했습니다 — 웹 프로젝트 폴더가 맞는지 확인해주세요.',
+      hasNotebook
+        ? '이 폴더는 주피터 노트북(.ipynb)인 것 같아요 — 노트북은 브라우저로 띄우는 웹 페이지가 아니라 이 기능(스크린샷) 대상이 아닙니다. 등록 폼의 "📁 폴더로 분석" 버튼을 대신 사용해주세요 (노트북 안의 코드·실행 결과·출력 이미지를 직접 읽어옵니다).'
+        : 'package.json의 "dev"/"start" 스크립트도, .html 파일도 찾지 못했습니다 — 웹 프로젝트 폴더가 맞는지 확인해주세요.',
     );
     e.code = 'NOT_A_PROJECT';
     throw e;
