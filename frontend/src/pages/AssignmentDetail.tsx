@@ -6,6 +6,7 @@ import GithubStatusBadge from '../components/GithubStatusBadge';
 import FavoriteToggle from '../components/FavoriteToggle';
 import HighlightedCode from '../components/HighlightedCode';
 import AssignmentCard from '../components/AssignmentCard';
+import Lightbox from '../components/Lightbox';
 
 // 같은 과목이면 +2점, 겹치는 태그 하나당 +1점 — 별도 추천 엔진 없이 기존 데이터만으로
 // "관련 있어 보이는" 순서를 매긴다. 점수가 0(과목도 다르고 겹치는 태그도 없음)이면 제외.
@@ -23,6 +24,7 @@ export default function AssignmentDetail() {
   const [related, setRelated] = useState<Assignment[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [lightbox, setLightbox] = useState<{ src: string; alt: string } | null>(null);
 
   const load = useCallback(() => {
     if (!id) return;
@@ -165,18 +167,21 @@ export default function AssignmentDetail() {
           <section className="doc-section">
             <h2 className="doc-section__label">이미지</h2>
             <div className="image-gallery">
-              {assignment.images.map((img) => (
-                <figure key={img.storedName} className={img.storedName === assignment.thumbnail ? 'is-thumbnail' : ''}>
-                  <img
-                    src={fileUrl(assignment.subjectSlug, assignment.leaf, 'images', img.storedName)}
-                    alt={img.filename}
-                  />
-                  <figcaption>
-                    {img.filename}
-                    {img.storedName === assignment.thumbnail ? ' (대표)' : ''}
-                  </figcaption>
-                </figure>
-              ))}
+              {assignment.images.map((img) => {
+                const src = fileUrl(assignment.subjectSlug, assignment.leaf, 'images', img.storedName);
+                return (
+                  <figure
+                    key={img.storedName}
+                    className={img.storedName === assignment.thumbnail ? 'is-thumbnail' : ''}
+                  >
+                    <img src={src} alt={img.filename} onClick={() => setLightbox({ src, alt: img.filename })} />
+                    <figcaption>
+                      {img.filename}
+                      {img.storedName === assignment.thumbnail ? ' (대표)' : ''}
+                    </figcaption>
+                  </figure>
+                );
+              })}
             </div>
           </section>
         )}
@@ -192,15 +197,15 @@ export default function AssignmentDetail() {
             )}
             {assignment.executionResultImages.length > 0 && (
               <div className="image-gallery">
-                {assignment.executionResultImages.map((img) => (
-                  <figure key={img.storedName}>
-                    <img
-                      src={fileUrl(assignment.subjectSlug, assignment.leaf, 'images', img.storedName)}
-                      alt={img.filename}
-                    />
-                    <figcaption>{img.filename}</figcaption>
-                  </figure>
-                ))}
+                {assignment.executionResultImages.map((img) => {
+                  const src = fileUrl(assignment.subjectSlug, assignment.leaf, 'images', img.storedName);
+                  return (
+                    <figure key={img.storedName}>
+                      <img src={src} alt={img.filename} onClick={() => setLightbox({ src, alt: img.filename })} />
+                      <figcaption>{img.filename}</figcaption>
+                    </figure>
+                  );
+                })}
               </div>
             )}
           </section>
@@ -251,6 +256,8 @@ export default function AssignmentDetail() {
           </div>
         </section>
       )}
+
+      {lightbox && <Lightbox src={lightbox.src} alt={lightbox.alt} onClose={() => setLightbox(null)} />}
     </article>
   );
 }

@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { createAssignment, updateAssignment, fetchAssignment, fileUrl, analyzeContent, captureScreenshot } from '../api/client';
 import type { Assignment, CodeBlock, FileRef } from '../api/types';
 import TagInput from '../components/TagInput';
+import Lightbox from '../components/Lightbox';
 
 interface Props {
   mode: 'create' | 'edit';
@@ -193,6 +194,7 @@ export default function AssignmentForm({ mode }: Props) {
   const [screenshotLoading, setScreenshotLoading] = useState(false);
   const [screenshotError, setScreenshotError] = useState<string | null>(null);
   const [screenshotNotice, setScreenshotNotice] = useState<string | null>(null);
+  const [lightbox, setLightbox] = useState<{ src: string; alt: string } | null>(null);
 
   useEffect(() => {
     if (mode !== 'edit' || !id) return;
@@ -757,7 +759,11 @@ export default function AssignmentForm({ mode }: Props) {
           <div className="image-preview-grid">
             {newImages.map((file, i) => (
               <div key={i} className="image-preview">
-                <img src={newImagePreviews[i]} alt={file.name} />
+                <img
+                  src={newImagePreviews[i]}
+                  alt={file.name}
+                  onClick={() => setLightbox({ src: newImagePreviews[i], alt: file.name })}
+                />
                 <button type="button" onClick={() => removeNewImage(i)} aria-label={`${file.name} 제거`}>
                   ×
                 </button>
@@ -774,6 +780,7 @@ export default function AssignmentForm({ mode }: Props) {
                   src={fileUrl(subjectSlug, leaf, 'images', f.storedName)}
                   alt={f.filename}
                   className="thumb-preview"
+                  onClick={() => setLightbox({ src: fileUrl(subjectSlug, leaf, 'images', f.storedName), alt: f.filename })}
                 />
                 <span>{f.filename}</span>
                 <label className="inline-check">
@@ -893,6 +900,7 @@ export default function AssignmentForm({ mode }: Props) {
                   src={fileUrl(subjectSlug, leaf, 'images', f.storedName)}
                   alt={f.filename}
                   className="thumb-preview"
+                  onClick={() => setLightbox({ src: fileUrl(subjectSlug, leaf, 'images', f.storedName), alt: f.filename })}
                 />
                 <span>{f.filename}</span>
                 <label className="inline-check">
@@ -930,6 +938,8 @@ export default function AssignmentForm({ mode }: Props) {
       <button type="submit" disabled={saving}>
         {saving ? '저장 중...' : '저장 (GitHub 자동 업로드)'}
       </button>
+
+      {lightbox && <Lightbox src={lightbox.src} alt={lightbox.alt} onClose={() => setLightbox(null)} />}
     </form>
   );
 }

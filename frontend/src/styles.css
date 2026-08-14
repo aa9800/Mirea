@@ -310,10 +310,24 @@
     @apply border-primary ring-2 ring-primary/25;
   }
   .image-gallery img {
-    @apply w-full object-cover block aspect-[4/3];
+    @apply w-full object-cover block aspect-[4/3] cursor-zoom-in;
   }
   .image-gallery figcaption {
     @apply text-xs text-muted px-2 py-1.5;
+  }
+
+  /* 썸네일이 작아서 안 보일 때 클릭해서 크게 보는 오버레이 */
+  .lightbox {
+    @apply fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-6 cursor-zoom-out;
+  }
+  .lightbox__img {
+    @apply max-w-full max-h-full object-contain rounded-lg cursor-default;
+  }
+  .lightbox__close {
+    @apply absolute top-4 right-5 w-10 h-10 flex items-center justify-center rounded-full bg-white/10 text-white text-2xl leading-none border-0 cursor-pointer transition-colors;
+  }
+  .lightbox__close:hover {
+    @apply bg-white/20;
   }
 
   /* 배운 점 / 어려웠던 점 — 회고 노트 느낌의 은은한 색 구분, 2열 유지 */
@@ -489,7 +503,7 @@
   }
 
   .thumb-preview {
-    @apply w-10 h-10 object-cover rounded;
+    @apply w-10 h-10 object-cover rounded cursor-zoom-in;
   }
 
   /* 이미지 드롭존 — 클릭/드래그앤드롭/클립보드 붙여넣기 공용 진입점 */
@@ -521,7 +535,7 @@
     @apply relative rounded-lg overflow-hidden border border-line aspect-square bg-[#eef0f5];
   }
   .image-preview img {
-    @apply w-full h-full object-cover block;
+    @apply w-full h-full object-cover block cursor-zoom-in;
   }
   .image-preview button {
     @apply absolute top-1 right-1 w-5 h-5 flex items-center justify-center rounded-full bg-black/60 text-white text-xs leading-none cursor-pointer;
