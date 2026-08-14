@@ -36,8 +36,11 @@ function buildReadme(meta) {
     lines.push('');
   }
 
-  if (meta.executionResult) {
-    lines.push('## 실행 결과', '', '```', meta.executionResult, '```', '');
+  if (meta.executionResult || meta.executionResultImages?.length) {
+    lines.push('## 실행 결과', '');
+    if (meta.executionResult) lines.push('```', meta.executionResult, '```', '');
+    for (const f of meta.executionResultImages || []) lines.push(`![${f.filename}](./images/${f.storedName})`);
+    if (meta.executionResultImages?.length) lines.push('');
   }
 
   if (meta.attachments?.length) {

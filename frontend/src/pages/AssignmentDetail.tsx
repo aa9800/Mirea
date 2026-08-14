@@ -181,13 +181,28 @@ export default function AssignmentDetail() {
           </section>
         )}
 
-        {assignment.executionResult && (
+        {(assignment.executionResult || assignment.executionResultImages.length > 0) && (
           <section className="doc-section">
             <h2 className="doc-section__label">실행 결과</h2>
-            <div className="code-frame">
-              <span className="code-frame__tag">output</span>
-              <pre className="code-block">{assignment.executionResult}</pre>
-            </div>
+            {assignment.executionResult && (
+              <div className="code-frame">
+                <span className="code-frame__tag">output</span>
+                <pre className="code-block">{assignment.executionResult}</pre>
+              </div>
+            )}
+            {assignment.executionResultImages.length > 0 && (
+              <div className="image-gallery">
+                {assignment.executionResultImages.map((img) => (
+                  <figure key={img.storedName}>
+                    <img
+                      src={fileUrl(assignment.subjectSlug, assignment.leaf, 'images', img.storedName)}
+                      alt={img.filename}
+                    />
+                    <figcaption>{img.filename}</figcaption>
+                  </figure>
+                ))}
+              </div>
+            )}
           </section>
         )}
 

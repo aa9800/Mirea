@@ -22,6 +22,9 @@ function normalizeMeta(meta) {
   if (!Array.isArray(meta.codeBlocks)) {
     meta.codeBlocks = meta.code ? [{ language: meta.codeLanguage || '', code: meta.code }] : [];
   }
+  if (!Array.isArray(meta.executionResultImages)) {
+    meta.executionResultImages = [];
+  }
   return meta;
 }
 

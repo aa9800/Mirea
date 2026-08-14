@@ -160,16 +160,20 @@ export default function AssignmentForm({ mode }: Props) {
   const [existingImages, setExistingImages] = useState<FileRef[]>([]);
   const [existingAttachments, setExistingAttachments] = useState<FileRef[]>([]);
   const [existingCodeFiles, setExistingCodeFiles] = useState<FileRef[]>([]);
+  const [existingExecutionImages, setExistingExecutionImages] = useState<FileRef[]>([]);
   const [thumbnail, setThumbnail] = useState<string | null>(null);
   const [removeImages, setRemoveImages] = useState<string[]>([]);
   const [removeAttachments, setRemoveAttachments] = useState<string[]>([]);
   const [removeCodeFiles, setRemoveCodeFiles] = useState<string[]>([]);
+  const [removeExecutionImages, setRemoveExecutionImages] = useState<string[]>([]);
 
   const [newImages, setNewImages] = useState<File[]>([]);
   const [newImagePreviews, setNewImagePreviews] = useState<string[]>([]);
   const [isDraggingImages, setIsDraggingImages] = useState(false);
   const [newAttachments, setNewAttachments] = useState<File[]>([]);
   const [newCodeFiles, setNewCodeFiles] = useState<File[]>([]);
+  const [newExecutionImages, setNewExecutionImages] = useState<File[]>([]);
+  const [newExecutionImagePreviews, setNewExecutionImagePreviews] = useState<string[]>([]);
 
   const [assignmentId, setAssignmentId] = useState<string | null>(null);
   const [subjectSlug, setSubjectSlug] = useState('');
@@ -188,9 +192,11 @@ export default function AssignmentForm({ mode }: Props) {
     setNewImages([]);
     setNewAttachments([]);
     setNewCodeFiles([]);
+    setNewExecutionImages([]);
     setRemoveImages([]);
     setRemoveAttachments([]);
     setRemoveCodeFiles([]);
+    setRemoveExecutionImages([]);
     fetchAssignment(id)
       .then((a: Assignment) => {
         setAssignmentId(a.id);
@@ -209,6 +215,7 @@ export default function AssignmentForm({ mode }: Props) {
         setExistingImages(a.images);
         setExistingAttachments(a.attachments);
         setExistingCodeFiles(a.codeFiles);
+        setExistingExecutionImages(a.executionResultImages);
         setThumbnail(a.thumbnail);
       })
       .catch((err) => setError(err.message))
@@ -385,11 +392,10 @@ export default function AssignmentForm({ mode }: Props) {
         }
       }
 
-      // 노트북에서 뽑은 실행 결과 이미지를 앞쪽에 둔다 — 새 과제 저장 시 대표 이미지가
-      // 지정 안 돼있으면 백엔드가 images[0]을 기본값으로 쓰므로, 자연스럽게 대표 이미지가 된다.
-      if (outputImageFiles.length || newImageFiles.length) {
-        setNewImages((prev) => [...prev, ...outputImageFiles, ...newImageFiles]);
-      }
+      if (newImageFiles.length) setNewImages((prev) => [...prev, ...newImageFiles]);
+      // 노트북에서 뽑은 실행 결과 이미지(plot 등)는 일반 이미지 갤러리가 아니라
+      // "실행 결과" 전용 슬롯으로 들어간다 — 실제로 그 코드를 실행한 결과물이니까.
+      if (outputImageFiles.length) setNewExecutionImages((prev) => [...prev, ...outputImageFiles]);
       if (newCodeFileList.length) setNewCodeFiles((prev) => [...prev, ...newCodeFileList]);
       if (newAttachmentFiles.length) setNewAttachments((prev) => [...prev, ...newAttachmentFiles]);
       if (newCode.length) {
@@ -421,7 +427,7 @@ export default function AssignmentForm({ mode }: Props) {
       const notes: string[] = [];
       if (truncated > 0) notes.push(`파일이 많아 ${picked.length}개만 처리하고 ${truncated}개는 건너뛰었어요.`);
       if (textForAi.length === 0) notes.push('분석할 텍스트 내용을 찾지 못해 파일만 첨부했어요.');
-      if (outputImageFiles.length > 0) notes.push(`노트북 실행 결과 이미지 ${outputImageFiles.length}개를 찾아 추가했어요.`);
+      if (outputImageFiles.length > 0) notes.push(`노트북 실행 결과 이미지 ${outputImageFiles.length}개를 "실행 결과"에 추가했어요.`);
       if (notes.length) setAiNotice(notes.join(' '));
     } catch (err) {
       setAiError((err as Error).message);
@@ -440,6 +446,15 @@ export default function AssignmentForm({ mode }: Props) {
     };
   }, [newImages]);
 
+  // 실행 결과 이미지도 동일하게 미리보기 URL을 관리한다.
+  useEffect(() => {
+    const urls = newExecutionImages.map((f) => URL.createObjectURL(f));
+    setNewExecutionImagePreviews(urls);
+    return () => {
+      urls.forEach((u) => URL.revokeObjectURL(u));
+    };
+  }, [newExecutionImages]);
+
   // 파일 선택 / 드래그앤드롭 / 클립보드 붙여넣기 — 세 가지 경로 모두 여기로 모여
   // 기존 목록 뒤에 이어붙인다 (이미지가 아닌 파일은 조용히 무시).
   function addImageFiles(files: FileList | File[]) {
@@ -450,6 +465,10 @@ export default function AssignmentForm({ mode }: Props) {
 
   function removeNewImage(index: number) {
     setNewImages((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  function removeNewExecutionImage(index: number) {
+    setNewExecutionImages((prev) => prev.filter((_, i) => i !== index));
   }
 
   // Ctrl+V로 클립보드의 이미지를 붙여넣을 수 있도록, 폼이 떠 있는 동안 전역으로 감지한다.
@@ -491,9 +510,11 @@ export default function AssignmentForm({ mode }: Props) {
     if (removeImages.length) fd.set('removeImages', removeImages.join(','));
     if (removeAttachments.length) fd.set('removeAttachments', removeAttachments.join(','));
     if (removeCodeFiles.length) fd.set('removeCodeFiles', removeCodeFiles.join(','));
+    if (removeExecutionImages.length) fd.set('removeExecutionResultImages', removeExecutionImages.join(','));
     newImages.forEach((f) => fd.append('images', f));
     newAttachments.forEach((f) => fd.append('attachments', f));
     newCodeFiles.forEach((f) => fd.append('codeFiles', f));
+    newExecutionImages.forEach((f) => fd.append('executionResultImages', f));
 
     setSaving(true);
     setError(null);
@@ -774,6 +795,53 @@ export default function AssignmentForm({ mode }: Props) {
           onChange={(e) => setExecutionResult(e.target.value)}
           placeholder="실행 로그, 최종 출력, 스크린샷 설명 등"
         />
+
+        <input
+          type="file"
+          multiple
+          accept="image/*"
+          onChange={(e) => {
+            if (e.target.files) setNewExecutionImages((prev) => [...prev, ...Array.from(e.target.files ?? [])]);
+            e.target.value = '';
+          }}
+        />
+        <p className="hint">실행 결과 화면(그래프, 스크린샷 등)이 있다면 이미지로 첨부하세요. 폴더 분석 시 노트북 출력 이미지는 자동으로 여기 들어와요.</p>
+
+        {newExecutionImages.length > 0 && (
+          <div className="image-preview-grid">
+            {newExecutionImages.map((file, i) => (
+              <div key={i} className="image-preview">
+                <img src={newExecutionImagePreviews[i]} alt={file.name} />
+                <button type="button" onClick={() => removeNewExecutionImage(i)} aria-label={`${file.name} 제거`}>
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {existingExecutionImages.length > 0 && (
+          <ul className="file-list file-list--editable">
+            {existingExecutionImages.map((f) => (
+              <li key={f.storedName}>
+                <img
+                  src={fileUrl(subjectSlug, leaf, 'images', f.storedName)}
+                  alt={f.filename}
+                  className="thumb-preview"
+                />
+                <span>{f.filename}</span>
+                <label className="inline-check">
+                  <input
+                    type="checkbox"
+                    checked={removeExecutionImages.includes(f.storedName)}
+                    onChange={() => toggleRemove(removeExecutionImages, setRemoveExecutionImages, f.storedName)}
+                  />
+                  삭제
+                </label>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       <div className="form-row form-row--split">

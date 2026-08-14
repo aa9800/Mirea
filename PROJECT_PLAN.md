@@ -103,6 +103,9 @@ assignments/
   "learnings": "random.sample로 중복 없는 추출을 할 수 있다는 걸 배웠다.",
   "difficulties": "번호 정렬 출력 부분에서 자잘한 실수가 있었다.",
   "executionResult": "실행 결과: [3, 11, 22, 27, 34, 41]",
+  "executionResultImages": [                                // 실행 결과 화면(그래프 등). 물리적으로는
+    { "filename": "plot.png", "storedName": "1699999999-xyz.png", "size": 15320 }  // images/ 폴더에 저장됨
+  ],
   "favorite": true,
   "thumbnail": "1699999999-def.png",  // images 중 대표로 지정한 storedName (없으면 첫 이미지)
   "images": [

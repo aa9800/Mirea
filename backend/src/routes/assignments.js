@@ -19,6 +19,7 @@ const uploadFields = upload.fields([
   { name: 'images' },
   { name: 'attachments' },
   { name: 'codeFiles' },
+  { name: 'executionResultImages' },
 ]);
 
 function parseTags(raw) {
@@ -124,6 +125,9 @@ router.post('/', uploadFields, async (req, res) => {
     const images = saveFiles(req.files?.images, dir, 'images');
     const attachments = saveFiles(req.files?.attachments, dir, 'attachments');
     const codeFiles = saveFiles(req.files?.codeFiles, dir, 'code');
+    // 실행 결과 이미지도 물리적으로는 images/ 폴더에 저장한다 (별도 폴더를 만들 이유가
+    // 없음 — meta.json의 배열이 분리돼 있으면 의미상 구분은 충분하다).
+    const executionResultImages = saveFiles(req.files?.executionResultImages, dir, 'images');
 
     const now = new Date().toISOString();
     const meta = {
@@ -140,6 +144,7 @@ router.post('/', uploadFields, async (req, res) => {
       learnings: (learnings || '').trim(),
       difficulties: (difficulties || '').trim(),
       executionResult: (executionResult || '').trim(),
+      executionResultImages,
       favorite: favorite === 'true' || favorite === true,
       thumbnail: (thumbnail && images.some((i) => i.storedName === thumbnail)) ? thumbnail : (images[0]?.storedName ?? null),
       images,
@@ -174,7 +179,7 @@ router.put('/:id', uploadFields, async (req, res) => {
     const {
       title, subject, date, description, codeBlocks, tags,
       learnings, difficulties, executionResult, favorite, thumbnail,
-      removeImages, removeAttachments, removeCodeFiles,
+      removeImages, removeAttachments, removeCodeFiles, removeExecutionResultImages,
     } = req.body;
 
     // 과목이 바뀌었으면 폴더를 새 과목 폴더로 옮긴다 (code/images/attachments는
@@ -185,10 +190,17 @@ router.put('/:id', uploadFields, async (req, res) => {
     let images = removeFiles(existing.images, dir, 'images', parseNameList(removeImages));
     let attachments = removeFiles(existing.attachments, dir, 'attachments', parseNameList(removeAttachments));
     let codeFiles = removeFiles(existing.codeFiles, dir, 'code', parseNameList(removeCodeFiles));
+    let executionResultImages = removeFiles(
+      existing.executionResultImages || [],
+      dir,
+      'images',
+      parseNameList(removeExecutionResultImages),
+    );
 
     images = images.concat(saveFiles(req.files?.images, dir, 'images'));
     attachments = attachments.concat(saveFiles(req.files?.attachments, dir, 'attachments'));
     codeFiles = codeFiles.concat(saveFiles(req.files?.codeFiles, dir, 'code'));
+    executionResultImages = executionResultImages.concat(saveFiles(req.files?.executionResultImages, dir, 'images'));
 
     const resolvedThumbnail = thumbnail && images.some((i) => i.storedName === thumbnail)
       ? thumbnail
@@ -210,6 +222,7 @@ router.put('/:id', uploadFields, async (req, res) => {
       learnings: learnings !== undefined ? learnings.trim() : existing.learnings,
       difficulties: difficulties !== undefined ? difficulties.trim() : existing.difficulties,
       executionResult: executionResult !== undefined ? executionResult.trim() : existing.executionResult,
+      executionResultImages,
       favorite: favorite !== undefined ? (favorite === 'true' || favorite === true) : existing.favorite,
       thumbnail: resolvedThumbnail,
       images,

@@ -36,6 +36,7 @@ export interface Assignment {
   learnings: string;
   difficulties: string;
   executionResult: string;
+  executionResultImages: FileRef[];
   favorite: boolean;
   thumbnail: string | null;
   images: FileRef[];
