@@ -113,7 +113,11 @@ Python  HTML/CSS  JavaScript  기타       (클릭 시 해당 과목으로 필�
 ## 7. 추가 기능
 
 이번 버전에 포함: 태그 · 배운 점 · 어려웠던 점 · 실행 결과 · 대표 이미지 ·
-즐겨찾기 · 검색 · GitHub 링크 및 마지막 업로드 시간
+즐겨찾기 · 검색 · GitHub 링크 및 마지막 업로드 시간 · 코드 문법 강조(여러 코드
+블록 지원) · 관련 과제 추천 · **AI로 자동 채우기**(코드/파일을 붙여넣거나 폴더를
+통째로 선택하면 제목/과목/태그/설명/배운 점/어려웠던 점/실행 결과까지 AI가 제안,
+폴더는 코드·이미지·첨부파일도 자동 분류 — 항상 초안일 뿐이며 사용자가 확인 후
+직접 저장해야 반영됨)
 
 추후 확장(설계만, 이번 구현 범위 아님): 과제 버전 기록 · 랜덤 복습 ·
 학습 통계 · 과목별 학습 기록 · 코드 변경 이력
@@ -128,6 +132,7 @@ Python  HTML/CSS  JavaScript  기타       (클릭 시 해당 과목으로 필�
 - **Backend**: Node.js + Express
 - **Storage**: 로컬 파일 시스템 (`assignments/` 폴더, meta.json 기반)
 - **Version Control**: Git + GitHub (백엔드에서 자동 add/commit/push)
+- **AI**: Gemini API(무료, 기본) 또는 Claude API(`@anthropic-ai/sdk`, 대안) — 등록 폼 자동 채우기 초안 제안 (선택 기능)
 
 ---
 
@@ -146,6 +151,22 @@ git push -u origin main
 
 이 단계를 건너뛰면 과제 등록/수정/삭제는 정상 동작하지만, GitHub 동기화는
 계속 "실패"로 표시된다.
+
+### 0-1. (선택) "AI로 자동 채우기"를 쓰려면
+
+```bash
+cd backend
+cp .env.example .env
+```
+
+`backend/.env`를 열어 `GEMINI_API_KEY=`에 [Google AI Studio](https://aistudio.google.com/apikey)에서
+**무료로** 발급받은 Gemini API 키를 붙여넣는다 (권장 방법). 이 값은 웹 화면
+어디에도 입력하지 않고 로컬 파일로만 관리하며, `.env`는 `.gitignore`에
+포함돼 있어 git에 커밋되지 않는다. 설정하지 않아도 나머지 기능은 그대로
+동작하고, 자동 채우기 버튼만 비활성화된다.
+
+(대안: `ANTHROPIC_API_KEY`를 대신 채우면 Claude API로 동작하지만, 이건
+Anthropic Console의 종량제 크레딧이 필요하다 — claude.ai 구독과는 별개 과금.)
 
 ### 1. 백엔드 실행
 

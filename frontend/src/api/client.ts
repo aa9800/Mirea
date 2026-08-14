@@ -1,4 +1,4 @@
-import type { Assignment, GitStatus, SubjectSummary } from './types';
+import type { Assignment, AiSuggestion, GitStatus, SubjectSummary } from './types';
 
 const BASE = '/api/assignments';
 
@@ -72,4 +72,19 @@ export async function toggleFavorite(id: string): Promise<Assignment> {
 export async function fetchGitStatus(): Promise<GitStatus> {
   const res = await fetch('/api/git/status');
   return handle<GitStatus>(res);
+}
+
+// 저장하지 않는다 — 결과로 폼 필드를 채우기만 하고, 사용자가 확인 후 직접 저장해야 반영된다.
+// content(붙여넣은 텍스트/단일 파일) 또는 files(폴더 선택 시 여러 파일) 중 하나를 채워서 호출한다.
+export async function analyzeContent(input: {
+  content?: string;
+  filename?: string;
+  files?: { name: string; content: string }[];
+}): Promise<AiSuggestion> {
+  const res = await fetch('/api/ai/analyze', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  });
+  return handle<AiSuggestion>(res);
 }

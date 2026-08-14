@@ -94,8 +94,9 @@ assignments/
   "date": "2026-08-14",             // 과제 관련 날짜 (제출기한 아님, 그냥 기록용)
   "description": "랜덤 로또 번호 생성 프로그램 구현",
   "tags": ["python", "random"],
-  "code": "import random\n...",      // 직접 붙여넣은 코드 스니펫 (선택)
-  "codeLanguage": "python",          // 상세 화면 문법 강조용 (GitHub 코드펜스 표기와 동일한 값)
+  "codeBlocks": [                     // 붙여넣은 코드 스니펫들 (언어가 달라도 여러 개 가능)
+    { "language": "python", "code": "import random\n...", "filename": "lotto.py" }
+  ],
   "codeFiles": [
     { "filename": "solution.py", "storedName": "1699999999-abc.py", "size": 512 }
   ],
@@ -122,7 +123,9 @@ assignments/
 ```
 
 - `tags`: 자유 입력 문자열 배열. 검색 시 제목/설명/코드/실행결과/배운점·어려운점과 함께 매칭 대상이 된다.
-- `codeLanguage`: 상세 화면에서 코드 블록에 문법 강조를 적용할 때 사용하는 언어 키. 비어있으면 강조 없이 일반 텍스트로 표시.
+- `codeBlocks`: `{ language, code, filename? }` 배열. `language`가 상세 화면 문법 강조 키(비어있으면
+  일반 텍스트). `filename`은 폴더 분석으로 자동 채워진 경우 원본 파일명을 표시용으로 남긴 것.
+  예전 버전(단일 `code`/`codeLanguage` 필드)으로 저장된 항목은 읽을 때 자동으로 이 배열 형태로 변환된다.
 - `learnings` / `difficulties`: 배운 점 / 어려웠던 점을 구조화한 두 개의 필드.
 - `executionResult`: 실행 로그/결과 요약 텍스트. 스크린샷은 `images`에 추가하고
   `thumbnail`로 지정하면 결과 화면을 대표 이미지로 보여줄 수 있다.
@@ -140,17 +143,20 @@ assignments/
   assignments/                  # 실제 과제 데이터 (git으로 관리되는 대상)
   backend/
     package.json
+    .env.example              # GEMINI_API_KEY 등 로컬 환경변수 템플릿 (.env는 gitignore)
     src/
-      server.js               # express 앱 진입점
+      server.js               # express 앱 진입점 (dotenv 로드)
       config.js                # 저장 경로, 포트 등 설정
       lib/
         store.js               # meta.json CRUD, 폴더/순번 생성, 파일 저장
         slug.js                # slug 생성
         readme.js               # meta.json → README.md 렌더링
         git.js                 # 실제 저장소 루트 탐지 + git add/commit/push 자동화
+        ai.js                  # Gemini(기본)/Claude API로 등록 폼 메타데이터 초안 제안
       routes/
         assignments.js         # /api/assignments 라우트
         git.js                 # /api/git/status 라우트 (읽기 전용)
+        ai.js                  # /api/ai/analyze 라우트
   frontend/
     index.html
     package.json
@@ -196,6 +202,7 @@ assignments/
 | DELETE | /api/assignments/:id             | 삭제                                   |
 | GET    | /files/:subjectSlug/:leaf/:type/:filename | 이미지/첨부파일/코드파일 정적 제공 (express.static) |
 | GET    | /api/git/status                  | 읽기 전용 Git 연결 상태 (아래 참고)     |
+| POST   | /api/ai/analyze                  | 코드/텍스트 분석 → 메타데이터 초안 제안 (저장 안 함, 아래 참고) |
 
 > `/files`로 정적 제공하는 이유: 프론트엔드 라우트가 이미 `/assignments/*`
 > (목록·상세·등록 화면)를 쓰고 있어서, 실제 업로드 파일 경로를 `/assignments`로
@@ -233,6 +240,42 @@ assignments/
    자격증명이 섞여 있어도(`https://user:token@host/...`) 응답 전에 제거한다.
    대시보드의 `GitConnectionStatus` 컴포넌트가 이걸 보여주기만 하며, 입력 필드는
    없다.
+
+### AI 자동 채우기 — Gemini API(기본, 무료) / Claude API(대안), 저장은 항상 사용자 확인 후
+
+새 과제 등록 폼에서 코드를 붙여넣거나 파일/폴더를 선택한 뒤 버튼을 누르면
+`POST /api/ai/analyze`가 그 내용을 분석해 폼 빈칸을 최대한 채워준다
+(`backend/src/lib/ai.js`, 구조화된 JSON 출력으로 결과를 강제).
+
+- **입력 방식 두 가지**:
+  - **✨ AI로 자동 채우기**: 붙여넣은 코드(또는 선택한 코드 파일 하나)를 분석.
+  - **📁 폴더로 분석**: 폴더를 통째로 선택하면 프론트에서 파일 확장자를 보고
+    결정적으로 분류한다 — 이미지 확장자는 이미지 칸으로, 코드 확장자는 "코드 파일
+    첨부" + "코드 블록"(언어 자동 지정) 양쪽에, 그 외 문서류는 첨부파일로. 읽을 수
+    있는 텍스트 내용은 모아서 AI 분석 한 번으로 나머지 빈칸을 채운다.
+    (`node_modules`/`.git` 등은 건너뛰고, 파일이 너무 많으면 일부만 처리한 뒤 알림.)
+- **제안 대상 필드**: 제목/과목/태그/설명/코드 언어(단일 붙여넣기일 때)에 더해
+  **배운 점 · 어려웠던 점 · 실행 결과**까지 시도한다. 뒤 세 개는 실제로 실행해본
+  게 아니라 코드를 읽고 추정한 값이라 근거가 부족하면 빈 문자열로 남는다 —
+  사용자가 반드시 확인해야 한다.
+- **코드는 여러 블록을 지원한다.** 과제 하나에 언어가 다른 코드가 여러 개 있을 수
+  있어 `codeBlocks` 배열로 관리하고, 폼에서 "+ 코드 블록 추가"로 늘릴 수 있다.
+- **자동 분리/병합은 하지 않는다.** 파일 하나(또는 폴더)를 여러 과제로 쪼개거나
+  비슷한 내용을 합치는 건 오판 위험이 커서(조용히 아카이브가 엉망이 될 수 있음)
+  이번 범위에 넣지 않았다 — 향후 확장 후보로만 남겨둔다.
+- **제안은 초안일 뿐, 절대 자동 저장되지 않는다.** 프론트는 응답으로 받은 값 중
+  **비어있는 필드만** 채우고(이미 입력한 내용은 덮어쓰지 않음), 태그는 기존 목록에
+  이어붙인다. 사용자가 확인·수정한 뒤 직접 저장 버튼을 눌러야 실제로 반영된다.
+- **API 키도 웹 UI에 입력받지 않는다.** GitHub 연동과 같은 원칙 — `backend/.env`에
+  `GEMINI_API_KEY`(권장, [Google AI Studio](https://aistudio.google.com/apikey)에서
+  무료 발급)를 설정해두면 그쪽을 우선 쓰고, 없으면 `ANTHROPIC_API_KEY`/
+  `ant auth login` OAuth로 Claude API에 폴백한다(단, 이건 Anthropic Console
+  종량제 크레딧이 필요하며 claude.ai 구독과는 별개 과금 — 실제 호출로 확인함).
+  아무 것도 없으면 이 기능만 조용히 비활성화된다(다른 기능엔 영향 없음). 실제
+  값을 담은 `.env`는 `.gitignore`에 있고, `.env.example`만 커밋된다.
+  (참고: 로컬 `claude` CLI를 서브프로세스로 불러 Claude Code 구독 인증을 재사용하는
+  방법도 검토했으나, Windows에서 `.cmd` 스크립트 spawn이 Node 보안 정책상 막혀
+  있어 포기했다.)
 
 ## 7. 프론트엔드 화면
 

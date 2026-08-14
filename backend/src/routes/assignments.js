@@ -38,6 +38,25 @@ function parseNameList(raw) {
     .filter(Boolean);
 }
 
+// 코드 블록 여러 개를 JSON 문자열(FormData 필드)로 받아 파싱한다.
+// 형식이 깨졌거나 없으면 빈 배열로 처리하고, 코드가 빈 블록은 저장하지 않는다.
+function parseCodeBlocks(raw) {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter((b) => b && typeof b.code === 'string' && b.code.trim())
+      .map((b) => ({
+        language: typeof b.language === 'string' ? b.language.trim() : '',
+        code: b.code.trim(),
+        filename: typeof b.filename === 'string' && b.filename.trim() ? b.filename.trim() : undefined,
+      }));
+  } catch {
+    return [];
+  }
+}
+
 function saveFiles(files, dir, subdir) {
   return (files || []).map((f) => {
     const storedName = `${Date.now()}-${Math.round(Math.random() * 1e9)}${path.extname(f.originalname)}`;
@@ -93,7 +112,7 @@ router.get('/:id', (req, res) => {
 // POST /api/assignments - 신규 등록
 router.post('/', uploadFields, async (req, res) => {
   try {
-    const { title, subject, date, description, code, codeLanguage, tags, learnings, difficulties, executionResult, favorite, thumbnail } = req.body;
+    const { title, subject, date, description, codeBlocks, tags, learnings, difficulties, executionResult, favorite, thumbnail } = req.body;
 
     if (!title || !title.trim() || !subject || !subject.trim()) {
       return res.status(400).json({ error: '제목과 과목은 필수입니다.' });
@@ -115,8 +134,7 @@ router.post('/', uploadFields, async (req, res) => {
       date: date || now.slice(0, 10),
       description: (description || '').trim(),
       tags: parseTags(tags),
-      code: (code || '').trim(),
-      codeLanguage: (codeLanguage || '').trim(),
+      codeBlocks: parseCodeBlocks(codeBlocks),
       codeFiles,
       learnings: (learnings || '').trim(),
       difficulties: (difficulties || '').trim(),
@@ -148,10 +166,12 @@ router.put('/:id', uploadFields, async (req, res) => {
     const { id } = req.params;
     const entry = store.findById(id);
     if (!entry) return res.status(404).json({ error: '과제를 찾을 수 없습니다.' });
-    const { meta: existing } = entry;
+    // 예전 스키마의 code/codeLanguage 단일 필드가 남아있을 수 있어 spread 전에 걷어낸다
+    // (codeBlocks는 store.findById가 이미 정규화해서 채워준 상태).
+    const { code: _legacyCode, codeLanguage: _legacyCodeLanguage, ...existing } = entry.meta;
 
     const {
-      title, subject, date, description, code, codeLanguage, tags,
+      title, subject, date, description, codeBlocks, tags,
       learnings, difficulties, executionResult, favorite, thumbnail,
       removeImages, removeAttachments, removeCodeFiles,
     } = req.body;
@@ -184,8 +204,7 @@ router.put('/:id', uploadFields, async (req, res) => {
       date: date || existing.date,
       description: description !== undefined ? description.trim() : existing.description,
       tags: tags !== undefined ? parseTags(tags) : existing.tags,
-      code: code !== undefined ? code.trim() : existing.code,
-      codeLanguage: codeLanguage !== undefined ? codeLanguage.trim() : existing.codeLanguage,
+      codeBlocks: codeBlocks !== undefined ? parseCodeBlocks(codeBlocks) : existing.codeBlocks,
       codeFiles,
       learnings: learnings !== undefined ? learnings.trim() : existing.learnings,
       difficulties: difficulties !== undefined ? difficulties.trim() : existing.difficulties,

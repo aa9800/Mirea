@@ -15,6 +15,16 @@ function listDirs(dir) {
     .map((d) => d.name);
 }
 
+// 예전 스키마(code/codeLanguage 단일 필드)로 저장된 meta.json을 읽을 때
+// codeBlocks 배열 형태로 맞춰준다. 새로 저장할 때는 항상 codeBlocks로 쓰이므로
+// 이 변환은 아직 마이그레이션 안 된 옛 파일을 읽을 때만 동작한다.
+function normalizeMeta(meta) {
+  if (!Array.isArray(meta.codeBlocks)) {
+    meta.codeBlocks = meta.code ? [{ language: meta.codeLanguage || '', code: meta.code }] : [];
+  }
+  return meta;
+}
+
 // assignments/ 아래 모든 meta.json을 읽어서 { meta, dir } 목록으로 반환한다.
 // 개인 아카이브 규모(수십~수백 건)에서는 매번 스캔해도 충분히 빠르다.
 function scanAll() {
@@ -27,7 +37,7 @@ function scanAll() {
       const metaFile = path.join(dir, 'meta.json');
       if (!fs.existsSync(metaFile)) continue;
       try {
-        const meta = JSON.parse(fs.readFileSync(metaFile, 'utf-8'));
+        const meta = normalizeMeta(JSON.parse(fs.readFileSync(metaFile, 'utf-8')));
         results.push({ meta, dir });
       } catch {
         // 손상된 meta.json은 건너뛴다
@@ -61,15 +71,15 @@ function listAssignments({ q, subject, favorite } = {}) {
   if (q && q.trim()) {
     const needle = q.trim().toLowerCase();
     items = items.filter((a) => {
-      // 제목/설명/태그뿐 아니라 코드·실행 결과·배운 점·어려웠던 점까지 검색 대상에 포함한다.
+      // 제목/설명/태그뿐 아니라 코드(여러 블록)·실행 결과·배운 점·어려웠던 점까지 검색 대상에 포함한다.
       const haystack = [
         a.title,
         a.description,
-        a.code,
         a.executionResult,
         a.learnings,
         a.difficulties,
         ...(a.tags || []),
+        ...(a.codeBlocks || []).flatMap((b) => [b.code, b.language, b.filename]),
       ]
         .join(' ')
         .toLowerCase();

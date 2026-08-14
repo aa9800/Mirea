@@ -12,8 +12,12 @@ function buildReadme(meta) {
     lines.push('## 설명', '', meta.description, '');
   }
 
-  if (meta.code) {
-    lines.push('## 코드', '', `\`\`\`${meta.codeLanguage || ''}`, meta.code, '```', '');
+  if (meta.codeBlocks?.length) {
+    lines.push('## 코드', '');
+    for (const block of meta.codeBlocks) {
+      if (block.filename) lines.push(`**${block.filename}**`, '');
+      lines.push(`\`\`\`${block.language || ''}`, block.code, '```', '');
+    }
   }
 
   if (meta.codeFiles?.length) {

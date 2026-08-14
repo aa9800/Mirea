@@ -8,6 +8,7 @@ frontend/vite.config.js
 frontend/vite.config.d.ts
 *.log
 .DS_Store
+backend/.env
 
 # Mirea 저장소의 다른 프로젝트(파이썬)에서 쓰던 규칙
 __pycache__/

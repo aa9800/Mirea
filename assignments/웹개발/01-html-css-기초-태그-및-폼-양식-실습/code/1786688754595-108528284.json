@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell($c = Get-Content -Raw -Encoding UTF8 \"c:\\\\html\\\\testing\\\\2025_하반기_AI_도구_인기_보고서.md\"; $c.Length)",
+      "Bash(python -c \"import markdown; print\\(markdown.__version__\\)\")",
+      "Bash(pip install *)",
+      "Bash(npx skills *)",
+      "Bash(node -e \"console.log\\(require.resolve\\('docx'\\)\\)\")",
+      "Bash(node -e \"console.log\\(require\\('docx'\\).Packer ? 'docx OK' : 'no'\\)\")"
+    ]
+  }
+}
