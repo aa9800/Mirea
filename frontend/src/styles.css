@@ -1,0 +1,523 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply m-0 bg-bg text-ink font-sans;
+  }
+  a {
+    @apply text-inherit no-underline;
+  }
+}
+
+/*
+  컴포넌트 클래스는 의미 단위 이름(assignment-card, btn, tag-chip ...)을 그대로 쓰고,
+  실제 스타일은 @apply로 Tailwind 유틸리티를 조합한다. JSX의 className은 건드리지
+  않고도 Tailwind 기반으로 스타일을 관리할 수 있게 하기 위한 선택이다.
+*/
+@layer components {
+  /* Layout */
+  .app {
+    @apply min-h-screen flex flex-col;
+  }
+
+  .topbar {
+    @apply flex items-center justify-between px-7 py-3.5 bg-card border-b border-line sticky top-0 z-10;
+  }
+  .brand {
+    @apply font-bold text-lg;
+  }
+  .topbar nav {
+    @apply flex items-center gap-5;
+  }
+  .topbar nav a {
+    @apply text-muted font-semibold text-sm;
+  }
+  .topbar nav a.active {
+    @apply text-primary;
+  }
+  .topbar nav a.new-btn {
+    @apply bg-primary text-white px-4 py-2 rounded-lg;
+  }
+  .topbar nav a.new-btn:hover {
+    @apply bg-primary-dark;
+  }
+
+  .content {
+    @apply max-w-[1080px] w-full mx-auto px-6 pt-10 pb-24 flex-1;
+  }
+
+  .section-header {
+    @apply flex items-start justify-between mb-4 gap-3 flex-wrap;
+  }
+  .section-header h2 {
+    @apply m-0 mb-1;
+  }
+
+  .muted {
+    @apply text-muted;
+  }
+  .error-text {
+    @apply text-danger font-semibold;
+  }
+  .empty {
+    @apply text-muted py-6;
+  }
+
+  /*
+    Dashboard — "훑어보기용" 요약 화면. 전체 과제 페이지(검색/필터 + 큰 카드 그리드)와
+    뚜렷이 구분되도록, 통계는 막대 위젯으로 · 목록은 조밀한 피드(행)로 보여준다.
+  */
+  .dashboard__intro {
+    @apply text-[15px] text-muted mb-7;
+  }
+
+  .dashboard__stats {
+    @apply flex flex-col sm:flex-row gap-5 mb-10 items-stretch;
+  }
+  .stat-total {
+    @apply flex flex-col items-center justify-center gap-1 bg-card border border-primary rounded-xl px-8 py-5 sm:w-40 shrink-0 text-center transition-colors;
+  }
+  .stat-total:hover {
+    @apply bg-primary/5;
+  }
+  .stat-total__value {
+    @apply text-3xl font-extrabold text-primary;
+  }
+  .stat-total__label {
+    @apply text-xs font-semibold text-muted mt-0.5;
+  }
+
+  .subject-bars {
+    @apply flex-1 flex flex-col justify-center gap-3 bg-card border border-line rounded-xl px-5 py-4;
+  }
+  .subject-bar {
+    @apply block;
+  }
+  .subject-bar__top {
+    @apply flex items-center justify-between text-sm mb-1;
+  }
+  .subject-bar__name {
+    @apply font-semibold text-ink transition-colors;
+  }
+  .subject-bar:hover .subject-bar__name {
+    @apply text-primary;
+  }
+  .subject-bar__count {
+    @apply text-muted text-xs;
+  }
+  .subject-bar__track {
+    @apply h-1.5 rounded-full bg-[#eef0f5] overflow-hidden;
+  }
+  .subject-bar__fill {
+    @apply h-full bg-primary rounded-full;
+  }
+
+  .dashboard__feed {
+    @apply mb-10;
+  }
+  .assignment-feed {
+    @apply flex flex-col bg-card border border-line rounded-xl px-5;
+  }
+
+  .assignment-row {
+    @apply flex items-center gap-3.5 py-3 border-b border-line;
+  }
+  .assignment-row:last-child {
+    @apply border-b-0;
+  }
+  .assignment-row__thumb {
+    @apply w-11 h-11 rounded-lg overflow-hidden bg-[#eef0f5] flex items-center justify-center text-muted font-bold shrink-0;
+  }
+  .assignment-row__thumb img {
+    @apply w-full h-full object-cover;
+  }
+  .assignment-row__body {
+    @apply flex-1 min-w-0;
+  }
+  .assignment-row__top {
+    @apply flex items-center justify-between gap-2 text-xs text-muted;
+  }
+  .assignment-row__subject {
+    @apply text-primary font-bold;
+  }
+  .assignment-row__title {
+    @apply flex items-center gap-1.5 font-semibold text-[15px] mt-0.5 truncate transition-colors;
+  }
+  .assignment-row:hover .assignment-row__title {
+    @apply text-primary;
+  }
+  .assignment-row__favorite {
+    @apply text-[#ffb400];
+  }
+  .assignment-row__tags {
+    @apply flex flex-wrap gap-1 mt-1.5;
+  }
+
+  /* Grid & cards */
+  .assignment-grid {
+    @apply grid gap-[18px] grid-cols-[repeat(auto-fill,minmax(220px,1fr))];
+  }
+
+  .assignment-card {
+    @apply bg-card border border-line rounded-xl overflow-hidden flex flex-col transition-transform duration-150 ease-out;
+  }
+  .assignment-card:hover {
+    @apply -translate-y-0.5 shadow-lg;
+  }
+
+  .assignment-card__thumb {
+    @apply relative bg-[#eef0f5] aspect-[16/10];
+  }
+  .assignment-card__thumb img {
+    @apply w-full h-full object-cover block;
+  }
+  .assignment-card__thumb-placeholder {
+    @apply w-full h-full flex items-center justify-center text-muted text-[13px];
+  }
+  .assignment-card__favorite {
+    @apply absolute top-2 right-2 text-[#ffb400] text-lg drop-shadow;
+  }
+  .assignment-card__body {
+    @apply px-3.5 pt-3 pb-4 flex flex-col gap-1;
+  }
+  .assignment-card__subject {
+    @apply text-xs text-primary font-bold;
+  }
+  .assignment-card__title {
+    @apply font-semibold text-[15px] leading-snug;
+  }
+  .assignment-card__date {
+    @apply text-xs text-muted;
+  }
+  .assignment-card__tags {
+    @apply flex flex-wrap gap-1 mt-1.5;
+  }
+
+  /* Filters */
+  .filters {
+    @apply flex flex-wrap gap-2.5 items-center mb-5;
+  }
+  .search-bar,
+  .subject-filter {
+    @apply px-3 py-2 border border-line rounded-lg text-sm bg-white;
+  }
+  .search-bar {
+    @apply flex-1 min-w-[200px];
+  }
+  .favorite-filter {
+    @apply flex items-center gap-1.5 text-sm text-muted;
+  }
+
+  /* Tags */
+  .tag-chip {
+    @apply inline-flex items-center gap-1 bg-[#eef1fd] text-primary rounded-full px-2.5 py-[3px] text-xs font-semibold;
+  }
+  .tag-chip button {
+    @apply bg-transparent border-0 text-inherit cursor-pointer text-[13px] leading-none p-0;
+  }
+  .tag-chip--readonly {
+    @apply bg-[#eef0f5] text-muted;
+  }
+
+  .tag-input {
+    @apply flex flex-wrap gap-1.5 items-center px-2.5 py-2 border border-line rounded-lg bg-[#fafbfc];
+  }
+  .tag-input input {
+    @apply border-0 bg-transparent outline-none flex-1 min-w-[140px] text-sm;
+  }
+
+  /*
+    Detail page — 관리자 대시보드보다 "개인 개발 노트"에 가깝게: 모든 섹션을
+    흰 카드로 감싸는 대신, 헤더는 계층을 또렷하게 세우고 본문은 문서처럼
+    흐르게 하며, 실제로 상태/구조가 다른 요소(깃허브 상태, 이미지, 회고)만
+    시각적으로 구분한다.
+  */
+  .assignment-detail {
+    @apply max-w-[760px] mx-auto;
+  }
+
+  .detail-header {
+    @apply flex flex-col gap-4 pb-6 mb-8 border-b border-line;
+  }
+  .detail-header__top {
+    @apply flex items-start justify-between gap-4 flex-wrap;
+  }
+  .detail-header__subject {
+    @apply block text-xs font-bold uppercase tracking-wider text-primary;
+  }
+  .detail-header__title {
+    @apply mt-1 text-[26px] sm:text-[30px] font-extrabold leading-tight text-ink;
+  }
+  .detail-header__date {
+    @apply mt-2 text-sm text-muted;
+  }
+  .detail-header__tags {
+    @apply flex flex-wrap gap-1.5;
+  }
+  .assignment-detail__actions {
+    @apply flex items-center gap-2 shrink-0;
+  }
+
+  /* 본문 흐름 — 카드가 아니라 문서 섹션의 연속 */
+  .doc-flow {
+    @apply flex flex-col gap-9 mb-10;
+  }
+  .doc-section {
+    @apply flex flex-col gap-3;
+  }
+  .doc-section__label {
+    @apply text-[13px] font-bold uppercase tracking-wide text-muted;
+  }
+  .doc-section__body {
+    @apply text-[15px] leading-relaxed text-ink whitespace-pre-wrap;
+  }
+
+  /* 코드/실행 결과 — dark 톤 유지 + 터미널/에디터 느낌의 라벨 탭 */
+  .code-frame {
+    @apply rounded-xl overflow-hidden bg-[#1e2230];
+  }
+  .code-frame__tag {
+    @apply block px-4 py-2 text-[11px] font-mono uppercase tracking-wider text-[#7b8496] bg-[#171a24] border-b border-white/5;
+  }
+  .code-block {
+    @apply px-4 py-4 text-[#e8eaf1] text-[13px] leading-relaxed overflow-x-auto whitespace-pre-wrap break-words font-mono;
+  }
+
+  .file-list {
+    @apply list-none p-0 m-0 flex flex-col gap-1.5;
+  }
+  .file-list a {
+    @apply text-primary font-semibold;
+  }
+  .file-list a:hover {
+    @apply underline;
+  }
+
+  .image-gallery {
+    @apply grid gap-3.5 grid-cols-[repeat(auto-fill,minmax(160px,1fr))];
+  }
+  .image-gallery figure {
+    @apply m-0 border border-line rounded-lg overflow-hidden;
+  }
+  .image-gallery figure.is-thumbnail {
+    @apply border-primary ring-2 ring-primary/25;
+  }
+  .image-gallery img {
+    @apply w-full object-cover block aspect-[4/3];
+  }
+  .image-gallery figcaption {
+    @apply text-xs text-muted px-2 py-1.5;
+  }
+
+  /* 배운 점 / 어려웠던 점 — 회고 노트 느낌의 은은한 색 구분, 2열 유지 */
+  .reflection-grid {
+    @apply grid grid-cols-2 gap-5;
+  }
+  .reflection-card {
+    @apply rounded-xl px-5 py-4 border;
+  }
+  .reflection-card h2 {
+    @apply text-[13px] font-bold uppercase tracking-wide mb-2;
+  }
+  .reflection-card p {
+    @apply text-[15px] leading-relaxed text-ink whitespace-pre-wrap;
+  }
+  .reflection-card--learnings {
+    @apply bg-[#f4f8ff] border-[#dbe6fb];
+  }
+  .reflection-card--learnings h2 {
+    @apply text-[#3b5bdb];
+  }
+  .reflection-card--difficulties {
+    @apply bg-[#fff8ef] border-[#f3e3c8];
+  }
+  .reflection-card--difficulties h2 {
+    @apply text-[#b7791f];
+  }
+
+  /* 관련 과제 — 상세 페이지 맨 아래, 탐색 페이지와 동일한 카드 재사용 */
+  .related-section {
+    @apply mt-10 pt-8 border-t border-line;
+  }
+  .related-grid {
+    @apply grid grid-cols-1 sm:grid-cols-3 gap-4 mt-3;
+  }
+
+  /* Buttons — 즐겨찾기/수정/삭제 크기·정렬 통일 (높이 36px 고정) */
+  .btn {
+    @apply inline-flex items-center justify-center h-9 px-3.5 border border-line bg-white rounded-lg text-sm font-semibold cursor-pointer transition-colors;
+  }
+  .btn:hover {
+    @apply bg-[#f2f3f7];
+  }
+  .btn--danger {
+    @apply text-danger border-danger;
+  }
+  .btn--danger:hover {
+    @apply bg-danger text-white;
+  }
+
+  .favorite-toggle {
+    @apply inline-flex items-center justify-center h-9 w-9 bg-transparent border border-line rounded-lg text-base text-[#ccc] cursor-pointer transition-colors;
+  }
+  .favorite-toggle--active {
+    @apply text-[#ffb400] border-[#ffb400];
+  }
+
+  /* GitHub 상태 — 카드가 아니라 상태를 알리는 얇은 스트립 (좌측 색상 바로만 구분) */
+  .github-badge {
+    @apply flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2.5 mb-8 rounded-lg text-[13px] bg-white border-y border-r border-l-4 border-line;
+  }
+  .github-badge--success {
+    @apply border-l-success;
+  }
+  .github-badge--failed {
+    @apply border-l-danger;
+  }
+  .github-badge--pending {
+    @apply border-l-warning;
+  }
+  .github-badge__status {
+    @apply font-bold;
+  }
+  .github-badge__time {
+    @apply text-muted;
+  }
+  .github-badge__link {
+    @apply text-primary font-semibold;
+  }
+  .github-badge__error {
+    @apply basis-full mt-1 bg-black/5 px-2.5 py-2 rounded-md text-xs whitespace-pre-wrap;
+  }
+
+  /* Git 연결 상태 — 대시보드 상단의 읽기 전용 요약. URL/토큰 입력은 없다. */
+  .git-status {
+    @apply flex flex-wrap items-baseline gap-x-3 gap-y-1 px-4 py-2.5 mb-7 rounded-lg text-[13px] bg-white border-y border-r border-l-4 border-line;
+  }
+  .git-status--ok {
+    @apply border-l-success;
+  }
+  .git-status--warning {
+    @apply border-l-warning;
+  }
+  .git-status--none {
+    @apply border-l-line;
+  }
+  .git-status__label {
+    @apply font-bold;
+  }
+  .git-status__detail {
+    @apply text-muted;
+  }
+  .git-status__path {
+    @apply basis-full text-xs text-muted font-mono truncate;
+  }
+
+  /* Form */
+  .assignment-form {
+    @apply bg-card border border-line rounded-xl px-7 py-6 max-w-[720px];
+  }
+  .form-row {
+    @apply mb-[18px] flex flex-col gap-1.5;
+  }
+  .form-row--split {
+    @apply grid grid-cols-2 gap-4;
+  }
+  .form-row__label-line {
+    @apply flex items-center justify-between gap-2;
+  }
+  .code-language-select {
+    @apply px-2 py-1 border border-line rounded-md text-xs bg-white text-muted;
+  }
+
+  .assignment-form label {
+    @apply text-sm font-semibold;
+  }
+  .assignment-form input[type='text'],
+  .assignment-form input[type='date'],
+  .assignment-form input:not([type]),
+  .assignment-form textarea {
+    @apply px-3 py-2.5 border border-line rounded-lg text-sm bg-[#fafbfc] font-sans;
+  }
+  .assignment-form textarea:focus,
+  .assignment-form input:focus {
+    @apply outline-none border-primary bg-white;
+  }
+
+  .code-input {
+    @apply text-[13px] font-mono;
+  }
+
+  .inline-check {
+    @apply inline-flex items-center gap-1 text-xs font-medium text-muted;
+  }
+
+  .file-list--editable li {
+    @apply flex items-center gap-2.5 py-1.5 border-b border-line text-[13px];
+  }
+
+  .thumb-preview {
+    @apply w-10 h-10 object-cover rounded;
+  }
+
+  /* 이미지 드롭존 — 클릭/드래그앤드롭/클립보드 붙여넣기 공용 진입점 */
+  .dropzone {
+    @apply relative border-2 border-dashed border-line rounded-lg px-5 py-6 text-center bg-[#fafbfc] transition-colors cursor-pointer;
+  }
+  .dropzone:hover,
+  .dropzone--active {
+    @apply border-primary bg-primary/5;
+  }
+  .dropzone__input {
+    @apply absolute w-px h-px opacity-0 overflow-hidden;
+  }
+  .dropzone__label {
+    @apply flex flex-col items-center gap-1 cursor-pointer;
+  }
+  .dropzone__label-main {
+    @apply text-sm font-medium text-ink;
+  }
+  .dropzone__label-sub {
+    @apply text-xs text-muted;
+  }
+
+  /* 저장 전 새로 추가한 이미지의 즉시 미리보기 */
+  .image-preview-grid {
+    @apply grid grid-cols-[repeat(auto-fill,minmax(84px,1fr))] gap-2 mt-3;
+  }
+  .image-preview {
+    @apply relative rounded-lg overflow-hidden border border-line aspect-square bg-[#eef0f5];
+  }
+  .image-preview img {
+    @apply w-full h-full object-cover block;
+  }
+  .image-preview button {
+    @apply absolute top-1 right-1 w-5 h-5 flex items-center justify-center rounded-full bg-black/60 text-white text-xs leading-none cursor-pointer;
+  }
+  .image-preview button:hover {
+    @apply bg-black/80;
+  }
+
+  .hint {
+    @apply text-xs text-muted mt-1;
+  }
+
+  .assignment-form button[type='submit'] {
+    @apply bg-primary text-white border-0 px-[22px] py-3 rounded-lg text-[15px] font-bold cursor-pointer;
+  }
+  .assignment-form button[type='submit']:hover {
+    @apply bg-primary-dark;
+  }
+  .assignment-form button[type='submit']:disabled {
+    @apply opacity-60 cursor-not-allowed;
+  }
+}
+
+@media (max-width: 640px) {
+  .form-row--split,
+  .reflection-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "assignment-archive-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "개인 학습 과제 아카이브 백엔드 (Express, 파일 기반 저장 + git 자동 동기화)",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node src/server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "multer": "^2.2.0"
+  }
+}
