@@ -51,6 +51,7 @@ function parseCodeBlocks(raw) {
         language: typeof b.language === 'string' ? b.language.trim() : '',
         code: b.code.trim(),
         filename: typeof b.filename === 'string' && b.filename.trim() ? b.filename.trim() : undefined,
+        description: typeof b.description === 'string' && b.description.trim() ? b.description.trim() : undefined,
       }));
   } catch {
     return [];

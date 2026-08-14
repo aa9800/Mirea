@@ -274,6 +274,11 @@
     @apply text-[15px] leading-relaxed text-ink whitespace-pre-wrap;
   }
 
+  /* 코드 블록 하나(설명 + 코드)를 묶는 단위 — 파일이 여러 개면 이 단위로 반복된다. */
+  .code-block-item {
+    @apply flex flex-col gap-2;
+  }
+
   /* 코드/실행 결과 — dark 톤 유지 + 터미널/에디터 느낌의 라벨 탭 */
   .code-frame {
     @apply rounded-xl overflow-hidden bg-[#1e2230];

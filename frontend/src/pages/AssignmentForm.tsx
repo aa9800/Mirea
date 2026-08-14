@@ -53,7 +53,7 @@ const CODE_EXT_LANGUAGE: Record<string, string> = {
 };
 // 코드 블록으로는 안 넣지만, 내용을 읽어서 AI 분석 참고 자료로는 쓸 수 있는 파일들.
 const TEXT_ONLY_EXT = /\.(md|txt|csv|ya?ml|xml|log|ini|cfg|env)$/i;
-const SKIP_DIR = /(^|[/\\])(node_modules|\.git|dist|build|__pycache__)([/\\]|$)/i;
+const SKIP_DIR = /(^|[/\\])(node_modules|\.git|dist|build|__pycache__|\.ipynb_checkpoints)([/\\]|$)/i;
 const MAX_FOLDER_FILES = 60;
 const MAX_TEXT_READ_SIZE = 300_000;
 
@@ -64,6 +64,82 @@ function extOf(filename: string): string {
 
 function relPath(f: File): string {
   return (f as File & { webkitRelativePath?: string }).webkitRelativePath || f.name;
+}
+
+function base64ToFile(base64: string, mime: string, filename: string): File {
+  const byteChars = atob(base64.replace(/\s/g, ''));
+  const byteArray = new Uint8Array(byteChars.length);
+  for (let i = 0; i < byteChars.length; i++) byteArray[i] = byteChars.charCodeAt(i);
+  return new File([byteArray], filename, { type: mime });
+}
+
+// .ipynb(주피터 노트북)는 JSON이라 그대로 코드 블록에 넣으면 못 알아보게 되니 직접 분해한다.
+// - code 셀 → 코드 블록 하나로 합침, markdown 셀 → AI 분석 참고 자료
+// - 실행 결과로 찍힌 텍스트(stdout 등) → "실행 결과" 필드 초안 (실제로 실행된 값이라 AI 추정보다 정확)
+// - 실행 결과로 찍힌 이미지(plot 등, 노트북 안에 base64로 저장돼 있음) → 이미지로 추출
+function extractNotebook(
+  jsonText: string,
+  baseName: string,
+): { code: string; language: string; markdown: string; outputText: string; outputImages: File[] } | null {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const nb: any = JSON.parse(jsonText);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const cells: any[] = Array.isArray(nb.cells) ? nb.cells : [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const joinSource = (s: any) => (Array.isArray(s) ? s.join('') : String(s || ''));
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const codeCells = cells.filter((c: any) => c.cell_type === 'code');
+    const code = codeCells
+      .map((c) => joinSource(c.source))
+      .filter((s: string) => s.trim())
+      .join('\n\n');
+    const markdown = cells
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .filter((c: any) => c.cell_type === 'markdown')
+      .map((c) => joinSource(c.source))
+      .filter((s: string) => s.trim())
+      .join('\n\n');
+
+    const outputTexts: string[] = [];
+    const outputImages: File[] = [];
+    let imgIndex = 0;
+    for (const cell of codeCells) {
+      for (const out of cell.outputs || []) {
+        if (out.output_type === 'stream' && out.text) {
+          outputTexts.push(joinSource(out.text));
+        } else if (out.output_type === 'error') {
+          outputTexts.push(`[에러] ${out.ename}: ${out.evalue}`);
+        } else if ((out.output_type === 'execute_result' || out.output_type === 'display_data') && out.data) {
+          const png = out.data['image/png'];
+          const jpeg = out.data['image/jpeg'];
+          if (png) {
+            outputImages.push(base64ToFile(png, 'image/png', `${baseName}-output-${++imgIndex}.png`));
+          } else if (jpeg) {
+            outputImages.push(base64ToFile(jpeg, 'image/jpeg', `${baseName}-output-${++imgIndex}.jpg`));
+          } else if (out.data['text/plain']) {
+            outputTexts.push(joinSource(out.data['text/plain']));
+          }
+        }
+      }
+    }
+
+    if (!code.trim() && !markdown.trim() && outputImages.length === 0 && outputTexts.length === 0) return null;
+
+    const rawLanguage: string = nb.metadata?.language_info?.name || nb.metadata?.kernelspec?.language || 'python';
+    const language = CODE_LANGUAGE_OPTIONS.some((opt) => opt.value === rawLanguage) ? rawLanguage : 'python';
+
+    return {
+      code: code.trim(),
+      language,
+      markdown: markdown.trim(),
+      outputText: outputTexts.join('\n').trim().slice(0, 4000),
+      outputImages,
+    };
+  } catch {
+    return null;
+  }
 }
 
 export default function AssignmentForm({ mode }: Props) {
@@ -246,6 +322,8 @@ export default function AssignmentForm({ mode }: Props) {
     const truncated = all.length - picked.length;
 
     const newImageFiles: File[] = [];
+    const outputImageFiles: File[] = [];
+    const capturedOutputTexts: string[] = [];
     const newCode: CodeBlock[] = [];
     const newCodeFileList: File[] = [];
     const newAttachmentFiles: File[] = [];
@@ -258,6 +336,25 @@ export default function AssignmentForm({ mode }: Props) {
 
         if (IMAGE_EXT.test(f.name)) {
           newImageFiles.push(f);
+          continue;
+        }
+
+        if (extOf(f.name) === 'ipynb') {
+          newCodeFileList.push(f);
+          if (f.size < MAX_TEXT_READ_SIZE) {
+            try {
+              const raw = await f.text();
+              const nb = extractNotebook(raw, f.name.replace(/\.ipynb$/i, ''));
+              if (nb) {
+                if (nb.code) newCode.push({ language: nb.language, code: nb.code, filename: rel });
+                textForAi.push({ name: rel, content: [nb.markdown, nb.code].filter(Boolean).join('\n\n') });
+                if (nb.outputText) capturedOutputTexts.push(nb.outputText);
+                if (nb.outputImages.length) outputImageFiles.push(...nb.outputImages);
+              }
+            } catch {
+              // JSON 파싱 실패 등 — 코드 블록은 못 만들어도 파일 첨부는 그대로 된다.
+            }
+          }
           continue;
         }
 
@@ -288,7 +385,11 @@ export default function AssignmentForm({ mode }: Props) {
         }
       }
 
-      if (newImageFiles.length) setNewImages((prev) => [...prev, ...newImageFiles]);
+      // 노트북에서 뽑은 실행 결과 이미지를 앞쪽에 둔다 — 새 과제 저장 시 대표 이미지가
+      // 지정 안 돼있으면 백엔드가 images[0]을 기본값으로 쓰므로, 자연스럽게 대표 이미지가 된다.
+      if (outputImageFiles.length || newImageFiles.length) {
+        setNewImages((prev) => [...prev, ...outputImageFiles, ...newImageFiles]);
+      }
       if (newCodeFileList.length) setNewCodeFiles((prev) => [...prev, ...newCodeFileList]);
       if (newAttachmentFiles.length) setNewAttachments((prev) => [...prev, ...newAttachmentFiles]);
       if (newCode.length) {
@@ -299,11 +400,28 @@ export default function AssignmentForm({ mode }: Props) {
       if (textForAi.length > 0) {
         const suggestion = await analyzeContent({ files: textForAi });
         applySuggestion(suggestion);
+        // 파일별 설명을 파일명으로 매칭해서 해당 코드 블록에 붙인다 (설명이 아직 없는 블록만).
+        if (suggestion.fileDescriptions?.length) {
+          const byFilename = new Map(suggestion.fileDescriptions.map((d) => [d.filename, d.description]));
+          setCodeBlocks((prev) =>
+            prev.map((b) =>
+              !b.description && b.filename && byFilename.has(b.filename)
+                ? { ...b, description: byFilename.get(b.filename) }
+                : b,
+            ),
+          );
+        }
+      }
+      // 노트북에 실제로 찍혀있던 실행 결과 텍스트는 AI 추정보다 정확하니, 비어있으면 그걸로 채운다
+      // (AI가 먼저 추정값을 채웠어도 여기서 실제 값으로 덮어쓴다).
+      if (capturedOutputTexts.length > 0 && !executionResult.trim()) {
+        setExecutionResult(capturedOutputTexts.join('\n---\n').slice(0, 4000));
       }
 
       const notes: string[] = [];
       if (truncated > 0) notes.push(`파일이 많아 ${picked.length}개만 처리하고 ${truncated}개는 건너뛰었어요.`);
       if (textForAi.length === 0) notes.push('분석할 텍스트 내용을 찾지 못해 파일만 첨부했어요.');
+      if (outputImageFiles.length > 0) notes.push(`노트북 실행 결과 이미지 ${outputImageFiles.length}개를 찾아 추가했어요.`);
       if (notes.length) setAiNotice(notes.join(' '));
     } catch (err) {
       setAiError((err as Error).message);
@@ -478,6 +596,12 @@ export default function AssignmentForm({ mode }: Props) {
                 </button>
               )}
             </div>
+            <input
+              className="code-block-editor__description"
+              placeholder="이 코드에 대한 설명 (선택 — 폴더로 분석하면 자동으로 채워져요)"
+              value={block.description ?? ''}
+              onChange={(e) => updateCodeBlock(i, { description: e.target.value })}
+            />
             <textarea
               rows={8}
               className="code-input"

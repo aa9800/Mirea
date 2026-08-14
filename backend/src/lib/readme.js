@@ -16,6 +16,7 @@ function buildReadme(meta) {
     lines.push('## 코드', '');
     for (const block of meta.codeBlocks) {
       if (block.filename) lines.push(`**${block.filename}**`, '');
+      if (block.description) lines.push(block.description, '');
       lines.push(`\`\`\`${block.language || ''}`, block.code, '```', '');
     }
   }

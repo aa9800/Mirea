@@ -19,6 +19,7 @@ export interface CodeBlock {
   language: string;
   code: string;
   filename?: string;
+  description?: string;
 }
 
 export interface Assignment {
@@ -63,6 +64,8 @@ export interface AiSuggestion {
   learnings: string;
   difficulties: string;
   executionResult: string;
+  // 폴더(여러 파일) 분석일 때만 채워진다 — 파일명으로 각 코드 블록에 매칭해서 쓴다.
+  fileDescriptions?: { filename: string; description: string }[];
 }
 
 // GET /api/git/status — 읽기 전용. URL/토큰 입력은 없고, 로컬에 이미 있는

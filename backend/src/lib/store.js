@@ -79,7 +79,7 @@ function listAssignments({ q, subject, favorite } = {}) {
         a.learnings,
         a.difficulties,
         ...(a.tags || []),
-        ...(a.codeBlocks || []).flatMap((b) => [b.code, b.language, b.filename]),
+        ...(a.codeBlocks || []).flatMap((b) => [b.code, b.language, b.filename, b.description]),
       ]
         .join(' ')
         .toLowerCase();

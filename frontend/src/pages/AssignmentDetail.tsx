@@ -138,7 +138,10 @@ export default function AssignmentDetail() {
           <section className="doc-section">
             <h2 className="doc-section__label">코드</h2>
             {assignment.codeBlocks.map((block, i) => (
-              <HighlightedCode key={i} code={block.code} language={block.language} tagLabel={block.filename} />
+              <div key={i} className="code-block-item">
+                {block.description && <p className="doc-section__body">{block.description}</p>}
+                <HighlightedCode code={block.code} language={block.language} tagLabel={block.filename} />
+              </div>
             ))}
           </section>
         )}

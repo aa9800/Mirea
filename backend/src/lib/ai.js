@@ -58,56 +58,114 @@ function getClient() {
   return getClient._instance;
 }
 
-// 새 과제 등록 폼의 빈칸을 최대한 채워주기 위한 스키마. codeLanguage는 붙여넣기/단일
+// 새 과제 등록 폼의 빈칸을 최대한 채워주기 위한 공통 필드. codeLanguage는 붙여넣기/단일
 // 파일 분석에서 코드 블록 하나의 언어를 제안할 때만 쓰이고, 폴더 분석은 파일 확장자로
 // 언어를 결정하므로 이 값을 쓰지 않는다. executionResult는 실제로 실행해본 게 아니라
 // 코드를 읽고 추정한 값이므로, 사용자가 검증해야 한다는 걸 설명에 명시한다.
+const BASE_PROPERTIES = {
+  title: { type: 'string', description: '과제 제목 (간결한 한국어)' },
+  subject: { type: 'string', description: '과목/분야 (예: Python, 자료구조, 웹개발)' },
+  tags: {
+    type: 'array',
+    items: { type: 'string' },
+    description: '3~6개의 짧은 태그 (영문 소문자 또는 한국어, 예: python, 재귀)',
+  },
+  description: { type: 'string', description: '2~3문장의 한국어 설명 (무엇을 만드는/푸는 과제인지)' },
+  codeLanguage: {
+    type: 'string',
+    description:
+      "python|javascript|typescript|java|c|cpp|html|css|bash|json|sql 중 하나. 코드가 아니거나 해당 없으면 빈 문자열",
+  },
+  learnings: {
+    type: 'string',
+    description: '이 코드를 작성하며 배웠을 법한 개념 1~2문장 (한국어). 추정이 어려우면 빈 문자열',
+  },
+  difficulties: {
+    type: 'string',
+    description: '이 코드에서 어려웠을 법한 부분 1~2문장 (한국어). 추정이 어려우면 빈 문자열',
+  },
+  executionResult: {
+    type: 'string',
+    description:
+      '코드를 실행하면 나올 것으로 예상되는 출력 (실제로 실행한 것이 아니라 코드를 읽고 추정한 값). 예측하기 어렵거나 코드가 아니면 빈 문자열',
+  },
+};
+const BASE_REQUIRED = ['title', 'subject', 'tags', 'description', 'codeLanguage', 'learnings', 'difficulties', 'executionResult'];
+
 const SUGGESTION_SCHEMA = {
   type: 'object',
-  properties: {
-    title: { type: 'string', description: '과제 제목 (간결한 한국어)' },
-    subject: { type: 'string', description: '과목/분야 (예: Python, 자료구조, 웹개발)' },
-    tags: {
-      type: 'array',
-      items: { type: 'string' },
-      description: '3~6개의 짧은 태그 (영문 소문자 또는 한국어, 예: python, 재귀)',
-    },
-    description: { type: 'string', description: '2~3문장의 한국어 설명 (무엇을 만드는/푸는 과제인지)' },
-    codeLanguage: {
-      type: 'string',
-      description:
-        "python|javascript|typescript|java|c|cpp|html|css|bash|json|sql 중 하나. 코드가 아니거나 해당 없으면 빈 문자열",
-    },
-    learnings: {
-      type: 'string',
-      description: '이 코드를 작성하며 배웠을 법한 개념 1~2문장 (한국어). 추정이 어려우면 빈 문자열',
-    },
-    difficulties: {
-      type: 'string',
-      description: '이 코드에서 어려웠을 법한 부분 1~2문장 (한국어). 추정이 어려우면 빈 문자열',
-    },
-    executionResult: {
-      type: 'string',
-      description:
-        '코드를 실행하면 나올 것으로 예상되는 출력 (실제로 실행한 것이 아니라 코드를 읽고 추정한 값). 예측하기 어렵거나 코드가 아니면 빈 문자열',
+  properties: BASE_PROPERTIES,
+  required: BASE_REQUIRED,
+  additionalProperties: false,
+};
+
+// 폴더(여러 파일) 분석 전용 확장 스키마 — 전체를 종합한 긴 설명 하나에 더해,
+// 파일별로도 각각 무엇을 하는지 개별 설명을 받는다 (파일마다 코드 블록이 따로
+// 생기므로, 그 블록 하나하나에 붙일 설명이 필요하다).
+const FOLDER_PROPERTIES = {
+  ...BASE_PROPERTIES,
+  description: {
+    type: 'string',
+    description:
+      '여러 파일을 종합한 전체 설명. 4~6문장 정도로, 이 과제가 전체적으로 무엇을 구현/학습하는지 조금 길게 설명 (한국어)',
+  },
+  fileDescriptions: {
+    type: 'array',
+    description:
+      '입력으로 주어진 파일 각각에 대한 개별 설명. filename은 입력에 표시된 파일명과 정확히 동일해야 한다.',
+    items: {
+      type: 'object',
+      properties: {
+        filename: { type: 'string', description: '입력에 표시된 파일명과 정확히 동일한 값' },
+        description: { type: 'string', description: '이 파일 하나가 구체적으로 무엇을 하는지 2~3문장 (한국어)' },
+      },
+      required: ['filename', 'description'],
+      additionalProperties: false,
     },
   },
-  required: ['title', 'subject', 'tags', 'description', 'codeLanguage', 'learnings', 'difficulties', 'executionResult'],
+};
+const FOLDER_REQUIRED = [...BASE_REQUIRED, 'fileDescriptions'];
+
+const FOLDER_SUGGESTION_SCHEMA = {
+  type: 'object',
+  properties: FOLDER_PROPERTIES,
+  required: FOLDER_REQUIRED,
   additionalProperties: false,
 };
 
 // Gemini의 schema 파서는 JSON Schema 전체 키워드를 다 지원하진 않아서
-// additionalProperties처럼 애매한 키워드는 뺀 축소판을 따로 둔다.
-const GEMINI_SUGGESTION_SCHEMA = {
+// additionalProperties처럼 애매한 키워드는 뺀 축소판을 따로 둔다(중첩 객체 포함).
+const GEMINI_SUGGESTION_SCHEMA = { type: 'object', properties: BASE_PROPERTIES, required: BASE_REQUIRED };
+const GEMINI_FOLDER_SUGGESTION_SCHEMA = {
   type: 'object',
-  properties: SUGGESTION_SCHEMA.properties,
-  required: SUGGESTION_SCHEMA.required,
+  properties: {
+    ...FOLDER_PROPERTIES,
+    fileDescriptions: {
+      ...FOLDER_PROPERTIES.fileDescriptions,
+      items: {
+        type: 'object',
+        properties: FOLDER_PROPERTIES.fileDescriptions.items.properties,
+        required: FOLDER_PROPERTIES.fileDescriptions.items.required,
+      },
+    },
+  },
+  required: FOLDER_REQUIRED,
 };
+
+function isFolderRequest({ files }) {
+  return Array.isArray(files) && files.length > 0;
+}
+
+function schemaFor({ files }, forGemini) {
+  const folder = isFolderRequest({ files });
+  if (forGemini) return folder ? GEMINI_FOLDER_SUGGESTION_SCHEMA : GEMINI_SUGGESTION_SCHEMA;
+  return folder ? FOLDER_SUGGESTION_SCHEMA : SUGGESTION_SCHEMA;
+}
 
 // 붙여넣은 텍스트(content) 하나만 올 수도 있고, 폴더를 선택해 여러 파일(files)이
 // 올 수도 있다. 폴더인 경우 파일별로 표시를 붙여 하나의 분석 대상 텍스트로 합친다.
 function buildContentBlock({ content, filename, files }) {
-  if (Array.isArray(files) && files.length > 0) {
+  if (isFolderRequest({ files })) {
     const perFileLimit = 4000;
     const combined = files
       .map((f) => `### 파일: ${f.name}\n${String(f.content || '').slice(0, perFileLimit)}`)
@@ -119,7 +177,7 @@ function buildContentBlock({ content, filename, files }) {
 
 function buildPrompt({ content, filename, files }) {
   const { text, label } = buildContentBlock({ content, filename, files });
-  return [
+  const lines = [
     '다음은 개인 학습 과제 아카이브에 저장할 내용입니다.',
     `대상: ${label}`,
     '---',
@@ -128,7 +186,15 @@ function buildPrompt({ content, filename, files }) {
     '위 내용을 분석해서 과제 등록 폼의 빈칸을 최대한 채울 수 있도록 메타데이터를 제안해주세요.',
     '배운 점/어려웠던 점/실행 결과는 코드만 보고 하는 추정입니다 — 자신 있게 추정할 수 있을 때만 채우고,',
     '근거가 부족하면 억지로 만들어내지 말고 빈 문자열로 두세요.',
-  ].join('\n');
+  ];
+  if (isFolderRequest({ files })) {
+    lines.push(
+      '파일이 여러 개입니다 — description(전체 설명)은 모든 파일을 종합해 조금 길게(4~6문장) 작성하고,',
+      'fileDescriptions에는 "### 파일: " 뒤에 나온 파일명을 정확히 그대로 사용해 파일 하나하나에 대한',
+      '설명을 따로 작성해주세요 (파일명이 하나라도 다르면 매칭이 안 되니 정확히 복사해서 쓰세요).',
+    );
+  }
+  return lines.join('\n');
 }
 
 function parseSuggestionText(text) {
@@ -145,8 +211,8 @@ function parseSuggestionText(text) {
   return JSON.parse(jsonSlice);
 }
 
-function validateSuggestion(obj) {
-  const missing = SUGGESTION_SCHEMA.required.filter((key) => obj[key] === undefined);
+function validateSuggestion(obj, required) {
+  const missing = required.filter((key) => obj[key] === undefined);
   if (missing.length > 0) {
     const err = new Error(`AI 응답에 필요한 항목이 빠졌습니다: ${missing.join(', ')}`);
     err.code = 'EMPTY';
@@ -161,6 +227,7 @@ const GEMINI_MODEL = 'gemini-3.6-flash';
 async function analyzeViaGemini({ content, filename, files }) {
   const prompt = buildPrompt({ content, filename, files });
   const apiKey = process.env.GEMINI_API_KEY;
+  const schema = schemaFor({ files }, true);
 
   let res;
   try {
@@ -176,7 +243,7 @@ async function analyzeViaGemini({ content, filename, files }) {
         response_format: {
           type: 'text',
           mime_type: 'application/json',
-          schema: GEMINI_SUGGESTION_SCHEMA,
+          schema,
         },
       }),
     });
@@ -208,7 +275,7 @@ async function analyzeViaGemini({ content, filename, files }) {
     throw e;
   }
 
-  return validateSuggestion(parseSuggestionText(textBlock.text));
+  return validateSuggestion(parseSuggestionText(textBlock.text), schemaFor({ files }, false).required);
 }
 
 // 기존 방식: @anthropic-ai/sdk로 직접 Messages API를 호출한다. GEMINI_API_KEY가
@@ -216,6 +283,7 @@ async function analyzeViaGemini({ content, filename, files }) {
 // Console 종량제 크레딧으로 과금됨).
 async function analyzeViaAnthropic({ content, filename, files }) {
   const prompt = buildPrompt({ content, filename, files });
+  const schema = schemaFor({ files }, false);
 
   let response;
   try {
@@ -224,7 +292,7 @@ async function analyzeViaAnthropic({ content, filename, files }) {
       max_tokens: 4096,
       output_config: {
         effort: 'medium',
-        format: { type: 'json_schema', schema: SUGGESTION_SCHEMA },
+        format: { type: 'json_schema', schema },
       },
       messages: [{ role: 'user', content: prompt }],
     });
@@ -252,7 +320,7 @@ async function analyzeViaAnthropic({ content, filename, files }) {
     throw err;
   }
 
-  return validateSuggestion(JSON.parse(textBlock.text));
+  return validateSuggestion(JSON.parse(textBlock.text), schema.required);
 }
 
 // 업로드/붙여넣은 내용(코드·텍스트, 단일 파일 또는 폴더)을 분석해 과제
