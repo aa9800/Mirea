@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const http = require('http');
 const { spawn, exec } = require('child_process');
 
 // 로컬 프로젝트 폴더를 실제로 실행해서(npm install → npm run dev/start) 화면을
@@ -122,6 +123,92 @@ function detectRoutes(projectPath) {
   return Array.from(found).slice(0, MAX_ROUTES);
 }
 
+// package.json이 없는(빌드 도구 없는 순수 HTML/CSS/JS) 프로젝트용 — 재귀적으로
+// .html 파일을 찾는다. index.html이 있으면 항상 맨 앞으로 와서 첫 스크린샷이 된다.
+function findHtmlFiles(projectPath) {
+  const results = walkFiles(projectPath, ['.html', '.htm']);
+  results.sort((a, b) => {
+    const aIsIndex = path.basename(a).toLowerCase() === 'index.html';
+    const bIsIndex = path.basename(b).toLowerCase() === 'index.html';
+    if (aIsIndex === bIsIndex) return 0;
+    return aIsIndex ? -1 : 1;
+  });
+  return results.slice(0, MAX_ROUTES);
+}
+
+const MIME_TYPES = {
+  '.html': 'text/html; charset=utf-8',
+  '.htm': 'text/html; charset=utf-8',
+  '.css': 'text/css',
+  '.js': 'application/javascript',
+  '.mjs': 'application/javascript',
+  '.json': 'application/json',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.gif': 'image/gif',
+  '.svg': 'image/svg+xml',
+  '.webp': 'image/webp',
+  '.ico': 'image/x-icon',
+  '.woff': 'font/woff',
+  '.woff2': 'font/woff2',
+  '.ttf': 'font/ttf',
+};
+
+// 빌드 도구/서버가 아예 없는 프로젝트를 위한 최소 정적 파일 서버. file://로 직접
+// 열면 최신 브라우저가 ES 모듈 스크립트(<script type="module">)를 CORS로 막아버려서
+// 화면이 반쯤 깨져 보일 수 있어, 진짜 http:// 로 서빙한다. 폴더 밖으로는 못 나가게 막는다.
+function serveStaticDir(rootDir) {
+  return new Promise((resolve, reject) => {
+    const server = http.createServer((req, res) => {
+      try {
+        const urlPath = decodeURIComponent((req.url || '/').split('?')[0]);
+        const target = path.normalize(path.join(rootDir, urlPath));
+        if (!target.startsWith(path.normalize(rootDir))) {
+          res.writeHead(403);
+          res.end('Forbidden');
+          return;
+        }
+        let filePath = target;
+        if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
+          filePath = path.join(filePath, 'index.html');
+        }
+        fs.readFile(filePath, (err, data) => {
+          if (err) {
+            res.writeHead(404);
+            res.end('Not found');
+            return;
+          }
+          res.writeHead(200, { 'Content-Type': MIME_TYPES[path.extname(filePath).toLowerCase()] || 'application/octet-stream' });
+          res.end(data);
+        });
+      } catch (err) {
+        res.writeHead(500);
+        res.end(String(err));
+      }
+    });
+    server.on('error', reject);
+    server.listen(0, '127.0.0.1', () => resolve(server));
+  });
+}
+
+// 여러 페이지를 순서대로 접속해 스크린샷을 찍는다 (npm dev 서버든 정적 서버든 공용).
+async function shootPages(page, baseUrl, pagePaths) {
+  const shots = [];
+  for (const pagePath of pagePaths) {
+    try {
+      await page.goto(new URL(pagePath, baseUrl).href, { waitUntil: 'networkidle2', timeout: 30000 });
+      await new Promise((r) => setTimeout(r, 500));
+      const buffer = await page.screenshot({ type: 'png' });
+      shots.push({ path: pagePath, buffer });
+    } catch (err) {
+      // 페이지 하나가 실패해도(예: 그 경로에서만 에러) 나머지는 계속 진행한다.
+      shots.push({ path: pagePath, error: err.message });
+    }
+  }
+  return shots;
+}
+
 function killTree(pid) {
   if (!pid) return;
   if (process.platform === 'win32') {
@@ -218,47 +305,20 @@ function startDevServerAndWaitForUrl(projectPath, script, timeoutMs) {
   });
 }
 
-async function captureDevServerScreenshot(projectPath) {
-  if (!fs.existsSync(projectPath) || !fs.statSync(projectPath).isDirectory()) {
-    const e = new Error('해당 경로의 폴더를 찾을 수 없습니다. 정확한 절대 경로인지 확인해주세요.');
-    e.code = 'NOT_FOUND';
-    throw e;
-  }
-
-  const pkgPath = path.join(projectPath, 'package.json');
-  if (!fs.existsSync(pkgPath)) {
-    const e = new Error('package.json이 없습니다 — Node.js 웹 프로젝트가 아닌 것 같아요.');
-    e.code = 'NOT_A_PROJECT';
-    throw e;
-  }
-
-  let pkg;
-  try {
-    pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
-  } catch {
-    const e = new Error('package.json을 읽지 못했습니다 (JSON 형식이 아닌 것 같아요).');
-    e.code = 'NOT_A_PROJECT';
-    throw e;
-  }
-
-  const scripts = pkg.scripts || {};
-  const devScript = scripts.dev ? 'dev' : scripts.start ? 'start' : null;
-  if (!devScript) {
-    const e = new Error('package.json에 "dev"나 "start" 스크립트가 없습니다.');
-    e.code = 'NOT_A_PROJECT';
-    throw e;
-  }
-
-  let puppeteer;
+function loadPuppeteer() {
   try {
     // eslint-disable-next-line global-require
-    puppeteer = require('puppeteer');
+    return require('puppeteer');
   } catch {
     const e = new Error('puppeteer 패키지가 설치되어 있지 않습니다. backend 폴더에서 npm install puppeteer를 실행해주세요.');
     e.code = 'NO_PUPPETEER';
     throw e;
   }
+}
 
+// package.json + dev/start 스크립트가 있는 프로젝트(Vite/CRA/Next 등) — 실제로
+// npm install/run dev로 띄운 뒤 소스 코드에서 찾은 라우트들을 스크린샷 찍는다.
+async function captureFromDevServer(projectPath, devScript, puppeteer) {
   const nodeModulesPath = path.join(projectPath, 'node_modules');
   if (!fs.existsSync(nodeModulesPath)) {
     await runCommand(NPM_CMD, ['install'], projectPath, 5 * 60 * 1000);
@@ -275,26 +335,73 @@ async function captureDevServerScreenshot(projectPath) {
     try {
       const page = await browser.newPage();
       await page.setViewport({ width: 1280, height: 800 });
-
-      const shots = [];
-      for (const routePath of routes) {
-        try {
-          await page.goto(new URL(routePath, url).href, { waitUntil: 'networkidle2', timeout: 30000 });
-          await new Promise((r) => setTimeout(r, 500));
-          const buffer = await page.screenshot({ type: 'png' });
-          shots.push({ path: routePath, buffer });
-        } catch (err) {
-          // 페이지 하나가 실패해도(예: 그 경로에서만 에러) 나머지는 계속 진행한다.
-          shots.push({ path: routePath, error: err.message });
-        }
-      }
-      return shots;
+      return await shootPages(page, url, routes);
     } finally {
       await browser.close();
     }
   } finally {
     killTree(child.pid);
   }
+}
+
+// 빌드 도구/서버가 없는 순수 HTML/CSS/JS 프로젝트 — npm install/run dev 없이,
+// 폴더를 그대로 정적 파일 서버로 잠깐 띄워서 찾은 .html 파일들을 스크린샷 찍는다.
+async function captureFromStaticFiles(projectPath, htmlFiles, puppeteer) {
+  const server = await serveStaticDir(projectPath);
+  const port = server.address().port;
+  const baseUrl = `http://127.0.0.1:${port}/`;
+  const pagePaths = htmlFiles.map((f) => '/' + path.relative(projectPath, f).replace(/\\/g, '/'));
+
+  try {
+    const browser = await puppeteer.launch({ headless: true });
+    try {
+      const page = await browser.newPage();
+      await page.setViewport({ width: 1280, height: 800 });
+      return await shootPages(page, baseUrl, pagePaths);
+    } finally {
+      await browser.close();
+    }
+  } finally {
+    server.close();
+  }
+}
+
+async function captureDevServerScreenshot(projectPath) {
+  if (!fs.existsSync(projectPath) || !fs.statSync(projectPath).isDirectory()) {
+    const e = new Error('해당 경로의 폴더를 찾을 수 없습니다. 정확한 절대 경로인지 확인해주세요.');
+    e.code = 'NOT_FOUND';
+    throw e;
+  }
+
+  const puppeteer = loadPuppeteer();
+
+  const pkgPath = path.join(projectPath, 'package.json');
+  let devScript = null;
+  if (fs.existsSync(pkgPath)) {
+    try {
+      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
+      const scripts = pkg.scripts || {};
+      devScript = scripts.dev ? 'dev' : scripts.start ? 'start' : null;
+    } catch {
+      // package.json이 깨져 있으면 무시하고 아래 정적 파일 방식으로 폴백한다.
+    }
+  }
+
+  if (devScript) {
+    return captureFromDevServer(projectPath, devScript, puppeteer);
+  }
+
+  // package.json이 없거나 dev/start 스크립트가 없으면 — 빌드 도구 없는 순수
+  // HTML/CSS/JS 프로젝트일 수 있으니 .html 파일을 찾아서 정적으로 서빙해본다.
+  const htmlFiles = findHtmlFiles(projectPath);
+  if (htmlFiles.length === 0) {
+    const e = new Error(
+      'package.json의 "dev"/"start" 스크립트도, .html 파일도 찾지 못했습니다 — 웹 프로젝트 폴더가 맞는지 확인해주세요.',
+    );
+    e.code = 'NOT_A_PROJECT';
+    throw e;
+  }
+  return captureFromStaticFiles(projectPath, htmlFiles, puppeteer);
 }
 
 module.exports = { captureDevServerScreenshot };
