@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm -v)",
+      "Bash(npm create *)",
+      "Bash(npx create-vite@latest --help)",
+      "Bash(npx create-vite@latest __vite_tmp__ --template react-ts --no-interactive --no-eslint)",
+      "Bash(mv __vite_tmp__/.oxlintrc.json ./)",
+      "Bash(rmdir __vite_tmp__)",
+      "Bash(npm install *)",
+      "Bash(rm -f src/assets/hero.png src/assets/react.svg src/assets/vite.svg src/App.css public/icons.svg public/favicon.svg)",
+      "Bash(rmdir src/assets)",
+      "Bash(npm run *)",
+      "Bash(netstat -ano)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" http://127.0.0.1:5173/)",
+      "Bash(curl -s http://127.0.0.1:5173/)"
+    ]
+  }
+}
