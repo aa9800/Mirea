@@ -618,9 +618,12 @@ export default function AssignmentForm({ mode }: Props) {
     newAttachments.forEach((f) => fd.append('attachments', f));
     newCodeFiles.forEach((f) => fd.append('codeFiles', f));
     newExecutionImages.forEach((f) => fd.append('executionResultImages', f));
-    // 파일 이름(File.name) 자체에 폴더 상대 경로가 들어있다(snapshotFile에서 넣어둠) —
-    // 백엔드가 이 이름을 그대로 상대 경로로 해석해서 source/ 밑에 구조 그대로 저장한다.
+    // File.name에 폴더 상대 경로를 넣어뒀지만(snapshotFile), 브라우저가 실제 업로드
+    // 시 파일명에서 경로 구분자를 잘라내버려서(Chrome 포함, 직접 확인함) 그대로는
+    // 못 믿는다 — 그래서 같은 순서로 경로 목록을 별도 필드에 JSON으로 함께 보내고,
+    // 백엔드가 인덱스로 맞춰 쓴다.
     newSourceFiles.forEach((f) => fd.append('sourceFiles', f));
+    fd.set('sourceFilePaths', JSON.stringify(newSourceFiles.map((f) => f.name)));
 
     setSaving(true);
     setError(null);

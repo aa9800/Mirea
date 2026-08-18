@@ -80,9 +80,11 @@ function saveFiles(files, dir, subdir) {
 // 사용자가 처음 올린 원본이어야 한다는 원칙. storedName을 랜덤 생성하지 않고 원본
 // 경로 자체를 실제 파일 경로로 쓴다(같은 경로로 다시 올리면 최신 버전으로 덮어써짐).
 //
-// f.originalname은 프론트가 File.name에 상대 경로(슬래시 포함)를 그대로 담아 보낸
-// 것이라 — 상위 폴더 탈출(..)이나 절대경로 세그먼트가 섞여 있어도 안전하도록 각
-// 세그먼트를 검증해서 걸러낸다.
+// 주의: 파일의 상대 경로를 File.name에 슬래시 포함해서 담아도, 브라우저가 실제
+// multipart 업로드 시 그 파일명에서 경로 구분자를 잘라내버린다(직접 확인함 — Chrome도
+// 예외 없음, 보안상의 동작으로 보임). 그래서 originalname은 못 믿고, 프론트가 파일들과
+// "같은 순서로" 별도 텍스트 필드(sourceFilePaths, JSON 배열)에 상대 경로를 보내고
+// 여기서 인덱스로 맞춰 쓴다. 그마저 없으면 그나마 원래 파일명(경로 없이)이라도 쓴다.
 function sanitizeRelPath(raw) {
   const segments = String(raw || '')
     .split(/[\\/]+/)
@@ -91,11 +93,20 @@ function sanitizeRelPath(raw) {
   return segments;
 }
 
-function saveSourceFiles(files, dir) {
+function saveSourceFiles(files, dir, pathsJson) {
+  if (!files || files.length === 0) return [];
+  let manifest = [];
+  try {
+    const parsed = JSON.parse(pathsJson || '[]');
+    if (Array.isArray(parsed)) manifest = parsed;
+  } catch {
+    // 무시 — 아래에서 파일별 originalname으로 폴백
+  }
+
   const sourceDir = path.join(dir, 'source');
-  return (files || []).map((f) => {
-    const segments = sanitizeRelPath(f.originalname);
-    const relPath = segments.length ? segments.join('/') : `file-${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+  return files.map((f, i) => {
+    const segments = sanitizeRelPath(manifest[i] || f.originalname);
+    const relPath = segments.length ? segments.join('/') : `file-${Date.now()}-${i}`;
     const fullPath = path.join(sourceDir, ...(segments.length ? segments : [relPath]));
     fs.mkdirSync(path.dirname(fullPath), { recursive: true });
     fs.writeFileSync(fullPath, f.buffer);
@@ -164,7 +175,7 @@ router.get('/:id', (req, res) => {
 // POST /api/assignments - 신규 등록
 router.post('/', uploadFields, async (req, res) => {
   try {
-    const { title, subject, date, description, codeBlocks, tags, learnings, difficulties, executionResult, favorite, thumbnail } = req.body;
+    const { title, subject, date, description, codeBlocks, tags, learnings, difficulties, executionResult, favorite, thumbnail, sourceFilePaths } = req.body;
 
     if (!title || !title.trim() || !subject || !subject.trim()) {
       return res.status(400).json({ error: '제목과 과목은 필수입니다.' });
@@ -178,7 +189,7 @@ router.post('/', uploadFields, async (req, res) => {
     // 실행 결과 이미지도 물리적으로는 images/ 폴더에 저장한다 (별도 폴더를 만들 이유가
     // 없음 — meta.json의 배열이 분리돼 있으면 의미상 구분은 충분하다).
     const executionResultImages = saveFiles(req.files?.executionResultImages, dir, 'images');
-    const sourceFiles = saveSourceFiles(req.files?.sourceFiles, dir);
+    const sourceFiles = saveSourceFiles(req.files?.sourceFiles, dir, sourceFilePaths);
 
     const now = new Date().toISOString();
     const meta = {
@@ -233,6 +244,7 @@ router.put('/:id', uploadFields, async (req, res) => {
       title, subject, date, description, codeBlocks, tags,
       learnings, difficulties, executionResult, favorite, thumbnail,
       removeImages, removeAttachments, removeCodeFiles, removeExecutionResultImages,
+      sourceFilePaths,
     } = req.body;
 
     // 과목이 바뀌었으면 폴더를 새 과목 폴더로 옮긴다 (code/images/attachments는
@@ -254,7 +266,7 @@ router.put('/:id', uploadFields, async (req, res) => {
     attachments = attachments.concat(saveFiles(req.files?.attachments, dir, 'attachments'));
     codeFiles = codeFiles.concat(saveFiles(req.files?.codeFiles, dir, 'code'));
     executionResultImages = executionResultImages.concat(saveFiles(req.files?.executionResultImages, dir, 'images'));
-    const sourceFiles = mergeSourceFiles(existing.sourceFiles, saveSourceFiles(req.files?.sourceFiles, dir));
+    const sourceFiles = mergeSourceFiles(existing.sourceFiles, saveSourceFiles(req.files?.sourceFiles, dir, sourceFilePaths));
 
     const resolvedThumbnail = thumbnail && images.some((i) => i.storedName === thumbnail)
       ? thumbnail
