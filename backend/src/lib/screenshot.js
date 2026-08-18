@@ -266,6 +266,8 @@ function startDevServerAndWaitForUrl(projectPath, script, timeoutMs) {
     const child = spawn(NPM_CMD, ['run', script], { cwd: projectPath, ...SPAWN_OPTS });
     let buffer = '';
     let settled = false;
+    let candidateUrl = null;
+    let graceTimer = null;
 
     const timer = setTimeout(() => {
       if (settled) return;
@@ -278,13 +280,37 @@ function startDevServerAndWaitForUrl(projectPath, script, timeoutMs) {
       );
     }, timeoutMs);
 
+    function finalize(url) {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      if (graceTimer) clearTimeout(graceTimer);
+      resolve({ child, url });
+    }
+
     function checkForUrl(chunk) {
       buffer += stripAnsi(chunk);
-      const match = buffer.match(/https?:\/\/(?:localhost|127\.0\.0\.1|\[::1\]):(\d+)\S*/);
-      if (match && !settled) {
-        settled = true;
-        clearTimeout(timer);
-        resolve({ child, url: match[0] });
+      if (settled) return;
+
+      // Next.js 등은 같은 프로젝트에 이미 떠있는 dev 서버가 있으면, 방금 새로 띄운
+      // 인스턴스는 다른 포트로 잠깐 떴다가 스스로 종료하고 "기존 서버"의 주소를
+      // 알려준다 — 그 경우 방금 뜬(곧 죽을) URL이 아니라 기존 서버 URL을 써야 한다.
+      const existingMatch = buffer.match(
+        /existing\s+(?:next\s+)?(?:dev(?:elopment)?\s+)?server.*?(https?:\/\/(?:localhost|127\.0\.0\.1|\[::1\]):\d+\/?)/is,
+      );
+      if (existingMatch) {
+        finalize(existingMatch[1]);
+        return;
+      }
+
+      if (!candidateUrl) {
+        const match = buffer.match(/https?:\/\/(?:localhost|127\.0\.0\.1|\[::1\]):(\d+)\S*/);
+        if (match) {
+          candidateUrl = match[0];
+          // 곧바로 확정하지 않고, 위의 "이미 실행 중" 안내가 뒤따라오는지 잠깐 더
+          // 지켜본다 — 없으면 이 후보 URL을 그대로 쓴다.
+          graceTimer = setTimeout(() => finalize(candidateUrl), 1500);
+        }
       }
     }
 
@@ -303,6 +329,60 @@ function startDevServerAndWaitForUrl(projectPath, script, timeoutMs) {
       reject(new Error(`개발 서버 프로세스가 예상보다 일찍 종료됐습니다 (exit ${code}).\n${buffer.slice(-1000)}`));
     });
   });
+}
+
+// backend/frontend처럼 나뉜 모노레포는 최상위에 package.json이 없을 수 있다(이
+// Study Archive 프로젝트 자체가 그 구조다). 그런 경우 화면을 찍어야 하니 "프론트
+// 엔드로 보이는" 하위 폴더를 찾는다. 백엔드도 흔히 "start" 스크립트가 있어서
+// (API 서버 실행용) 아무 package.json이나 집으면 API 서버를 스크린샷 시도하는
+// 실수를 하게 되니, index.html이 있거나 vite/react/next 같은 프레임워크 의존성이
+// 있는 경우만 "프론트엔드"로 인정한다.
+const FRONTEND_SUBDIR_NAMES = ['frontend', 'client', 'web', 'webapp', 'app', 'www', 'ui'];
+const FRONTEND_INDICATOR_DEPS = [
+  'vite', 'react', 'react-dom', 'next', 'vue', '@angular/core', 'svelte', 'react-scripts', 'parcel',
+];
+
+function readDevScript(dir) {
+  const pkgPath = path.join(dir, 'package.json');
+  if (!fs.existsSync(pkgPath)) return null;
+  let pkg;
+  try {
+    pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
+  } catch {
+    return null;
+  }
+  const scripts = pkg.scripts || {};
+  const devScript = scripts.dev ? 'dev' : scripts.start ? 'start' : null;
+  return devScript ? { devScript, pkg } : null;
+}
+
+function looksLikeFrontend(dir, pkg) {
+  if (fs.existsSync(path.join(dir, 'index.html'))) return true;
+  const deps = { ...(pkg.dependencies || {}), ...(pkg.devDependencies || {}) };
+  return FRONTEND_INDICATOR_DEPS.some((d) => d in deps);
+}
+
+// 실제로 npm run dev/start를 실행할 폴더를 정한다. 루트가 프론트엔드처럼 보이면
+// 그대로 쓰고, 아니면 frontend/client/web 같은 흔한 하위 폴더 이름을 차례로
+// 확인한다. 프론트엔드로 확신할 수 있는 폴더가 없으면 마지막 수단으로 루트에
+// dev/start 스크립트만 있어도 시도는 해본다(프레임워크 감지가 안 되는 경우 대비).
+function resolveWebProjectRoot(projectPath) {
+  const rootScript = readDevScript(projectPath);
+  if (rootScript && looksLikeFrontend(projectPath, rootScript.pkg)) {
+    return { dir: projectPath, devScript: rootScript.devScript };
+  }
+
+  for (const name of FRONTEND_SUBDIR_NAMES) {
+    const dir = path.join(projectPath, name);
+    if (!fs.existsSync(dir)) continue;
+    const found = readDevScript(dir);
+    if (found && looksLikeFrontend(dir, found.pkg)) {
+      return { dir, devScript: found.devScript };
+    }
+  }
+
+  if (rootScript) return { dir: projectPath, devScript: rootScript.devScript };
+  return null;
 }
 
 function loadPuppeteer() {
@@ -375,20 +455,9 @@ async function captureDevServerScreenshot(projectPath) {
 
   const puppeteer = loadPuppeteer();
 
-  const pkgPath = path.join(projectPath, 'package.json');
-  let devScript = null;
-  if (fs.existsSync(pkgPath)) {
-    try {
-      const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'));
-      const scripts = pkg.scripts || {};
-      devScript = scripts.dev ? 'dev' : scripts.start ? 'start' : null;
-    } catch {
-      // package.json이 깨져 있으면 무시하고 아래 정적 파일 방식으로 폴백한다.
-    }
-  }
-
-  if (devScript) {
-    return captureFromDevServer(projectPath, devScript, puppeteer);
+  const resolved = resolveWebProjectRoot(projectPath);
+  if (resolved) {
+    return captureFromDevServer(resolved.dir, resolved.devScript, puppeteer);
   }
 
   // package.json이 없거나 dev/start 스크립트가 없으면 — 빌드 도구 없는 순수

@@ -12,7 +12,13 @@ const router = express.Router();
 // (multipart 필드 순서에 상관없이 title/subject로 먼저 폴더를 만들 수 있도록)
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 25 * 1024 * 1024 }, // 파일당 25MB
+  limits: {
+    fileSize: 25 * 1024 * 1024, // 파일당 25MB
+    // codeBlocks는 파일이 아니라 텍스트 필드(JSON 문자열)라 fieldSize 제한을 받는다.
+    // multer 기본값이 1MB라, 폴더 분석으로 코드 블록이 수십 개 생기면 쉽게 넘겨서
+    // 업로드 자체가 깨지고 브라우저에는 그냥 "Failed to fetch"로만 보였다.
+    fieldSize: 25 * 1024 * 1024,
+  },
 });
 
 const uploadFields = upload.fields([

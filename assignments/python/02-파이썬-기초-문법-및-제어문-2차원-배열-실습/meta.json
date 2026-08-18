@@ -83,9 +83,9 @@
   "createdAt": "2026-08-14T07:51:23.357Z",
   "updatedAt": "2026-08-14T07:51:23.357Z",
   "github": {
-    "status": "pending",
-    "url": null,
-    "lastSyncedAt": null,
+    "status": "success",
+    "url": "https://github.com/aa9800/Mirea/tree/main/assignments/python/02-파이썬-기초-문법-및-제어문-2차원-배열-실습",
+    "lastSyncedAt": "2026-08-14T07:51:26.001Z",
     "lastError": null
   }
 }

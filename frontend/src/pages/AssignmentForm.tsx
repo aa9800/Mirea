@@ -71,6 +71,20 @@ function relPath(f: File): string {
   return (f as File & { webkitRelativePath?: string }).webkitRelativePath || f.name;
 }
 
+// OneDrive 동기화 등으로 폴더 선택 이후 디스크의 파일이 살짝만 바뀌어도, 브라우저가
+// 실제 저장 시점에 "선택했을 때와 다르다"며 업로드를 거부한다(net::ERR_UPLOAD_FILE_CHANGED
+// — 폴더 분석 직후 바로 저장하지 않고 시간을 두면 실제로 겪는 문제). 그래서 폴더에서
+// 읽은 파일은 내용을 즉시 메모리로 복사해 원본 파일 핸들과의 연결을 끊어둔다 — 이후
+// 저장 시점까지 시간이 걸리거나 디스크에서 뭔가 바뀌어도 영향받지 않는다.
+async function snapshotFile(f: File): Promise<File> {
+  try {
+    const buf = await f.arrayBuffer();
+    return new File([buf], f.name, { type: f.type, lastModified: f.lastModified });
+  } catch {
+    return f; // 복사가 실패하면 그냥 원본으로라도 시도한다
+  }
+}
+
 function base64ToFile(base64: string, mime: string, filename: string): File {
   const byteChars = atob(base64.replace(/\s/g, ''));
   const byteArray = new Uint8Array(byteChars.length);
@@ -370,12 +384,12 @@ export default function AssignmentForm({ mode }: Props) {
         const rel = relPath(f);
 
         if (IMAGE_EXT.test(f.name)) {
-          newImageFiles.push(f);
+          newImageFiles.push(await snapshotFile(f));
           continue;
         }
 
         if (extOf(f.name) === 'ipynb') {
-          newCodeFileList.push(f);
+          newCodeFileList.push(await snapshotFile(f));
           if (f.size < MAX_TEXT_READ_SIZE) {
             try {
               const raw = await f.text();
@@ -395,7 +409,7 @@ export default function AssignmentForm({ mode }: Props) {
 
         const language = CODE_EXT_LANGUAGE[extOf(f.name)];
         if (language) {
-          newCodeFileList.push(f);
+          newCodeFileList.push(await snapshotFile(f));
           if (f.size < MAX_TEXT_READ_SIZE) {
             try {
               const text = await f.text();
@@ -409,7 +423,7 @@ export default function AssignmentForm({ mode }: Props) {
         }
 
         // 코드도 이미지도 아닌 파일 — 첨부로 남기고, 문서류 텍스트면 AI 참고 자료로만 쓴다.
-        newAttachmentFiles.push(f);
+        newAttachmentFiles.push(await snapshotFile(f));
         if (TEXT_ONLY_EXT.test(f.name) && f.size < MAX_TEXT_READ_SIZE) {
           try {
             const text = await f.text();
