@@ -529,9 +529,9 @@
   "createdAt": "2026-08-18T07:48:01.533Z",
   "updatedAt": "2026-08-18T07:48:01.533Z",
   "github": {
-    "status": "pending",
-    "url": null,
-    "lastSyncedAt": null,
+    "status": "success",
+    "url": "https://github.com/aa9800/Mirea/tree/main/assignments/웹개발/04-next-js와-fastapi-기반-미니-장바구니-구현-프로젝트",
+    "lastSyncedAt": "2026-08-18T07:48:04.972Z",
     "lastError": null
   }
 }
