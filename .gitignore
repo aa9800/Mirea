@@ -10,6 +10,6 @@ frontend/vite.config.d.ts
 .DS_Store
 backend/.env
 
-# Mirea 저장소의 다른 프로젝트(파이썬)에서 쓰던 규칙
+# 과제로 올라오는 파이썬 코드 실행 시 생길 수 있는 캐시 파일
 __pycache__/
 *.pyc
