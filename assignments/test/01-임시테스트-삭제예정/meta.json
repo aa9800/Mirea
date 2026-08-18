@@ -1,0 +1,34 @@
+{
+  "id": "test-01-임시테스트-삭제예정",
+  "subjectSlug": "test",
+  "leaf": "01-임시테스트-삭제예정",
+  "title": "__임시테스트_삭제예정__",
+  "subject": "__test__",
+  "date": "2026-08-18",
+  "description": "",
+  "tags": [],
+  "codeBlocks": [],
+  "codeFiles": [],
+  "sourceFiles": [
+    {
+      "path": "main.py",
+      "size": 17
+    }
+  ],
+  "learnings": "",
+  "difficulties": "",
+  "executionResult": "",
+  "executionResultImages": [],
+  "favorite": false,
+  "thumbnail": null,
+  "images": [],
+  "attachments": [],
+  "createdAt": "2026-08-18T09:17:03.605Z",
+  "updatedAt": "2026-08-18T09:17:03.605Z",
+  "github": {
+    "status": "pending",
+    "url": null,
+    "lastSyncedAt": null,
+    "lastError": null
+  }
+}

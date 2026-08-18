@@ -19,6 +19,14 @@ export function fileUrl(
   return `/files/${encodeURIComponent(subjectSlug)}/${encodeURIComponent(leaf)}/${type}/${encodeURIComponent(storedName)}`;
 }
 
+// source/ 밑의 원본 보존 파일 — relativePath가 폴더 구조를 담은 실제 경로라
+// 세그먼트별로 인코딩해야 한다 (전체를 통째로 encodeURIComponent 하면 "/"까지
+// %2F로 바뀌어 경로가 깨진다).
+export function sourceFileUrl(subjectSlug: string, leaf: string, relativePath: string): string {
+  const encodedPath = relativePath.split('/').map(encodeURIComponent).join('/');
+  return `/files/${encodeURIComponent(subjectSlug)}/${encodeURIComponent(leaf)}/source/${encodedPath}`;
+}
+
 export interface ListParams {
   q?: string;
   subject?: string;

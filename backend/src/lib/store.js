@@ -25,6 +25,9 @@ function normalizeMeta(meta) {
   if (!Array.isArray(meta.executionResultImages)) {
     meta.executionResultImages = [];
   }
+  if (!Array.isArray(meta.sourceFiles)) {
+    meta.sourceFiles = [];
+  }
   return meta;
 }
 

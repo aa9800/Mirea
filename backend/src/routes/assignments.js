@@ -27,6 +27,7 @@ const uploadFields = upload.fields([
   { name: 'attachments' },
   { name: 'codeFiles' },
   { name: 'executionResultImages' },
+  { name: 'sourceFiles' },
 ]);
 
 function parseTags(raw) {
@@ -72,6 +73,41 @@ function saveFiles(files, dir, subdir) {
     fs.writeFileSync(path.join(dir, subdir, storedName), f.buffer);
     return { filename: f.originalname, storedName, size: f.size };
   });
+}
+
+// 폴더로 분석한 원본 파일을 "해석된" 코드 블록 등과 별개로, 원래 상대 경로 그대로
+// source/ 밑에 보존한다 — 웹 화면은 AI가 해석한 내용을 보여주지만, git 백업 자체는
+// 사용자가 처음 올린 원본이어야 한다는 원칙. storedName을 랜덤 생성하지 않고 원본
+// 경로 자체를 실제 파일 경로로 쓴다(같은 경로로 다시 올리면 최신 버전으로 덮어써짐).
+//
+// f.originalname은 프론트가 File.name에 상대 경로(슬래시 포함)를 그대로 담아 보낸
+// 것이라 — 상위 폴더 탈출(..)이나 절대경로 세그먼트가 섞여 있어도 안전하도록 각
+// 세그먼트를 검증해서 걸러낸다.
+function sanitizeRelPath(raw) {
+  const segments = String(raw || '')
+    .split(/[\\/]+/)
+    .map((seg) => seg.trim())
+    .filter((seg) => seg && seg !== '.' && seg !== '..');
+  return segments;
+}
+
+function saveSourceFiles(files, dir) {
+  const sourceDir = path.join(dir, 'source');
+  return (files || []).map((f) => {
+    const segments = sanitizeRelPath(f.originalname);
+    const relPath = segments.length ? segments.join('/') : `file-${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    const fullPath = path.join(sourceDir, ...(segments.length ? segments : [relPath]));
+    fs.mkdirSync(path.dirname(fullPath), { recursive: true });
+    fs.writeFileSync(fullPath, f.buffer);
+    return { path: relPath, size: f.size };
+  });
+}
+
+// 같은 상대 경로로 다시 올라온 파일은 최신 것으로 교체하고, 새 경로는 추가한다.
+function mergeSourceFiles(existing, incoming) {
+  const map = new Map((existing || []).map((s) => [s.path, s]));
+  for (const s of incoming) map.set(s.path, s);
+  return Array.from(map.values());
 }
 
 function removeFiles(existing, dir, subdir, toRemove) {
@@ -142,6 +178,7 @@ router.post('/', uploadFields, async (req, res) => {
     // 실행 결과 이미지도 물리적으로는 images/ 폴더에 저장한다 (별도 폴더를 만들 이유가
     // 없음 — meta.json의 배열이 분리돼 있으면 의미상 구분은 충분하다).
     const executionResultImages = saveFiles(req.files?.executionResultImages, dir, 'images');
+    const sourceFiles = saveSourceFiles(req.files?.sourceFiles, dir);
 
     const now = new Date().toISOString();
     const meta = {
@@ -155,6 +192,7 @@ router.post('/', uploadFields, async (req, res) => {
       tags: parseTags(tags),
       codeBlocks: parseCodeBlocks(codeBlocks),
       codeFiles,
+      sourceFiles,
       learnings: (learnings || '').trim(),
       difficulties: (difficulties || '').trim(),
       executionResult: (executionResult || '').trim(),
@@ -216,6 +254,7 @@ router.put('/:id', uploadFields, async (req, res) => {
     attachments = attachments.concat(saveFiles(req.files?.attachments, dir, 'attachments'));
     codeFiles = codeFiles.concat(saveFiles(req.files?.codeFiles, dir, 'code'));
     executionResultImages = executionResultImages.concat(saveFiles(req.files?.executionResultImages, dir, 'images'));
+    const sourceFiles = mergeSourceFiles(existing.sourceFiles, saveSourceFiles(req.files?.sourceFiles, dir));
 
     const resolvedThumbnail = thumbnail && images.some((i) => i.storedName === thumbnail)
       ? thumbnail
@@ -234,6 +273,7 @@ router.put('/:id', uploadFields, async (req, res) => {
       tags: tags !== undefined ? parseTags(tags) : existing.tags,
       codeBlocks: codeBlocks !== undefined ? parseCodeBlocks(codeBlocks) : existing.codeBlocks,
       codeFiles,
+      sourceFiles,
       learnings: learnings !== undefined ? learnings.trim() : existing.learnings,
       difficulties: difficulties !== undefined ? difficulties.trim() : existing.difficulties,
       executionResult: executionResult !== undefined ? executionResult.trim() : existing.executionResult,

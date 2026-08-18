@@ -12,6 +12,24 @@ function buildReadme(meta) {
     lines.push('## 설명', '', meta.description, '');
   }
 
+  if (meta.sourceFiles?.length) {
+    // 폴더로 분석했을 때 원본 파일을 원래 경로 그대로 보존해둔 것 — AI가 재분류한
+    // 코드 블록과 별개로, "진짜 백업"은 이 폴더다. GitHub에서 source/ 로 들어가면
+    // 실제 폴더 구조(frontend/, backend/ 등) 그대로 볼 수 있다.
+    lines.push(
+      '## 원본 파일',
+      '',
+      `업로드한 프로젝트의 원본 파일 ${meta.sourceFiles.length}개가 폴더 구조 그대로 [source/](./source/)에 보관되어 있습니다.`,
+      '',
+    );
+    for (const f of [...meta.sourceFiles].sort((a, b) => a.path.localeCompare(b.path))) {
+      // 링크 대상은 세그먼트별로 인코딩(경로 구분자 "/"는 그대로 유지), 표시 텍스트는 원래 경로 그대로.
+      const linkPath = f.path.split('/').map(encodeURIComponent).join('/');
+      lines.push(`- [${f.path}](./source/${linkPath})`);
+    }
+    lines.push('');
+  }
+
   if (meta.codeBlocks?.length) {
     lines.push('## 코드', '');
     // 폴더로 통째로 분석하면 코드 블록이 수십 개까지 생길 수 있어서, 그대로 다

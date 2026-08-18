@@ -54,12 +54,15 @@ const CODE_EXT_LANGUAGE: Record<string, string> = {
 };
 // 코드 블록으로는 안 넣지만, 내용을 읽어서 AI 분석 참고 자료로는 쓸 수 있는 파일들.
 const TEXT_ONLY_EXT = /\.(md|txt|csv|ya?ml|xml|log|ini|cfg|env)$/i;
+// node_modules류 자동 생성/의존성 폴더 — venv가 빠져있던 탓에 파이썬 프로젝트를 분석하면
+// 가상환경 안 수천 개 파일이 60개 제한을 다 잡아먹어서 정작 실제 코드가 하나도 못 들어간
+// 적이 있었다(실제로 겪음). 언어별로 흔한 것들을 최대한 포함해둔다.
 const SKIP_DIR =
-  /(^|[/\\])(node_modules|\.git|dist|build|__pycache__|\.ipynb_checkpoints|\.claude|\.vscode|\.idea)([/\\]|$)/i;
+  /(^|[/\\])(node_modules|\.git|dist|build|__pycache__|\.ipynb_checkpoints|\.claude|\.vscode|\.idea|venv|\.venv|env|\.mypy_cache|\.pytest_cache|\.tox|target|vendor|\.gradle|\.next|\.nuxt|\.svelte-kit|\.turbo|\.parcel-cache|\.cache|\.output|coverage)([/\\]|$)/i;
 // 의존성 버전 해시만 잔뜩 든 락파일 — 몇십~몇백 KB짜리 순수 노이즈라 코드 블록은커녕
 // 첨부로도 의미가 없어서 폴더 분석에서 통째로 건너뛴다.
 const LOCKFILE_NAMES = new Set(['package-lock.json', 'yarn.lock', 'pnpm-lock.yaml', 'bun.lockb', 'composer.lock']);
-const MAX_FOLDER_FILES = 60;
+const MAX_FOLDER_FILES = 150;
 const MAX_TEXT_READ_SIZE = 300_000;
 
 function extOf(filename: string): string {
@@ -67,8 +70,12 @@ function extOf(filename: string): string {
   return m ? m[1] : '';
 }
 
+// webkitRelativePath는 항상 "맨 처음 고른 폴더 이름/..."으로 시작해서, 파일마다 똑같은
+// 접두사가 반복돼 라벨 가독성만 떨어뜨린다 — 그 첫 세그먼트(고른 폴더 이름 자체)는 잘라낸다.
 function relPath(f: File): string {
-  return (f as File & { webkitRelativePath?: string }).webkitRelativePath || f.name;
+  const full = (f as File & { webkitRelativePath?: string }).webkitRelativePath || f.name;
+  const firstSlash = full.indexOf('/');
+  return firstSlash === -1 ? full : full.slice(firstSlash + 1);
 }
 
 // OneDrive 동기화 등으로 폴더 선택 이후 디스크의 파일이 살짝만 바뀌어도, 브라우저가
@@ -76,10 +83,13 @@ function relPath(f: File): string {
 // — 폴더 분석 직후 바로 저장하지 않고 시간을 두면 실제로 겪는 문제). 그래서 폴더에서
 // 읽은 파일은 내용을 즉시 메모리로 복사해 원본 파일 핸들과의 연결을 끊어둔다 — 이후
 // 저장 시점까지 시간이 걸리거나 디스크에서 뭔가 바뀌어도 영향받지 않는다.
-async function snapshotFile(f: File): Promise<File> {
+// nameOverride를 안 주면 f.name(폴더 경로 없는 파일명만)을 쓴다 — 폴더에서 읽은
+// 파일은 relPath(f)를 넘겨서 실제 업로드되는 파일 이름에도 폴더 구조가 남게 한다
+// (전에는 파일 내용만 옮기고 이름은 "eslint.config.mjs"처럼 경로 없이 밋밋해졌었다).
+async function snapshotFile(f: File, nameOverride?: string): Promise<File> {
   try {
     const buf = await f.arrayBuffer();
-    return new File([buf], f.name, { type: f.type, lastModified: f.lastModified });
+    return new File([buf], nameOverride ?? f.name, { type: f.type, lastModified: f.lastModified });
   } catch {
     return f; // 복사가 실패하면 그냥 원본으로라도 시도한다
   }
@@ -195,6 +205,9 @@ export default function AssignmentForm({ mode }: Props) {
   const [existingAttachments, setExistingAttachments] = useState<FileRef[]>([]);
   const [existingCodeFiles, setExistingCodeFiles] = useState<FileRef[]>([]);
   const [existingExecutionImages, setExistingExecutionImages] = useState<FileRef[]>([]);
+  // 폴더로 분석했을 때 원본 그대로 보존되는 파일들 — 카테고리 분류와 별개로 git
+  // 백업 목적. storedName이 따로 없고 원래 상대 경로 자체가 실제 저장 경로다.
+  const [existingSourceFiles, setExistingSourceFiles] = useState<{ path: string; size: number }[]>([]);
   const [thumbnail, setThumbnail] = useState<string | null>(null);
   const [removeImages, setRemoveImages] = useState<string[]>([]);
   const [removeAttachments, setRemoveAttachments] = useState<string[]>([]);
@@ -208,6 +221,7 @@ export default function AssignmentForm({ mode }: Props) {
   const [newCodeFiles, setNewCodeFiles] = useState<File[]>([]);
   const [newExecutionImages, setNewExecutionImages] = useState<File[]>([]);
   const [newExecutionImagePreviews, setNewExecutionImagePreviews] = useState<string[]>([]);
+  const [newSourceFiles, setNewSourceFiles] = useState<File[]>([]);
 
   const [assignmentId, setAssignmentId] = useState<string | null>(null);
   const [subjectSlug, setSubjectSlug] = useState('');
@@ -233,6 +247,7 @@ export default function AssignmentForm({ mode }: Props) {
     setNewAttachments([]);
     setNewCodeFiles([]);
     setNewExecutionImages([]);
+    setNewSourceFiles([]);
     setRemoveImages([]);
     setRemoveAttachments([]);
     setRemoveCodeFiles([]);
@@ -256,6 +271,7 @@ export default function AssignmentForm({ mode }: Props) {
         setExistingAttachments(a.attachments);
         setExistingCodeFiles(a.codeFiles);
         setExistingExecutionImages(a.executionResultImages);
+        setExistingSourceFiles(a.sourceFiles ?? []);
         setThumbnail(a.thumbnail);
       })
       .catch((err) => setError(err.message))
@@ -376,20 +392,26 @@ export default function AssignmentForm({ mode }: Props) {
     const newCode: CodeBlock[] = [];
     const newCodeFileList: File[] = [];
     const newAttachmentFiles: File[] = [];
+    const sourceFileList: File[] = [];
     const textForAi: { name: string; content: string }[] = [];
 
     setAiLoading(true);
     try {
       for (const f of picked) {
         const rel = relPath(f);
+        // 파일 내용은 한 번만 메모리로 복사해서(스냅샷), AI가 분류한 카테고리 배열과
+        // "원본 그대로 보존"용 배열(sourceFileList) 양쪽에 같은 객체를 넣는다 — 웹
+        // 화면은 "해석한 내용"을 보여주는 용도고, git 백업은 원본이어야 한다는 원칙.
+        const snapshot = await snapshotFile(f, rel);
+        sourceFileList.push(snapshot);
 
         if (IMAGE_EXT.test(f.name)) {
-          newImageFiles.push(await snapshotFile(f));
+          newImageFiles.push(snapshot);
           continue;
         }
 
         if (extOf(f.name) === 'ipynb') {
-          newCodeFileList.push(await snapshotFile(f));
+          newCodeFileList.push(snapshot);
           if (f.size < MAX_TEXT_READ_SIZE) {
             try {
               const raw = await f.text();
@@ -409,7 +431,7 @@ export default function AssignmentForm({ mode }: Props) {
 
         const language = CODE_EXT_LANGUAGE[extOf(f.name)];
         if (language) {
-          newCodeFileList.push(await snapshotFile(f));
+          newCodeFileList.push(snapshot);
           if (f.size < MAX_TEXT_READ_SIZE) {
             try {
               const text = await f.text();
@@ -423,7 +445,7 @@ export default function AssignmentForm({ mode }: Props) {
         }
 
         // 코드도 이미지도 아닌 파일 — 첨부로 남기고, 문서류 텍스트면 AI 참고 자료로만 쓴다.
-        newAttachmentFiles.push(await snapshotFile(f));
+        newAttachmentFiles.push(snapshot);
         if (TEXT_ONLY_EXT.test(f.name) && f.size < MAX_TEXT_READ_SIZE) {
           try {
             const text = await f.text();
@@ -434,6 +456,7 @@ export default function AssignmentForm({ mode }: Props) {
         }
       }
 
+      if (sourceFileList.length) setNewSourceFiles((prev) => [...prev, ...sourceFileList]);
       if (newImageFiles.length) setNewImages((prev) => [...prev, ...newImageFiles]);
       // 노트북에서 뽑은 실행 결과 이미지(plot 등)는 일반 이미지 갤러리가 아니라
       // "실행 결과" 전용 슬롯으로 들어간다 — 실제로 그 코드를 실행한 결과물이니까.
@@ -595,6 +618,9 @@ export default function AssignmentForm({ mode }: Props) {
     newAttachments.forEach((f) => fd.append('attachments', f));
     newCodeFiles.forEach((f) => fd.append('codeFiles', f));
     newExecutionImages.forEach((f) => fd.append('executionResultImages', f));
+    // 파일 이름(File.name) 자체에 폴더 상대 경로가 들어있다(snapshotFile에서 넣어둠) —
+    // 백엔드가 이 이름을 그대로 상대 경로로 해석해서 source/ 밑에 구조 그대로 저장한다.
+    newSourceFiles.forEach((f) => fd.append('sourceFiles', f));
 
     setSaving(true);
     setError(null);
@@ -750,6 +776,31 @@ export default function AssignmentForm({ mode }: Props) {
           </ul>
         )}
       </div>
+
+      {(existingSourceFiles.length > 0 || newSourceFiles.length > 0) && (
+        <div className="form-row">
+          <label>원본 파일 (폴더 분석으로 자동 보존됨)</label>
+          <p className="hint">
+            폴더로 분석하면 업로드한 프로젝트의 원본 파일이 폴더 구조 그대로 함께 저장돼요 — 수동으로 뺄 수는 없어요.
+          </p>
+          {existingSourceFiles.length > 0 && (
+            <ul className="file-list">
+              {[...existingSourceFiles]
+                .sort((a, b) => a.path.localeCompare(b.path))
+                .map((f) => (
+                  <li key={f.path}>{f.path}</li>
+                ))}
+            </ul>
+          )}
+          {newSourceFiles.length > 0 && (
+            <ul className="file-list">
+              {newSourceFiles.map((f, i) => (
+                <li key={i}>{f.name} (신규)</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       <div className="form-row">
         <label>이미지</label>

@@ -13,6 +13,13 @@ export interface FileRef {
   size: number;
 }
 
+// 폴더로 분석했을 때, AI가 재분류하기 전의 "원본 그대로"를 git 백업용으로 보존한
+// 파일 하나. storedName이 따로 없다 — path 자체가 source/ 밑의 실제 상대 경로다.
+export interface SourceFileRef {
+  path: string;
+  size: number;
+}
+
 // 과제 하나에 코드가 여러 개(언어가 서로 달라도) 있을 수 있어 블록 배열로 관리한다.
 // filename은 폴더 분석으로 자동 채워진 경우 원본 파일명을 표시용으로 남긴 것.
 export interface CodeBlock {
@@ -41,6 +48,7 @@ export interface Assignment {
   thumbnail: string | null;
   images: FileRef[];
   attachments: FileRef[];
+  sourceFiles: SourceFileRef[];
   createdAt: string;
   updatedAt: string;
   github: GithubInfo;

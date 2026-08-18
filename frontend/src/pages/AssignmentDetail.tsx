@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { fetchAssignment, fetchAssignments, deleteAssignment, toggleFavorite, fileUrl } from '../api/client';
+import { fetchAssignment, fetchAssignments, deleteAssignment, toggleFavorite, fileUrl, sourceFileUrl } from '../api/client';
 import type { Assignment } from '../api/types';
 import GithubStatusBadge from '../components/GithubStatusBadge';
 import FavoriteToggle from '../components/FavoriteToggle';
@@ -133,6 +133,26 @@ export default function AssignmentDetail() {
           <section className="doc-section">
             <h2 className="doc-section__label">설명</h2>
             <p className="doc-section__body">{assignment.description}</p>
+          </section>
+        )}
+
+        {assignment.sourceFiles.length > 0 && (
+          <section className="doc-section">
+            <h2 className="doc-section__label">원본 파일</h2>
+            <p className="doc-section__body">
+              업로드한 프로젝트의 원본 파일 {assignment.sourceFiles.length}개가 폴더 구조 그대로 보존되어 있습니다.
+            </p>
+            <ul className="file-list">
+              {[...assignment.sourceFiles]
+                .sort((a, b) => a.path.localeCompare(b.path))
+                .map((f) => (
+                  <li key={f.path}>
+                    <a href={sourceFileUrl(assignment.subjectSlug, assignment.leaf, f.path)} download>
+                      {f.path}
+                    </a>
+                  </li>
+                ))}
+            </ul>
           </section>
         )}
 
