@@ -1,0 +1,23 @@
+# 과제 목록
+
+총 5개 · 과목 4개 · Study Archive에서 자동 생성됨
+
+## 웹개발 (2)
+
+- **[Next.js와 FastAPI 기반 미니 장바구니 구현 프로젝트](./웹개발/04-next-js와-fastapi-기반-미니-장바구니-구현-프로젝트/)** · 2026-08-18 — `nextjs` `fastapi` `sqlite` `react` `typescript` `장바구니`
+- **[나만의 콘텐츠 아카이브 'Moa' 개발 계획서](./웹개발/03-나만의-콘텐츠-아카이브-moa-개발-계획서/)** · 2026-08-14 — `웹개발` `프로젝트기획` `api연동` `localstorage` `javascript`
+
+## HTML/CSS/JavaScript 및 Python 문서 처리 (1)
+
+- **[웹 퍼블리싱 기초 및 문서 자동화·검증 스크립트 모음](./html-css-javascript-및-python-문서-처리/01-웹-퍼블리싱-기초-및-문서-자동화-검증-스크립트-모음/)** · 2026-08-14 — `html` `css` `javascript` `python` `docx` `웹기초`
+
+## Python (1)
+
+- **[파이썬 기초 문법 및 제어문·2차원 배열 실습](./python/02-파이썬-기초-문법-및-제어문-2차원-배열-실습/)** · 2026-08-14 — `python` `기초문법` `제어문` `리스트` `반복문`
+
+## React / TypeScript (1)
+
+- **[Someday - React와 TypeScript 기반 개인 버킷리스트 아카이브](./react-typescript/01-someday-react와-typescript-기반-개인-버킷리스트-아카이브/)** · 2026-08-14 — `react` `typescript` `tailwindcss` `vite` `bucketlist` `localstorage`
+
+---
+_이 파일은 과제를 저장/삭제할 때마다 자동으로 다시 생성됩니다 — 직접 수정하지 마세요._

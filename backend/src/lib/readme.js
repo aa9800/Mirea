@@ -14,10 +14,24 @@ function buildReadme(meta) {
 
   if (meta.codeBlocks?.length) {
     lines.push('## 코드', '');
+    // 폴더로 통째로 분석하면 코드 블록이 수십 개까지 생길 수 있어서, 그대로 다
+    // 펼쳐두면 README 하나가 수천 줄짜리 벽이 된다(실제로 겪음 — 2000줄, 160KB).
+    // 파일이 몇 개 안 되는 보통 과제는 지금처럼 바로 보이게 두고, 많으면(4개 초과)
+    // GitHub이 지원하는 접기(<details>)로 감싸서 평소엔 파일명만 보이게 한다.
+    const useCollapsible = meta.codeBlocks.length > 4;
     for (const block of meta.codeBlocks) {
-      if (block.filename) lines.push(`**${block.filename}**`, '');
-      if (block.description) lines.push(block.description, '');
-      lines.push(`\`\`\`${block.language || ''}`, block.code, '```', '');
+      const label = block.filename || '코드';
+      const codeFence = [`\`\`\`${block.language || ''}`, block.code, '```'];
+      if (useCollapsible) {
+        lines.push('<details>');
+        lines.push(`<summary><strong>${label}</strong>${block.description ? ` — ${block.description}` : ''}</summary>`, '');
+        lines.push(...codeFence, '');
+        lines.push('</details>', '');
+      } else {
+        if (block.filename) lines.push(`**${block.filename}**`, '');
+        if (block.description) lines.push(block.description, '');
+        lines.push(...codeFence, '');
+      }
     }
   }
 
@@ -57,4 +71,40 @@ function buildReadme(meta) {
   return lines.join('\n');
 }
 
-module.exports = { buildReadme };
+// assignments/ 바로 아래에 두는 전체 목록 인덱스 — GitHub에서 "assignments" 폴더로
+// 들어가면 이 파일이 바로 보여서, 하위 폴더를 일일이 안 눌러봐도 과목별로 과제들이
+// 한눈에 쭉 보이게 한다. 과제를 저장/삭제할 때마다 최신 상태로 다시 생성된다.
+function buildAssignmentsIndex(allMeta) {
+  const bySubject = new Map();
+  for (const m of allMeta) {
+    const key = m.subject || '(미분류)';
+    if (!bySubject.has(key)) bySubject.set(key, []);
+    bySubject.get(key).push(m);
+  }
+
+  const lines = ['# 과제 목록', '', `총 ${allMeta.length}개 · 과목 ${bySubject.size}개 · Study Archive에서 자동 생성됨`, ''];
+
+  const subjects = Array.from(bySubject.keys()).sort((a, b) => a.localeCompare(b, 'ko'));
+  for (const subject of subjects) {
+    const items = bySubject
+      .get(subject)
+      .sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.createdAt || '').localeCompare(a.createdAt || ''));
+    lines.push(`## ${subject} (${items.length})`, '');
+    for (const m of items) {
+      const favorite = m.favorite ? ' ⭐' : '';
+      const tags = m.tags?.length ? ` — ${m.tags.map((t) => `\`${t}\``).join(' ')}` : '';
+      lines.push(`- **[${m.title}](./${m.subjectSlug}/${m.leaf}/)**${favorite} · ${m.date}${tags}`);
+    }
+    lines.push('');
+  }
+
+  if (allMeta.length === 0) {
+    lines.push('_아직 등록된 과제가 없습니다._', '');
+  }
+
+  lines.push('---', '_이 파일은 과제를 저장/삭제할 때마다 자동으로 다시 생성됩니다 — 직접 수정하지 마세요._');
+
+  return lines.join('\n');
+}
+
+module.exports = { buildReadme, buildAssignmentsIndex };

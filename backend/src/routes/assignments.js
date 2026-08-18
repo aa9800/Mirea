@@ -4,7 +4,8 @@ const express = require('express');
 const multer = require('multer');
 const store = require('../lib/store');
 const git = require('../lib/git');
-const { buildReadme } = require('../lib/readme');
+const { ASSIGNMENTS_DIR } = require('../config');
+const { buildReadme, buildAssignmentsIndex } = require('../lib/readme');
 
 const router = express.Router();
 
@@ -88,6 +89,13 @@ function writeReadme(dir, meta) {
   fs.writeFileSync(path.join(dir, 'README.md'), buildReadme(meta), 'utf-8');
 }
 
+// assignments/ 바로 아래의 전체 목록 인덱스를 최신 상태로 다시 만든다 — GitHub에서
+// "assignments" 폴더로 들어가면 과목별 목록이 바로 보이도록. 과제가 등록/수정/삭제/
+// 즐겨찾기 변경될 때마다 호출해서 항상 최신 상태를 유지한다.
+function writeAssignmentsIndex() {
+  fs.writeFileSync(path.join(ASSIGNMENTS_DIR, 'README.md'), buildAssignmentsIndex(store.listAssignments()), 'utf-8');
+}
+
 // GET /api/assignments  - 목록
 router.get('/', (req, res) => {
   const { q, subject, favorite } = req.query;
@@ -162,6 +170,7 @@ router.post('/', uploadFields, async (req, res) => {
 
     store.writeMeta(dir, meta);
     writeReadme(dir, meta);
+    writeAssignmentsIndex();
     res.status(201).json(meta);
 
     // 응답은 먼저 보내고, git 동기화는 백그라운드에서 진행 후 meta.json에 결과 반영
@@ -239,6 +248,7 @@ router.put('/:id', uploadFields, async (req, res) => {
 
     store.writeMeta(dir, meta);
     writeReadme(dir, meta);
+    writeAssignmentsIndex();
     res.json(meta);
 
     git.syncAssignmentMeta(newId, `과제 수정: ${meta.title}`).catch(() => {});
@@ -255,6 +265,7 @@ router.patch('/:id/favorite', (req, res) => {
 
   const meta = { ...entry.meta, favorite: !entry.meta.favorite };
   store.writeMeta(entry.dir, meta);
+  writeAssignmentsIndex();
   res.json(meta);
 });
 
@@ -265,6 +276,7 @@ router.delete('/:id', async (req, res) => {
   if (!entry) return res.status(404).json({ error: '과제를 찾을 수 없습니다.' });
 
   store.deleteAssignmentDir(entry.dir);
+  writeAssignmentsIndex();
 
   const result = await git.runGitSync(`과제 삭제: ${entry.meta.title}`);
   if (result.status === 'failed') {

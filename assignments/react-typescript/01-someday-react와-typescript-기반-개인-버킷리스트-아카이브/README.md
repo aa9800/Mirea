@@ -10,9 +10,8 @@ Someday 프로젝트는 사용자가 하고 싶은 경험과 목표를 등록하
 
 ## 코드
 
-**Someday/.oxlintrc.json**
-
-Oxlint 린터의 설정 파일로, React 규칙과 TypeScript 플러그인을 활성화하여 코드 품질 규칙을 정의합니다.
+<details>
+<summary><strong>Someday/.oxlintrc.json</strong> — Oxlint 린터의 설정 파일로, React 규칙과 TypeScript 플러그인을 활성화하여 코드 품질 규칙을 정의합니다.</summary>
 
 ```json
 {
@@ -25,9 +24,10 @@ Oxlint 린터의 설정 파일로, React 규칙과 TypeScript 플러그인을 �
 }
 ```
 
-**Someday/index.html**
+</details>
 
-웹 애플리케이션의 HTML 엔트리 포인트 파일로, 메타 태그 설정과 React 앱이 마운트될 루트 엘리먼트를 포함합니다.
+<details>
+<summary><strong>Someday/index.html</strong> — 웹 애플리케이션의 HTML 엔트리 포인트 파일로, 메타 태그 설정과 React 앱이 마운트될 루트 엘리먼트를 포함합니다.</summary>
 
 ```html
 <!doctype html>
@@ -44,9 +44,10 @@ Oxlint 린터의 설정 파일로, React 규칙과 TypeScript 플러그인을 �
 </html>
 ```
 
-**Someday/package.json**
+</details>
 
-프로젝트의 의존성 패키지(React, Tailwind CSS, date-fns 등)와 실행 스크립트를 정의한 메타데이터 파일입니다.
+<details>
+<summary><strong>Someday/package.json</strong> — 프로젝트의 의존성 패키지(React, Tailwind CSS, date-fns 등)와 실행 스크립트를 정의한 메타데이터 파일입니다.</summary>
 
 ```json
 {
@@ -80,9 +81,10 @@ Oxlint 린터의 설정 파일로, React 규칙과 TypeScript 플러그인을 �
 }
 ```
 
-**Someday/tsconfig.app.json**
+</details>
 
-애플리케이션 소스 코드 컴파일을 위한 상세 TypeScript 설정 및 타입 검사 규칙을 담고 있습니다.
+<details>
+<summary><strong>Someday/tsconfig.app.json</strong> — 애플리케이션 소스 코드 컴파일을 위한 상세 TypeScript 설정 및 타입 검사 규칙을 담고 있습니다.</summary>
 
 ```json
 {
@@ -113,9 +115,10 @@ Oxlint 린터의 설정 파일로, React 규칙과 TypeScript 플러그인을 �
 }
 ```
 
-**Someday/tsconfig.json**
+</details>
 
-앱과 노드 환경용 TS 구성 파일들을 종합하여 참조하는 TypeScript 루트 설정 파일입니다.
+<details>
+<summary><strong>Someday/tsconfig.json</strong> — 앱과 노드 환경용 TS 구성 파일들을 종합하여 참조하는 TypeScript 루트 설정 파일입니다.</summary>
 
 ```json
 {
@@ -127,9 +130,10 @@ Oxlint 린터의 설정 파일로, React 규칙과 TypeScript 플러그인을 �
 }
 ```
 
-**Someday/tsconfig.node.json**
+</details>
 
-vite.config.ts 등 Node.js 개발 환경에서 실행되는 도구용 TypeScript 컴파일 옵션 파일입니다.
+<details>
+<summary><strong>Someday/tsconfig.node.json</strong> — vite.config.ts 등 Node.js 개발 환경에서 실행되는 도구용 TypeScript 컴파일 옵션 파일입니다.</summary>
 
 ```json
 {
@@ -157,9 +161,10 @@ vite.config.ts 등 Node.js 개발 환경에서 실행되는 도구용 TypeScript
 }
 ```
 
-**Someday/vite.config.ts**
+</details>
 
-Vite 번들러 설정 파일로, React 및 Tailwind CSS 플러그인 연결과 포트 설정을 담당합니다.
+<details>
+<summary><strong>Someday/vite.config.ts</strong> — Vite 번들러 설정 파일로, React 및 Tailwind CSS 플러그인 연결과 포트 설정을 담당합니다.</summary>
 
 ```typescript
 import { defineConfig } from 'vite'
@@ -177,9 +182,10 @@ export default defineConfig({
 })
 ```
 
-**Someday/src/App.tsx**
+</details>
 
-애플리케이션의 최상위 컴포넌트로, 버킷리스트 상태 관리, 데모 데이터 생성, 필터/정렬 상태 조합 및 주요 UI 구조를 오케스트레이션합니다.
+<details>
+<summary><strong>Someday/src/App.tsx</strong> — 애플리케이션의 최상위 컴포넌트로, 버킷리스트 상태 관리, 데모 데이터 생성, 필터/정렬 상태 조합 및 주요 UI 구조를 오케스트레이션합니다.</summary>
 
 ```typescript
 import { Compass } from "lucide-react";
@@ -472,9 +478,10 @@ function App() {
 export default App;
 ```
 
-**Someday/src/index.css**
+</details>
 
-Tailwind CSS v4의 @theme 기능을 활용해 따뜻한 감성의 커스텀 색상 토큰(paper, ink, accent 등)을 정의한 메인 CSS 파일입니다.
+<details>
+<summary><strong>Someday/src/index.css</strong> — Tailwind CSS v4의 @theme 기능을 활용해 따뜻한 감성의 커스텀 색상 토큰(paper, ink, accent 등)을 정의한 메인 CSS 파일입니다.</summary>
 
 ```css
 @import "tailwindcss";
@@ -509,9 +516,10 @@ body {
 }
 ```
 
-**Someday/src/main.tsx**
+</details>
 
-React 19 클라이언트 루트를 생성하고 App 컴포넌트를 StrictMode로 감싸 DOM에 렌더링하는 엔트리 스크립트입니다.
+<details>
+<summary><strong>Someday/src/main.tsx</strong> — React 19 클라이언트 루트를 생성하고 App 컴포넌트를 StrictMode로 감싸 DOM에 렌더링하는 엔트리 스크립트입니다.</summary>
 
 ```typescript
 import { StrictMode } from 'react'
@@ -526,9 +534,10 @@ createRoot(document.getElementById('root')!).render(
 )
 ```
 
-**Someday/src/utils/date.ts**
+</details>
 
-date-fns를 활용해 버킷의 목표일과 오늘 날짜를 비교하고 'D-Day', 'D-N', '목표일 지남' 배지 상태를 계산하는 유틸리티입니다.
+<details>
+<summary><strong>Someday/src/utils/date.ts</strong> — date-fns를 활용해 버킷의 목표일과 오늘 날짜를 비교하고 'D-Day', 'D-N', '목표일 지남' 배지 상태를 계산하는 유틸리티입니다.</summary>
 
 ```typescript
 import { differenceInCalendarDays, parseISO } from "date-fns";
@@ -555,9 +564,10 @@ export function getDDayDisplay(bucket: Bucket): DDayDisplay | null {
 }
 ```
 
-**Someday/src/utils/filterSort.ts**
+</details>
 
-검색어, 카테고리, 완료 상태에 따른 버킷 filtering 및 목표일/중요도/등록순 sorting 로직을 처리하는 유틸리티 모듈입니다.
+<details>
+<summary><strong>Someday/src/utils/filterSort.ts</strong> — 검색어, 카테고리, 완료 상태에 따른 버킷 filtering 및 목표일/중요도/등록순 sorting 로직을 처리하는 유틸리티 모듈입니다.</summary>
 
 ```typescript
 import type { Bucket, BucketCategory, BucketStatus } from "../types/bucket";
@@ -622,7 +632,10 @@ export function sortBuckets(buckets: Bucket[], option: SortOption): Bucket[] {
 }
 ```
 
-**Someday/src/utils/image.ts**
+</details>
+
+<details>
+<summary><strong>Someday/src/utils/image.ts</strong></summary>
 
 ```typescript
 // 사진 첨부(추가 기능)에서 사용하는 이미지 처리 유틸.
@@ -671,7 +684,10 @@ export function readAndResizeImage(file: File): Promise<string> {
 }
 ```
 
-**Someday/src/types/bucket.ts**
+</details>
+
+<details>
+<summary><strong>Someday/src/types/bucket.ts</strong></summary>
 
 ```typescript
 // 버킷 데이터 타입 정의 (PROJECT_PLAN.md 11. 데이터 구조 기준)
@@ -723,7 +739,10 @@ export const BUCKET_IMPORTANCES: BucketImportance[] = ["상", "중", "하"];
 export const BUCKET_STATUSES: BucketStatus[] = ["계획 중", "진행 중", "완료"];
 ```
 
-**Someday/src/storage/bucketStorage.ts**
+</details>
+
+<details>
+<summary><strong>Someday/src/storage/bucketStorage.ts</strong></summary>
 
 ```typescript
 import type { Bucket } from "../types/bucket";
@@ -762,7 +781,10 @@ export function saveBuckets(buckets: Bucket[]): void {
 }
 ```
 
-**Someday/src/components/BucketCard.tsx**
+</details>
+
+<details>
+<summary><strong>Someday/src/components/BucketCard.tsx</strong></summary>
 
 ```typescript
 import { Calendar, CheckCircle2, Heart, Pencil, Star, Trash2 } from "lucide-react";
@@ -950,7 +972,10 @@ function BucketCard({ bucket, onStatusChange, onToggleFavorite, onEdit, onDelete
 export default BucketCard;
 ```
 
-**Someday/src/components/BucketForm.tsx**
+</details>
+
+<details>
+<summary><strong>Someday/src/components/BucketForm.tsx</strong></summary>
 
 ```typescript
 import { ImagePlus, X } from "lucide-react";
@@ -1280,7 +1305,10 @@ function BucketForm({ onAdd, onUpdate, editingBucket, onCancelEdit }: BucketForm
 export default BucketForm;
 ```
 
-**Someday/src/components/FilterBar.tsx**
+</details>
+
+<details>
+<summary><strong>Someday/src/components/FilterBar.tsx</strong></summary>
 
 ```typescript
 import { Heart, Search } from "lucide-react";
@@ -1398,7 +1426,10 @@ function FilterBar({
 export default FilterBar;
 ```
 
-**Someday/src/components/SummaryBar.tsx**
+</details>
+
+<details>
+<summary><strong>Someday/src/components/SummaryBar.tsx</strong></summary>
 
 ```typescript
 import type { Bucket } from "../types/bucket";
@@ -1451,6 +1482,8 @@ function SummaryBar({ buckets }: SummaryBarProps) {
 
 export default SummaryBar;
 ```
+
+</details>
 
 ## 코드 파일
 

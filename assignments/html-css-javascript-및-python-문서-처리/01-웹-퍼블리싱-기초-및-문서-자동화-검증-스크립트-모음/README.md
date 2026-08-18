@@ -10,9 +10,8 @@
 
 ## 코드
 
-**html/회원가입/form.html**
-
-회원가입을 위한 아이디, 비밀번호, 이름, 우편번호, 연락처, 생년월일 등의 입력 폼을 테이블 레이아웃으로 구성한 HTML 파일입니다.
+<details>
+<summary><strong>html/회원가입/form.html</strong> — 회원가입을 위한 아이디, 비밀번호, 이름, 우편번호, 연락처, 생년월일 등의 입력 폼을 테이블 레이아웃으로 구성한 HTML 파일입니다.</summary>
 
 ```html
 <!DOCTYPE html>
@@ -95,9 +94,10 @@
 </body>
 ```
 
-**html/회원가입/index.html**
+</details>
 
-회원가입 폼으로 이동하기 위한 메인 안내 페이지 HTML 파일입니다.
+<details>
+<summary><strong>html/회원가입/index.html</strong> — 회원가입 폼으로 이동하기 위한 메인 안내 페이지 HTML 파일입니다.</summary>
 
 ```html
 <!DOCTYPE html>
@@ -115,9 +115,10 @@
 </html>
 ```
 
-**html/시간표/index.html**
+</details>
 
-기초적인 HTML table 태그를 사용하여 과목별 교시 시간표를 작성한 파일입니다.
+<details>
+<summary><strong>html/시간표/index.html</strong> — 기초적인 HTML table 태그를 사용하여 과목별 교시 시간표를 작성한 파일입니다.</summary>
 
 ```html
 <!doctype html>
@@ -173,9 +174,10 @@
 </html>
 ```
 
-**html/시간표/index2.html**
+</details>
 
-thead와 tbody 태그를 활용하여 구조적으로 다듬은 시간표 HTML 파일입니다.
+<details>
+<summary><strong>html/시간표/index2.html</strong> — thead와 tbody 태그를 활용하여 구조적으로 다듬은 시간표 HTML 파일입니다.</summary>
 
 ```html
 <!doctype html>
@@ -229,9 +231,10 @@ thead와 tbody 태그를 활용하여 구조적으로 다듬은 시간표 HTML �
 </html>
 ```
 
-**html/수강신청/index.html**
+</details>
 
-fieldset 및 다양한 input 입력 타입(number, readonly, optgroup 등)을 활용해 수강신청 및 교재 주문 양식을 구현한 HTML 파일입니다.
+<details>
+<summary><strong>html/수강신청/index.html</strong> — fieldset 및 다양한 input 입력 타입(number, readonly, optgroup 등)을 활용해 수강신청 및 교재 주문 양식을 구현한 HTML 파일입니다.</summary>
 
 ```html
 <!doctype html>
@@ -297,9 +300,10 @@ fieldset 및 다양한 input 입력 타입(number, readonly, optgroup 등)을 �
     </body>
 ```
 
-**html/수강신청/index2.html**
+</details>
 
-datalist 태그를 활용하여 사용자 관심 분야 선택 옵션을 목록 형태로 제공하는 HTML 파일입니다.
+<details>
+<summary><strong>html/수강신청/index2.html</strong> — datalist 태그를 활용하여 사용자 관심 분야 선택 옵션을 목록 형태로 제공하는 HTML 파일입니다.</summary>
 
 ```html
 <body>
@@ -325,9 +329,10 @@ datalist 태그를 활용하여 사용자 관심 분야 선택 옵션을 목록 
 </body>
 ```
 
-**html/내부스타일시트/index.html**
+</details>
 
-외부 CSS 파일 연동 링크 및 인라인 스타일을 적용해본 웹 페이지 기초 파일입니다.
+<details>
+<summary><strong>html/내부스타일시트/index.html</strong> — 외부 CSS 파일 연동 링크 및 인라인 스타일을 적용해본 웹 페이지 기초 파일입니다.</summary>
 
 ```html
 <!DOCTYPE html>
@@ -344,9 +349,10 @@ datalist 태그를 활용하여 사용자 관심 분야 선택 옵션을 목록 
 </body>
 ```
 
-**html/내부스타일시트/style.css**
+</details>
 
-리스트 요소의 글자 색상 및 스타일 규칙을 지정한 간단한 CSS 파일입니다.
+<details>
+<summary><strong>html/내부스타일시트/style.css</strong> — 리스트 요소의 글자 색상 및 스타일 규칙을 지정한 간단한 CSS 파일입니다.</summary>
 
 ```css
 /ul{
@@ -356,9 +362,10 @@ datalist 태그를 활용하여 사용자 관심 분야 선택 옵션을 목록 
 /
 ```
 
-**html/ul,li/index.html**
+</details>
 
-순서가 없는 리스트(ul)와 순서가 있는 리스트(ol) 태그의 유형(type, start) 속성을 활용한 웹 페이지입니다.
+<details>
+<summary><strong>html/ul,li/index.html</strong> — 순서가 없는 리스트(ul)와 순서가 있는 리스트(ol) 태그의 유형(type, start) 속성을 활용한 웹 페이지입니다.</summary>
 
 ```html
 <!doctype html>
@@ -387,9 +394,10 @@ datalist 태그를 활용하여 사용자 관심 분야 선택 옵션을 목록 
 </html>
 ```
 
-**html/type_radio,checkbox/index.html**
+</details>
 
-radio 버튼, checkbox, color 파커 입력 항목을 활용한 폼 요소 실습 HTML 파일입니다.
+<details>
+<summary><strong>html/type_radio,checkbox/index.html</strong> — radio 버튼, checkbox, color 파커 입력 항목을 활용한 폼 요소 실습 HTML 파일입니다.</summary>
 
 ```html
 <!doctype html>
@@ -423,9 +431,10 @@ radio 버튼, checkbox, color 파커 입력 항목을 활용한 폼 요소 실�
 </html>
 ```
 
-**html/type_number,range/index.html**
+</details>
 
-number 및 range 입력 타입을 이용해 수치 범위와 등급을 선택할 수 있는 폼 실습 파일입니다.
+<details>
+<summary><strong>html/type_number,range/index.html</strong> — number 및 range 입력 타입을 이용해 수치 범위와 등급을 선택할 수 있는 폼 실습 파일입니다.</summary>
 
 ```html
 <!doctype html>
@@ -454,9 +463,10 @@ number 및 range 입력 타입을 이용해 수치 범위와 등급을 선택할
 </html>
 ```
 
-**html/text-decoration/bigc.html**
+</details>
 
-CSS의 text-transform 속성을 사용하여 영문 텍스트의 대소문자 변환 스타일을 실습한 파일입니다.
+<details>
+<summary><strong>html/text-decoration/bigc.html</strong> — CSS의 text-transform 속성을 사용하여 영문 텍스트의 대소문자 변환 스타일을 실습한 파일입니다.</summary>
 
 ```html
 <style>
@@ -472,9 +482,10 @@ CSS의 text-transform 속성을 사용하여 영문 텍스트의 대소문자 �
   </ul>
 ```
 
-**html/text-decoration/index.html**
+</details>
 
-a 태그 밑줄 제거 및 text-decoration: line-through를 이용한 취소선 표현 실습 HTML 파일입니다.
+<details>
+<summary><strong>html/text-decoration/index.html</strong> — a 태그 밑줄 제거 및 text-decoration: line-through를 이용한 취소선 표현 실습 HTML 파일입니다.</summary>
 
 ```html
 <style>
@@ -491,9 +502,10 @@ a 태그 밑줄 제거 및 text-decoration: line-through를 이용한 취소선 
 <p> 토마토는 비타민 A, C가 풍부한 <span class="edited">과일이다</span> 채소다.</p>
 ```
 
-**html/text-align/index.html**
+</details>
 
-CSS text-align 속성을 이용하여 문단 정렬 방식(left, center, right, justify)을 비교하는 실습 파일입니다.
+<details>
+<summary><strong>html/text-align/index.html</strong> — CSS text-align 속성을 이용하여 문단 정렬 방식(left, center, right, justify)을 비교하는 실습 파일입니다.</summary>
 
 ```html
 <style>
@@ -509,9 +521,10 @@ CSS text-align 속성을 이용하여 문단 정렬 방식(left, center, right, 
 <p class="align-justify"> 가나다라마바사 .....</p>
 ```
 
-**html/testing/2025_하반기_AI_도구_인기_보고서.html**
+</details>
 
-2025년 하반기 AI 도구 인기도 조사 보고서 내용과 인라인 CSS 스타일링이 포함된 문서 페이지입니다.
+<details>
+<summary><strong>html/testing/2025_하반기_AI_도구_인기_보고서.html</strong> — 2025년 하반기 AI 도구 인기도 조사 보고서 내용과 인라인 CSS 스타일링이 포함된 문서 페이지입니다.</summary>
 
 ```html
 <!doctype html>
@@ -779,9 +792,10 @@ CSS text-align 속성을 이용하여 문단 정렬 방식(left, center, right, 
 </html>
 ```
 
-**html/testing/index.html**
+</details>
 
-온라인 쇼핑몰(School Shop) 메인 레이아웃, 헤더 네비게이션, 이미지 슬라이더 구역을 정의한 HTML 파일입니다.
+<details>
+<summary><strong>html/testing/index.html</strong> — 온라인 쇼핑몰(School Shop) 메인 레이아웃, 헤더 네비게이션, 이미지 슬라이더 구역을 정의한 HTML 파일입니다.</summary>
 
 ```html
 <!DOCTYPE html>
@@ -922,9 +936,10 @@ CSS text-align 속성을 이용하여 문단 정렬 방식(left, center, right, 
 </html>
 ```
 
-**html/testing/script.js**
+</details>
 
-쇼핑몰 웹 페이지의 메뉴 전환, 로그인 알림창, 자동 이미지 슬라이더 동작을 제어하는 자바스크립트 파일입니다.
+<details>
+<summary><strong>html/testing/script.js</strong> — 쇼핑몰 웹 페이지의 메뉴 전환, 로그인 알림창, 자동 이미지 슬라이더 동작을 제어하는 자바스크립트 파일입니다.</summary>
 
 ```javascript
 /* =========================================================
@@ -1151,9 +1166,10 @@ document.querySelector(".cart-order-btn").addEventListener("click", () => {
 renderCart();
 ```
 
-**html/testing/skills-lock.json**
+</details>
 
-에이전트 스킬 연동 및 버전 정보를 기록한 JSON 메타데이터 파일입니다.
+<details>
+<summary><strong>html/testing/skills-lock.json</strong> — 에이전트 스킬 연동 및 버전 정보를 기록한 JSON 메타데이터 파일입니다.</summary>
 
 ```json
 {
@@ -1169,9 +1185,10 @@ renderCart();
 }
 ```
 
-**html/testing/style.css**
+</details>
 
-쇼핑몰 웹 페이지의 전체 스타일, 레이아웃, 버튼, 네비게이션 및 슬라이더 스타일을 정의한 CSS 파일입니다.
+<details>
+<summary><strong>html/testing/style.css</strong> — 쇼핑몰 웹 페이지의 전체 스타일, 레이아웃, 버튼, 네비게이션 및 슬라이더 스타일을 정의한 CSS 파일입니다.</summary>
 
 ```css
 /* ==================== 공통 ==================== */
@@ -1696,9 +1713,10 @@ ul {
 }
 ```
 
-**html/testing/.agents/skills/docx/scripts/accept_changes.py**
+</details>
 
-LibreOffice 매크로 및 명령어 인터페이스를 이용하여 DOCX 파일 내 모든 변경 사항 추적(tracked changes)을 수락 처리하는 스크립트입니다.
+<details>
+<summary><strong>html/testing/.agents/skills/docx/scripts/accept_changes.py</strong> — LibreOffice 매크로 및 명령어 인터페이스를 이용하여 DOCX 파일 내 모든 변경 사항 추적(tracked changes)을 수락 처리하는 스크립트입니다.</summary>
 
 ```python
 """Accept all tracked changes in a DOCX file using LibreOffice.
@@ -1838,9 +1856,10 @@ if __name__ == "__main__":
         raise SystemExit(1)
 ```
 
-**html/testing/.agents/skills/docx/scripts/comment.py**
+</details>
 
-DOCX 문서 내 특정 위치에 댓글/주석(comment)을 프로그래밍 방식으로 추가해주는 파이썬 스크립트입니다.
+<details>
+<summary><strong>html/testing/.agents/skills/docx/scripts/comment.py</strong> — DOCX 문서 내 특정 위치에 댓글/주석(comment)을 프로그래밍 방식으로 추가해주는 파이썬 스크립트입니다.</summary>
 
 ```python
 """Add comments to a DOCX document.
@@ -2213,9 +2232,10 @@ if __name__ == "__main__":
     main()
 ```
 
-**html/testing/.agents/skills/docx/scripts/merge_runs.py**
+</details>
 
-Word 문서 XML 내부에서 인접하고 동일한 포맷을 가진 Run(<w:r>) 엘리먼트들을 하나로 병합하여 구조를 단순화하는 파이썬 파일입니다.
+<details>
+<summary><strong>html/testing/.agents/skills/docx/scripts/merge_runs.py</strong> — Word 문서 XML 내부에서 인접하고 동일한 포맷을 가진 Run(<w:r>) 엘리먼트들을 하나로 병합하여 구조를 단순화하는 파이썬 파일입니다.</summary>
 
 ```python
 """Merge adjacent identically-formatted runs in a DOCX.
@@ -2530,9 +2550,10 @@ if __name__ == "__main__":
     main()
 ```
 
-**html/testing/.agents/skills/docx/scripts/office/soffice.py**
+</details>
 
-샌드박스 환경 등에서 LibreOffice(soffice) 프로세스를 유연하게 실행할 수 있도록 돕는 헬퍼 모듈입니다.
+<details>
+<summary><strong>html/testing/.agents/skills/docx/scripts/office/soffice.py</strong> — 샌드박스 환경 등에서 LibreOffice(soffice) 프로세스를 유연하게 실행할 수 있도록 돕는 헬퍼 모듈입니다.</summary>
 
 ```python
 """
@@ -2729,9 +2750,10 @@ if __name__ == "__main__":
     sys.exit(result.returncode)
 ```
 
-**html/testing/.agents/skills/docx/scripts/office/validate.py**
+</details>
 
-오피스 파일 압축 해제 후 XSD 스키마 검증 및 추적 변경사항 유효성을 검사하는 커맨드라인 CLI 진입점 스크립트입니다.
+<details>
+<summary><strong>html/testing/.agents/skills/docx/scripts/office/validate.py</strong> — 오피스 파일 압축 해제 후 XSD 스키마 검증 및 추적 변경사항 유효성을 검사하는 커맨드라인 CLI 진입점 스크립트입니다.</summary>
 
 ```python
 """
@@ -2909,9 +2931,10 @@ if __name__ == "__main__":
     main()
 ```
 
-**html/testing/.agents/skills/docx/scripts/office/validators/base.py**
+</details>
 
-XSD 스키마 로딩, 요소 ID 고유성 검사 등 문서 검증 모듈 공통 로직을 담은 기본 검증 클래스 파일입니다.
+<details>
+<summary><strong>html/testing/.agents/skills/docx/scripts/office/validators/base.py</strong> — XSD 스키마 로딩, 요소 ID 고유성 검사 등 문서 검증 모듈 공통 로직을 담은 기본 검증 클래스 파일입니다.</summary>
 
 ```python
 """
@@ -3791,9 +3814,10 @@ if __name__ == "__main__":
     raise RuntimeError("This module should not be run directly.")
 ```
 
-**html/testing/.agents/skills/docx/scripts/office/validators/docx.py**
+</details>
 
-Word 문서(DOCX)의 네임스페이스, ID, 공백 보존(xml:space), 삭제/삽입 태그 유효성을 종합 검증하는 파이썬 클래스입니다.
+<details>
+<summary><strong>html/testing/.agents/skills/docx/scripts/office/validators/docx.py</strong> — Word 문서(DOCX)의 네임스페이스, ID, 공백 보존(xml:space), 삭제/삽입 태그 유효성을 종합 검증하는 파이썬 클래스입니다.</summary>
 
 ```python
 """
@@ -4264,9 +4288,10 @@ if __name__ == "__main__":
     raise RuntimeError("This module should not be run directly.")
 ```
 
-**html/testing/.agents/skills/docx/scripts/office/validators/pptx.py**
+</details>
 
-PowerPoint 문서(PPTX)의 슬라이드 레이아웃, 테마, 차트, 네임스페이스 등의 유효성을 검증하는 클래스 스크립트입니다.
+<details>
+<summary><strong>html/testing/.agents/skills/docx/scripts/office/validators/pptx.py</strong> — PowerPoint 문서(PPTX)의 슬라이드 레이아웃, 테마, 차트, 네임스페이스 등의 유효성을 검증하는 클래스 스크립트입니다.</summary>
 
 ```python
 """
@@ -4712,9 +4737,10 @@ if __name__ == "__main__":
     raise RuntimeError("This module should not be run directly.")
 ```
 
-**html/testing/.agents/skills/docx/scripts/office/validators/redlining.py**
+</details>
 
-Word 문서 본문 내 추적되지 않은 수정 사항(untracked edits)이 있는지 원본 문서와 비교 검증하는 스크립트입니다.
+<details>
+<summary><strong>html/testing/.agents/skills/docx/scripts/office/validators/redlining.py</strong> — Word 문서 본문 내 추적되지 않은 수정 사항(untracked edits)이 있는지 원본 문서와 비교 검증하는 스크립트입니다.</summary>
 
 ```python
 """
@@ -5018,9 +5044,10 @@ if __name__ == "__main__":
     raise RuntimeError("This module should not be run directly.")
 ```
 
-**html/testing/.agents/skills/docx/scripts/office/validators/__init__.py**
+</details>
 
-validators 패키지 내 검증기 클래스들을 모아 내보내는 파이썬 초기화 파일입니다.
+<details>
+<summary><strong>html/testing/.agents/skills/docx/scripts/office/validators/__init__.py</strong> — validators 패키지 내 검증기 클래스들을 모아 내보내는 파이썬 초기화 파일입니다.</summary>
 
 ```python
 """
@@ -5039,6 +5066,8 @@ __all__ = [
     "RedliningValidator",
 ]
 ```
+
+</details>
 
 ## 코드 파일
 
