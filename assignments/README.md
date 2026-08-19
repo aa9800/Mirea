@@ -1,10 +1,9 @@
 # 과제 목록
 
-총 6개 · 과목 5개 · Study Archive에서 자동 생성됨
+총 5개 · 과목 5개 · Study Archive에서 자동 생성됨
 
-## 웹개발 (2)
+## 웹개발 (1)
 
-- **[Next.js와 FastAPI 기반 미니 장바구니 구현 프로젝트](./웹개발/04-next-js와-fastapi-기반-미니-장바구니-구현-프로젝트/)** · 2026-08-18 — `nextjs` `fastapi` `sqlite` `react` `typescript` `장바구니`
 - **[나만의 콘텐츠 아카이브 'Moa' 개발 계획서](./웹개발/03-나만의-콘텐츠-아카이브-moa-개발-계획서/)** · 2026-08-14 — `웹개발` `프로젝트기획` `api연동` `localstorage` `javascript`
 
 ## HTML/CSS/JavaScript 및 Python 문서 처리 (1)

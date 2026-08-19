@@ -28,6 +28,13 @@ function normalizeMeta(meta) {
   if (!Array.isArray(meta.sourceFiles)) {
     meta.sourceFiles = [];
   }
+  // 대표 이미지 후보가 하나도 없는데(images가 비어있음) 실행 결과 이미지는 있으면
+  // 그걸 대신 대표 이미지로 쓴다 — 카드/목록에서 "No Image"로 보이는 것보다 실행
+  // 결과 화면(노트북 plot, 스크린샷 등)이라도 보여주는 게 낫다. 실행 결과 이미지도
+  // 물리적으로는 images/ 폴더에 저장돼 있어서 기존 fileUrl(..., 'images', ...) 그대로 쓸 수 있다.
+  if (!meta.thumbnail && (!meta.images || meta.images.length === 0) && meta.executionResultImages.length > 0) {
+    meta.thumbnail = meta.executionResultImages[0].storedName;
+  }
   return meta;
 }
 
