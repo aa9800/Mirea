@@ -90,31 +90,23 @@ function buildReadme(meta) {
 }
 
 // assignments/ 바로 아래에 두는 전체 목록 인덱스 — GitHub에서 "assignments" 폴더로
-// 들어가면 이 파일이 바로 보여서, 하위 폴더를 일일이 안 눌러봐도 과목별로 과제들이
-// 한눈에 쭉 보이게 한다. 과제를 저장/삭제할 때마다 최신 상태로 다시 생성된다.
+// 들어가면 이 파일이 바로 보여서, 하위 폴더를 일일이 안 눌러봐도 전체 과제가 제목
+// 기준으로 한눈에 쭉 보이게 한다. 과목(카테고리) 분류는 웹 화면에서만 보여주는
+// 것으로 하고, git 쪽은 분류 없이 최신순으로만 나열한다 — 과목이 여러 개면 오히려
+// 폴더/섹션이 잘게 쪼개져서 한눈에 보기 불편하다는 판단. 과제를 저장/삭제할 때마다
+// 최신 상태로 다시 생성된다.
 function buildAssignmentsIndex(allMeta) {
-  const bySubject = new Map();
-  for (const m of allMeta) {
-    const key = m.subject || '(미분류)';
-    if (!bySubject.has(key)) bySubject.set(key, []);
-    bySubject.get(key).push(m);
-  }
+  const lines = ['# 과제 목록', '', `총 ${allMeta.length}개 · Study Archive에서 자동 생성됨`, ''];
 
-  const lines = ['# 과제 목록', '', `총 ${allMeta.length}개 · 과목 ${bySubject.size}개 · Study Archive에서 자동 생성됨`, ''];
-
-  const subjects = Array.from(bySubject.keys()).sort((a, b) => a.localeCompare(b, 'ko'));
-  for (const subject of subjects) {
-    const items = bySubject
-      .get(subject)
-      .sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.createdAt || '').localeCompare(a.createdAt || ''));
-    lines.push(`## ${subject} (${items.length})`, '');
-    for (const m of items) {
-      const favorite = m.favorite ? ' ⭐' : '';
-      const tags = m.tags?.length ? ` — ${m.tags.map((t) => `\`${t}\``).join(' ')}` : '';
-      lines.push(`- **[${m.title}](./${m.subjectSlug}/${m.leaf}/)**${favorite} · ${m.date}${tags}`);
-    }
-    lines.push('');
+  const items = [...allMeta].sort(
+    (a, b) => (b.date || '').localeCompare(a.date || '') || (b.createdAt || '').localeCompare(a.createdAt || ''),
+  );
+  for (const m of items) {
+    const favorite = m.favorite ? ' ⭐' : '';
+    const tags = m.tags?.length ? ` — ${m.tags.map((t) => `\`${t}\``).join(' ')}` : '';
+    lines.push(`- **[${m.title}](./${m.leaf}/)**${favorite} · ${m.date}${tags}`);
   }
+  lines.push('');
 
   if (allMeta.length === 0) {
     lines.push('_아직 등록된 과제가 없습니다._', '');

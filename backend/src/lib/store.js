@@ -42,22 +42,21 @@ function normalizeMeta(meta) {
 }
 
 // assignments/ 아래 모든 meta.json을 읽어서 { meta, dir } 목록으로 반환한다.
-// 개인 아카이브 규모(수십~수백 건)에서는 매번 스캔해도 충분히 빠르다.
+// 과목별 하위 폴더 없이 assignments/<leaf>/meta.json 한 단계로 평평하게 저장한다 —
+// 카테고리 분류는 웹 화면에서만 보여주고, git 구조는 과목과 무관하게 전체가 한
+// 폴더 아래 바로 모여 있도록. 개인 아카이브 규모(수십~수백 건)에서는 매번 스캔해도 충분히 빠르다.
 function scanAll() {
   ensureAssignmentsDir();
   const results = [];
-  for (const subjectSlug of listDirs(ASSIGNMENTS_DIR)) {
-    const subjectDir = path.join(ASSIGNMENTS_DIR, subjectSlug);
-    for (const leaf of listDirs(subjectDir)) {
-      const dir = path.join(subjectDir, leaf);
-      const metaFile = path.join(dir, 'meta.json');
-      if (!fs.existsSync(metaFile)) continue;
-      try {
-        const meta = normalizeMeta(JSON.parse(fs.readFileSync(metaFile, 'utf-8')));
-        results.push({ meta, dir });
-      } catch {
-        // 손상된 meta.json은 건너뛴다
-      }
+  for (const leaf of listDirs(ASSIGNMENTS_DIR)) {
+    const dir = path.join(ASSIGNMENTS_DIR, leaf);
+    const metaFile = path.join(dir, 'meta.json');
+    if (!fs.existsSync(metaFile)) continue;
+    try {
+      const meta = normalizeMeta(JSON.parse(fs.readFileSync(metaFile, 'utf-8')));
+      results.push({ meta, dir });
+    } catch {
+      // 손상된 meta.json은 건너뛴다
     }
   }
   return results;
@@ -124,86 +123,43 @@ function getSubjectsSummary() {
   return Array.from(map.entries()).map(([subject, count]) => ({ subject, count }));
 }
 
-// 과목 폴더 안에서 사용 중인 최대 순번 + 1 을 계산한다 (중간 삭제되어도 번호가 안 꼬이도록).
-function nextSequence(subjectDir) {
+// assignments/ 바로 아래에서 사용 중인 최대 순번 + 1 을 계산한다 (중간 삭제되어도
+// 번호가 안 꼬이도록). 과목과 무관하게 전체 과제를 통틀어 하나의 순번을 매긴다 —
+// 과목별 폴더가 없어졌으니 순번도 전역이어야 "등록한 순서대로" 쭉 보인다.
+function nextSequence() {
   let max = 0;
-  for (const leaf of listDirs(subjectDir)) {
+  for (const leaf of listDirs(ASSIGNMENTS_DIR)) {
     const m = leaf.match(/^(\d+)-/);
     if (m) max = Math.max(max, parseInt(m[1], 10));
   }
   return max + 1;
 }
 
-// 새 과제를 위한 폴더(과목/순번-제목)를 만들고 { id, subjectSlug, leaf, dir }를 반환한다.
-function createAssignmentPath({ title, subject }) {
+// 새 과제를 위한 폴더(assignments/순번-제목)를 만들고 { id, leaf, dir }를 반환한다.
+// id와 leaf는 같은 값이다 — 과목 접두어가 없어지면서 폴더명 자체가 곧 고유 id가 됐다.
+function createAssignmentPath({ title }) {
   ensureAssignmentsDir();
-  const subjectSlug = slugify(subject);
-  const subjectDir = path.join(ASSIGNMENTS_DIR, subjectSlug);
-  fs.mkdirSync(subjectDir, { recursive: true });
 
-  const seq = String(nextSequence(subjectDir)).padStart(2, '0');
+  const seq = String(nextSequence()).padStart(2, '0');
   const titleSlug = slugify(title);
 
   let leaf = `${seq}-${titleSlug}`;
   let n = 2;
-  while (fs.existsSync(path.join(subjectDir, leaf))) {
+  while (fs.existsSync(path.join(ASSIGNMENTS_DIR, leaf))) {
     leaf = `${seq}-${titleSlug}-${n}`;
     n += 1;
   }
 
-  const dir = path.join(subjectDir, leaf);
+  const dir = path.join(ASSIGNMENTS_DIR, leaf);
   fs.mkdirSync(path.join(dir, 'code'), { recursive: true });
   fs.mkdirSync(path.join(dir, 'images'), { recursive: true });
   fs.mkdirSync(path.join(dir, 'attachments'), { recursive: true });
 
-  return { id: `${subjectSlug}-${leaf}`, subjectSlug, leaf, dir };
-}
-
-// 과목 폴더가 비어 있으면(안의 과제 폴더를 다 옮기거나 지운 경우) 함께 정리한다.
-// git은 어차피 빈 디렉터리를 추적하지 않으므로 순전히 로컬 정리용이다.
-function removeIfEmptySubjectDir(subjectDir) {
-  try {
-    if (fs.existsSync(subjectDir) && fs.readdirSync(subjectDir).length === 0) {
-      fs.rmdirSync(subjectDir);
-    }
-  } catch {
-    // 동시성 등으로 실패해도 무시 — 다음 정리 기회에 다시 시도된다.
-  }
+  return { id: leaf, leaf, dir };
 }
 
 function deleteAssignmentDir(dir) {
-  const subjectDir = path.dirname(dir);
   fs.rmSync(dir, { recursive: true, force: true });
-  removeIfEmptySubjectDir(subjectDir);
-}
-
-// 수정 중 과목이 바뀌면(슬러그 기준) 폴더 전체를 새 과목 폴더로 옮긴다.
-// 폴더 안 code/images/attachments는 그대로 딸려가므로 파일 경로는 건드릴 필요 없다.
-// 같은 슬러그로 귀결되는 경우(대소문자 차이 등)는 불필요한 폴더 이동을 하지 않는다.
-function moveToSubjectIfChanged(entry, newSubject) {
-  const newSubjectSlug = slugify(newSubject);
-  if (newSubjectSlug === entry.meta.subjectSlug) {
-    return { dir: entry.dir, subjectSlug: entry.meta.subjectSlug, leaf: entry.meta.leaf, id: entry.meta.id };
-  }
-
-  const newSubjectDir = path.join(ASSIGNMENTS_DIR, newSubjectSlug);
-  fs.mkdirSync(newSubjectDir, { recursive: true });
-
-  const titleSlug = entry.meta.leaf.replace(/^\d+-/, '');
-  const seq = String(nextSequence(newSubjectDir)).padStart(2, '0');
-  let leaf = `${seq}-${titleSlug}`;
-  let n = 2;
-  while (fs.existsSync(path.join(newSubjectDir, leaf))) {
-    leaf = `${seq}-${titleSlug}-${n}`;
-    n += 1;
-  }
-
-  const newDir = path.join(newSubjectDir, leaf);
-  const oldSubjectDir = path.dirname(entry.dir);
-  fs.renameSync(entry.dir, newDir);
-  removeIfEmptySubjectDir(oldSubjectDir);
-
-  return { dir: newDir, subjectSlug: newSubjectSlug, leaf, id: `${newSubjectSlug}-${leaf}` };
 }
 
 module.exports = {
@@ -217,5 +173,4 @@ module.exports = {
   getSubjectsSummary,
   createAssignmentPath,
   deleteAssignmentDir,
-  moveToSubjectIfChanged,
 };

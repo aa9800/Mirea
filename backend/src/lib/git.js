@@ -72,7 +72,7 @@ async function buildGithubUrl(meta, repoRoot) {
   const { remoteUrl, branch } = await getRemoteInfo(repoRoot);
   if (!remoteUrl || !branch) return null;
   const repoHttps = toHttpsRepoUrl(remoteUrl);
-  return `${repoHttps}/tree/${branch}/assignments/${meta.subjectSlug}/${meta.leaf}`;
+  return `${repoHttps}/tree/${branch}/assignments/${meta.leaf}`;
 }
 
 // 웹에서 보여줄 읽기 전용 Git 연결 상태. URL/토큰 입력 없이, 이미 로컬에 있는

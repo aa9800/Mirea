@@ -224,7 +224,6 @@ export default function AssignmentForm({ mode }: Props) {
   const [newSourceFiles, setNewSourceFiles] = useState<File[]>([]);
 
   const [assignmentId, setAssignmentId] = useState<string | null>(null);
-  const [subjectSlug, setSubjectSlug] = useState('');
   const [leaf, setLeaf] = useState('');
   const [loading, setLoading] = useState(mode === 'edit');
   const [saving, setSaving] = useState(false);
@@ -255,7 +254,6 @@ export default function AssignmentForm({ mode }: Props) {
     fetchAssignment(id)
       .then((a: Assignment) => {
         setAssignmentId(a.id);
-        setSubjectSlug(a.subjectSlug);
         setLeaf(a.leaf);
         setTitle(a.title);
         setSubject(a.subject);
@@ -803,7 +801,7 @@ export default function AssignmentForm({ mode }: Props) {
           <ul className="file-list file-list--editable">
             {existingCodeFiles.map((f) => (
               <li key={f.storedName}>
-                <a href={fileUrl(subjectSlug, leaf, 'code', f.storedName)} target="_blank" rel="noreferrer">
+                <a href={fileUrl(leaf,'code', f.storedName)} target="_blank" rel="noreferrer">
                   {f.filename}
                 </a>
                 <label className="inline-check">
@@ -907,10 +905,10 @@ export default function AssignmentForm({ mode }: Props) {
             {existingImages.map((f) => (
               <li key={f.storedName}>
                 <img
-                  src={fileUrl(subjectSlug, leaf, 'images', f.storedName)}
+                  src={fileUrl(leaf,'images', f.storedName)}
                   alt={f.filename}
                   className="thumb-preview"
-                  onClick={() => setLightbox({ src: fileUrl(subjectSlug, leaf, 'images', f.storedName), alt: f.filename })}
+                  onClick={() => setLightbox({ src: fileUrl(leaf,'images', f.storedName), alt: f.filename })}
                 />
                 <span>{f.filename}</span>
                 <label className="inline-check">
@@ -948,7 +946,7 @@ export default function AssignmentForm({ mode }: Props) {
           <ul className="file-list file-list--editable">
             {existingAttachments.map((f) => (
               <li key={f.storedName}>
-                <a href={fileUrl(subjectSlug, leaf, 'attachments', f.storedName)} target="_blank" rel="noreferrer">
+                <a href={fileUrl(leaf,'attachments', f.storedName)} target="_blank" rel="noreferrer">
                   {f.filename}
                 </a>
                 <label className="inline-check">
@@ -1035,10 +1033,10 @@ export default function AssignmentForm({ mode }: Props) {
             {existingExecutionImages.map((f) => (
               <li key={f.storedName}>
                 <img
-                  src={fileUrl(subjectSlug, leaf, 'images', f.storedName)}
+                  src={fileUrl(leaf,'images', f.storedName)}
                   alt={f.filename}
                   className="thumb-preview"
-                  onClick={() => setLightbox({ src: fileUrl(subjectSlug, leaf, 'images', f.storedName), alt: f.filename })}
+                  onClick={() => setLightbox({ src: fileUrl(leaf,'images', f.storedName), alt: f.filename })}
                 />
                 <span>{f.filename}</span>
                 <label className="inline-check">

@@ -148,7 +148,7 @@ export default function AssignmentDetail() {
             {assignment.executionResultImages.length > 0 && (
               <div className="image-gallery">
                 {assignment.executionResultImages.map((img) => {
-                  const src = fileUrl(assignment.subjectSlug, assignment.leaf, 'images', img.storedName);
+                  const src = fileUrl(assignment.leaf, 'images', img.storedName);
                   return (
                     <figure key={img.storedName}>
                       <img src={src} alt={img.filename} onClick={() => setLightbox({ src, alt: img.filename })} />
@@ -179,7 +179,7 @@ export default function AssignmentDetail() {
             <ul className="file-list">
               {assignment.codeFiles.map((f) => (
                 <li key={f.storedName}>
-                  <a href={fileUrl(assignment.subjectSlug, assignment.leaf, 'code', f.storedName)} download>
+                  <a href={fileUrl(assignment.leaf, 'code', f.storedName)} download>
                     {f.filename}
                   </a>
                 </li>
@@ -199,7 +199,7 @@ export default function AssignmentDetail() {
                 .sort((a, b) => a.path.localeCompare(b.path))
                 .map((f) => (
                   <li key={f.path}>
-                    <a href={sourceFileUrl(assignment.subjectSlug, assignment.leaf, f.path)} download>
+                    <a href={sourceFileUrl(assignment.leaf, f.path)} download>
                       {f.path}
                     </a>
                   </li>
@@ -213,7 +213,7 @@ export default function AssignmentDetail() {
             <h2 className="doc-section__label">이미지</h2>
             <div className="image-gallery">
               {assignment.images.map((img) => {
-                const src = fileUrl(assignment.subjectSlug, assignment.leaf, 'images', img.storedName);
+                const src = fileUrl(assignment.leaf, 'images', img.storedName);
                 return (
                   <figure
                     key={img.storedName}
@@ -237,7 +237,7 @@ export default function AssignmentDetail() {
             <ul className="file-list">
               {assignment.attachments.map((f) => (
                 <li key={f.storedName}>
-                  <a href={fileUrl(assignment.subjectSlug, assignment.leaf, 'attachments', f.storedName)} download>
+                  <a href={fileUrl(assignment.leaf, 'attachments', f.storedName)} download>
                     {f.filename}
                   </a>
                 </li>

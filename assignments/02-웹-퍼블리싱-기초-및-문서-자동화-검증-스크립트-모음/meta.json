@@ -1,7 +1,6 @@
 {
-  "id": "html-css-javascript-및-python-문서-처리-01-웹-퍼블리싱-기초-및-문서-자동화-검증-스크립트-모음",
-  "subjectSlug": "html-css-javascript-및-python-문서-처리",
-  "leaf": "01-웹-퍼블리싱-기초-및-문서-자동화-검증-스크립트-모음",
+  "id": "02-웹-퍼블리싱-기초-및-문서-자동화-검증-스크립트-모음",
+  "leaf": "02-웹-퍼블리싱-기초-및-문서-자동화-검증-스크립트-모음",
   "title": "웹 퍼블리싱 기초 및 문서 자동화·검증 스크립트 모음",
   "subject": "HTML/CSS/JavaScript 및 Python 문서 처리",
   "date": "2026-08-14",
@@ -388,7 +387,7 @@
     }
   ],
   "favorite": false,
-  "thumbnail": "1786692743529-660986434.jpg",
+  "thumbnail": "1786692743585-17672255.png",
   "images": [
     {
       "filename": "cancel.jpg",
@@ -547,8 +546,9 @@
   "updatedAt": "2026-08-14T07:32:23.592Z",
   "github": {
     "status": "success",
-    "url": "https://github.com/aa9800/Mirea/tree/main/assignments/html-css-javascript-및-python-문서-처리/01-웹-퍼블리싱-기초-및-문서-자동화-검증-스크립트-모음",
+    "url": "https://github.com/aa9800/Mirea/tree/main/assignments/02-웹-퍼블리싱-기초-및-문서-자동화-검증-스크립트-모음",
     "lastSyncedAt": "2026-08-14T07:32:27.803Z",
     "lastError": null
-  }
+  },
+  "sourceFiles": []
 }

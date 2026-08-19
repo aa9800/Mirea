@@ -6,7 +6,7 @@ import { fileUrl } from '../api/client';
 // 구분되도록 일부러 작고 조밀하게 — 훑어보기 용도라는 걸 시각적으로 드러낸다.
 export default function AssignmentRow({ assignment }: { assignment: Assignment }) {
   const thumbUrl = assignment.thumbnail
-    ? fileUrl(assignment.subjectSlug, assignment.leaf, 'images', assignment.thumbnail)
+    ? fileUrl(assignment.leaf, 'images', assignment.thumbnail)
     : null;
 
   return (

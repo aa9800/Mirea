@@ -10,21 +10,22 @@ async function handle<T>(res: Response): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+// 과목(카테고리)별 하위 폴더 없이 assignments/<leaf>/... 한 단계로 평평하게
+// 저장하므로, 파일 URL도 leaf(=과제 id) 하나만 있으면 만들 수 있다.
 export function fileUrl(
-  subjectSlug: string,
   leaf: string,
   type: 'images' | 'attachments' | 'code',
   storedName: string,
 ): string {
-  return `/files/${encodeURIComponent(subjectSlug)}/${encodeURIComponent(leaf)}/${type}/${encodeURIComponent(storedName)}`;
+  return `/files/${encodeURIComponent(leaf)}/${type}/${encodeURIComponent(storedName)}`;
 }
 
 // source/ 밑의 원본 보존 파일 — relativePath가 폴더 구조를 담은 실제 경로라
 // 세그먼트별로 인코딩해야 한다 (전체를 통째로 encodeURIComponent 하면 "/"까지
 // %2F로 바뀌어 경로가 깨진다).
-export function sourceFileUrl(subjectSlug: string, leaf: string, relativePath: string): string {
+export function sourceFileUrl(leaf: string, relativePath: string): string {
   const encodedPath = relativePath.split('/').map(encodeURIComponent).join('/');
-  return `/files/${encodeURIComponent(subjectSlug)}/${encodeURIComponent(leaf)}/source/${encodedPath}`;
+  return `/files/${encodeURIComponent(leaf)}/source/${encodedPath}`;
 }
 
 export interface ListParams {

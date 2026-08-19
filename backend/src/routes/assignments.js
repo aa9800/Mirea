@@ -174,7 +174,7 @@ router.post('/', uploadFields, async (req, res) => {
       return res.status(400).json({ error: '제목과 과목은 필수입니다.' });
     }
 
-    const { id, subjectSlug, leaf, dir } = store.createAssignmentPath({ title, subject });
+    const { id, leaf, dir } = store.createAssignmentPath({ title });
 
     const images = saveFiles(req.files?.images, dir, 'images');
     const attachments = saveFiles(req.files?.attachments, dir, 'attachments');
@@ -187,7 +187,6 @@ router.post('/', uploadFields, async (req, res) => {
     const now = new Date().toISOString();
     const meta = {
       id,
-      subjectSlug,
       leaf,
       title: title.trim(),
       subject: subject.trim(),
@@ -244,10 +243,11 @@ router.put('/:id', uploadFields, async (req, res) => {
       sourceFilePaths,
     } = req.body;
 
-    // 과목이 바뀌었으면 폴더를 새 과목 폴더로 옮긴다 (code/images/attachments는
-    // 폴더째로 이동하므로 그대로 유지된다). 변경이 없으면 기존 위치 그대로 반환된다.
+    // 과목은 이제 폴더 구조와 무관한 순수 메타데이터라, 값이 바뀌어도 폴더를 옮기거나
+    // id가 바뀌지 않는다 — 예전에는 과목별 폴더를 옮겨야 해서 id/URL이 바뀌었지만,
+    // 과목 접두어가 없어진 지금은 그럴 이유가 없다.
     const resolvedSubject = subject !== undefined ? subject.trim() : existing.subject;
-    const { dir, subjectSlug, leaf, id: newId } = store.moveToSubjectIfChanged(entry, resolvedSubject);
+    const { dir } = entry;
 
     let images = removeFiles(existing.images, dir, 'images', parseNameList(removeImages));
     let attachments = removeFiles(existing.attachments, dir, 'attachments', parseNameList(removeAttachments));
@@ -276,9 +276,6 @@ router.put('/:id', uploadFields, async (req, res) => {
     const now = new Date().toISOString();
     const meta = {
       ...existing,
-      id: newId,
-      subjectSlug,
-      leaf,
       title: title !== undefined ? title.trim() : existing.title,
       subject: resolvedSubject,
       date: date || existing.date,
@@ -304,7 +301,7 @@ router.put('/:id', uploadFields, async (req, res) => {
     writeAssignmentsIndex();
     res.json(meta);
 
-    git.syncAssignmentMeta(newId, `과제 수정: ${meta.title}`).catch(() => {});
+    git.syncAssignmentMeta(id, `과제 수정: ${meta.title}`).catch(() => {});
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: '수정 중 오류가 발생했습니다.' });

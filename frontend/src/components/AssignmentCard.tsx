@@ -4,7 +4,7 @@ import { fileUrl } from '../api/client';
 
 export default function AssignmentCard({ assignment }: { assignment: Assignment }) {
   const thumbUrl = assignment.thumbnail
-    ? fileUrl(assignment.subjectSlug, assignment.leaf, 'images', assignment.thumbnail)
+    ? fileUrl(assignment.leaf, 'images', assignment.thumbnail)
     : null;
 
   return (

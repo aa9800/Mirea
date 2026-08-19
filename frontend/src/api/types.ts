@@ -31,7 +31,6 @@ export interface CodeBlock {
 
 export interface Assignment {
   id: string;
-  subjectSlug: string;
   leaf: string;
   title: string;
   subject: string;
