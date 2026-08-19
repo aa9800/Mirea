@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { createAssignment, updateAssignment, fetchAssignment, fileUrl, analyzeContent, captureScreenshot } from '../api/client';
+import { createAssignment, updateAssignment, fetchAssignment, fileUrl, analyzeContent, captureScreenshot, captureScreenshotFromFiles } from '../api/client';
 import type { Assignment, CodeBlock, FileRef } from '../api/types';
 import TagInput from '../components/TagInput';
 import Lightbox from '../components/Lightbox';
@@ -489,11 +489,43 @@ export default function AssignmentForm({ mode }: Props) {
         setExecutionResult(capturedOutputTexts.join('\n---\n').slice(0, 4000));
       }
 
+      // 폴더가 실행 가능한 웹 프로젝트로 보이면(package.json이나 .html이 있으면),
+      // 방금 읽은 파일 그대로 자동으로 화면도 찍어본다 — 아직 저장 전이라 경로가
+      // 없어도 서버가 임시 폴더에 잠깐 풀어놓고 실행해본 뒤 바로 정리한다. 의존성
+      // 설치가 필요하면 시간이 걸릴 수 있고, 실패해도 나머지 분석 결과는 그대로 둔다.
+      const looksRunnable = picked.some((f) => {
+        const rel = relPath(f).toLowerCase();
+        return /(^|\/)package\.json$/.test(rel) || /\.html?$/.test(rel);
+      });
+      let screenshotCount = 0;
+      if (looksRunnable && sourceFileList.length > 0) {
+        setAiNotice('실행 가능한 프로젝트로 보여서 화면도 자동으로 찍어볼게요 (설치가 필요하면 시간이 좀 걸려요)...');
+        try {
+          const { images } = await captureScreenshotFromFiles(sourceFileList);
+          if (images.length > 0) {
+            const files = images.map(({ path: routePath, image }, i) => {
+              const base64 = image.split(',')[1] ?? '';
+              const safeName = routePath.replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-|-$/g, '') || 'root';
+              return base64ToFile(base64, 'image/png', `screenshot-${safeName || i}-${Date.now()}.png`);
+            });
+            setNewExecutionImages((prev) => [...prev, ...files]);
+            screenshotCount = images.length;
+          }
+        } catch {
+          // 자동 스크린샷은 "되면 좋고" 수준이라 실패해도 전체 분석 흐름을 막지 않는다.
+        }
+      }
+
       const notes: string[] = [];
       if (truncated > 0) notes.push(`파일이 많아 ${picked.length}개만 처리하고 ${truncated}개는 건너뛰었어요.`);
       if (textForAi.length === 0) notes.push('분석할 텍스트 내용을 찾지 못해 파일만 첨부했어요.');
       if (outputImageFiles.length > 0) notes.push(`노트북 실행 결과 이미지 ${outputImageFiles.length}개를 "실행 결과"에 추가했어요.`);
-      if (notes.length) setAiNotice(notes.join(' '));
+      if (screenshotCount > 0) {
+        notes.push(`실행 가능한 프로젝트로 보여서 화면 ${screenshotCount}개를 자동으로 찍어 "실행 결과"에 추가했어요.`);
+      } else if (looksRunnable) {
+        notes.push('실행 가능한 프로젝트로 보였지만 자동 스크린샷엔 실패했어요 — 필요하면 아래 스크린샷 버튼으로 다시 시도해보세요.');
+      }
+      setAiNotice(notes.length ? notes.join(' ') : null);
     } catch (err) {
       setAiError((err as Error).message);
     } finally {

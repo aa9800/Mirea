@@ -1,9 +1,31 @@
+const fs = require('fs');
+const os = require('os');
 const path = require('path');
 const express = require('express');
+const multer = require('multer');
 const store = require('../lib/store');
+const { sanitizeRelPath } = require('../lib/paths');
 const { captureDevServerScreenshot } = require('../lib/screenshot');
 
 const router = express.Router();
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 25 * 1024 * 1024, fieldSize: 25 * 1024 * 1024 },
+});
+
+function shotsToResponse(shots) {
+  return {
+    images: shots
+      .filter((s) => s.buffer)
+      .map((s) => ({ path: s.path, image: `data:image/png;base64,${s.buffer.toString('base64')}` })),
+    failed: shots.filter((s) => s.error).map((s) => ({ path: s.path, error: s.error })),
+  };
+}
+
+function screenshotErrorStatus(err) {
+  return err.code === 'NOT_FOUND' ? 404 : err.code === 'NOT_A_PROJECT' ? 400 : err.code === 'NO_PUPPETEER' ? 503 : 500;
+}
 
 // POST /api/screenshot - 로컬 프로젝트 폴더 "경로"를 받아 개발 서버를 실제로 실행하고
 // 소스 코드에서 자동으로 찾은 페이지 경로들을 각각 스크린샷 찍어 base64로 돌려준다.
@@ -37,17 +59,49 @@ router.post('/', async (req, res) => {
 
   try {
     const shots = await captureDevServerScreenshot(resolvedPath);
-    res.json({
-      images: shots
-        .filter((s) => s.buffer)
-        .map((s) => ({ path: s.path, image: `data:image/png;base64,${s.buffer.toString('base64')}` })),
-      failed: shots.filter((s) => s.error).map((s) => ({ path: s.path, error: s.error })),
-    });
+    res.json(shotsToResponse(shots));
   } catch (err) {
     console.error(err);
-    const status =
-      err.code === 'NOT_FOUND' ? 404 : err.code === 'NOT_A_PROJECT' ? 400 : err.code === 'NO_PUPPETEER' ? 503 : 500;
-    res.status(status).json({ error: err.message || '스크린샷 촬영 중 오류가 발생했습니다.' });
+    res.status(screenshotErrorStatus(err)).json({ error: err.message || '스크린샷 촬영 중 오류가 발생했습니다.' });
+  }
+});
+
+// POST /api/screenshot/from-files - 아직 저장 전인 과제(새로 등록하는 중)를 위한 경로.
+// "폴더로 분석" 직후, 방금 읽은 원본 파일들을 그대로 여기로 보내면 임시 폴더에 잠깐
+// 풀어놓고 스크린샷을 찍은 뒤 즉시 정리한다 — 경로 입력도, 먼저 저장하는 것도 필요
+// 없다. sourceFiles 업로드와 완전히 같은 방식(파일 + 같은 순서의 경로 매니페스트)을 쓴다.
+router.post('/from-files', upload.array('sourceFiles'), async (req, res) => {
+  const files = req.files;
+  if (!files || files.length === 0) {
+    return res.status(400).json({ error: '파일이 없습니다.' });
+  }
+
+  let manifest = [];
+  try {
+    const parsed = JSON.parse(req.body?.sourceFilePaths || '[]');
+    if (Array.isArray(parsed)) manifest = parsed;
+  } catch {
+    // 무시 — 아래에서 파일별 originalname으로 폴백
+  }
+
+  const tempDir = path.join(os.tmpdir(), `study-archive-screenshot-${Date.now()}-${Math.round(Math.random() * 1e9)}`);
+
+  try {
+    for (let i = 0; i < files.length; i++) {
+      const segments = sanitizeRelPath(manifest[i] || files[i].originalname);
+      const relPath = segments.length ? segments.join('/') : `file-${i}`;
+      const fullPath = path.join(tempDir, ...(segments.length ? segments : [relPath]));
+      fs.mkdirSync(path.dirname(fullPath), { recursive: true });
+      fs.writeFileSync(fullPath, files[i].buffer);
+    }
+
+    const shots = await captureDevServerScreenshot(tempDir);
+    res.json(shotsToResponse(shots));
+  } catch (err) {
+    console.error(err);
+    res.status(screenshotErrorStatus(err)).json({ error: err.message || '스크린샷 촬영 중 오류가 발생했습니다.' });
+  } finally {
+    fs.rm(tempDir, { recursive: true, force: true }, () => {});
   }
 });
 

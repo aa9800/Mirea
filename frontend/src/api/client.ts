@@ -103,6 +103,18 @@ export async function captureScreenshot(target: { projectPath: string } | { assi
   return handle<ScreenshotResult>(res);
 }
 
+// "폴더로 분석" 직후, 아직 저장 전인 상태에서 방금 읽은 원본 파일들을 그대로 보내
+// 스크린샷을 찍는다 — 경로 입력도, 먼저 저장하는 것도 필요 없다. 서버가 임시 폴더에
+// 잠깐 풀어놓고 찍은 뒤 바로 정리한다. files는 이름에 폴더 상대 경로가 담긴 File들
+// (AssignmentForm의 snapshotFile로 만든 것)이어야 한다.
+export async function captureScreenshotFromFiles(files: File[]): Promise<ScreenshotResult> {
+  const fd = new FormData();
+  files.forEach((f) => fd.append('sourceFiles', f));
+  fd.set('sourceFilePaths', JSON.stringify(files.map((f) => f.name)));
+  const res = await fetch('/api/screenshot/from-files', { method: 'POST', body: fd });
+  return handle<ScreenshotResult>(res);
+}
+
 // 저장하지 않는다 — 결과로 폼 필드를 채우기만 하고, 사용자가 확인 후 직접 저장해야 반영된다.
 // content(붙여넣은 텍스트/단일 파일) 또는 files(폴더 선택 시 여러 파일) 중 하나를 채워서 호출한다.
 export async function analyzeContent(input: {

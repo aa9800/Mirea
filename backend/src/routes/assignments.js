@@ -6,6 +6,7 @@ const store = require('../lib/store');
 const git = require('../lib/git');
 const { ASSIGNMENTS_DIR } = require('../config');
 const { buildReadme, buildAssignmentsIndex } = require('../lib/readme');
+const { sanitizeRelPath } = require('../lib/paths');
 
 const router = express.Router();
 
@@ -85,14 +86,6 @@ function saveFiles(files, dir, subdir) {
 // 예외 없음, 보안상의 동작으로 보임). 그래서 originalname은 못 믿고, 프론트가 파일들과
 // "같은 순서로" 별도 텍스트 필드(sourceFilePaths, JSON 배열)에 상대 경로를 보내고
 // 여기서 인덱스로 맞춰 쓴다. 그마저 없으면 그나마 원래 파일명(경로 없이)이라도 쓴다.
-function sanitizeRelPath(raw) {
-  const segments = String(raw || '')
-    .split(/[\\/]+/)
-    .map((seg) => seg.trim())
-    .filter((seg) => seg && seg !== '.' && seg !== '..');
-  return segments;
-}
-
 function saveSourceFiles(files, dir, pathsJson) {
   if (!files || files.length === 0) return [];
   let manifest = [];
