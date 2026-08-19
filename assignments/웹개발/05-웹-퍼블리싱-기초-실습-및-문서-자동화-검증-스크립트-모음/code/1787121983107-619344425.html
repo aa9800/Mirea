@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>프로필 카드</title>
+        <style>
+            body{
+                background-color: #f4f4f4;
+                font-family : Arial,sans-serif;
+                display : flex;/*전체 카드를 가로나 새로방향으로 쉽게 대치*/
+                justify-content : center;/*가운데*/
+                align-items: center;/*세로기준 중앙*/
+                height: 100vh;
+            }
+            .card {
+                width: 400px; /* 넓이 */
+                background-color: white; /* 배경색 */
+                border-radius: 15px;
+                padding: 30px; /*카드사이즈*/
+                text-align: center;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2); /*뒤에 음영*/
+            }
+            .profile{
+                width: 120px;
+                height : 120px;
+                border-radius: 50%;
+            }
+            h1{
+                color:#333;
+                margin:15px 0 5px;
+            }
+            .info{
+                color : #777;
+                margin-bottom:20px; /*아래쪽 띄우기*/
+            }
+            .intro{                
+                background-color: #f8f9fa;
+                border-radius: 10px;/*테두리 둥그렇게*/
+                margin-bottom: 20px;
+            }
+            .btn{
+                display: inline-block; /*버튼 칸 차지 늘리기*/
+                padding: 10px 25px;
+                background-color: #4a6cf7;
+                color: white;
+                text-decoration: none;/*밑줄 삭제*/
+                border-radius: 8px;
+            }
+            .btn:hover{
+                background-color: #2748d8;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="card">
+            <img src="image.jpg" class="profile">
+            <h1>홍길동</h1>
+            <div class="info">
+                대학교 졸업생 | 인공지능 개발자
+            </div>
+            <div class="intro">
+                HTML과 CSS를 배우며 웹 개발에 관심을 가지고 있습니다.
+            </div>            
+            <a href="#" class="btn"> Github </a>
+        </div>
+    </body>
+</html>

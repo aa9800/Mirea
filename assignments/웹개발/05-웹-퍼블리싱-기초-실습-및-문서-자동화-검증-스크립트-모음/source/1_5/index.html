@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ko"> <!언어한글!>
+<head> 
+<meta charset="UTF-8">
+<title>우리 동네 고양이 도감</title>
+<style>/*css 설정 */
+body{ /*body부분 스타일 설정*/
+    background-color:#eef2ec; /*배경색*/
+    font-family: Arial, sans-serif; /*폰트 설정*/
+    margin:0;/*여백*/ 
+    padding:0;/*테두리안쪽크기*/
+}
+/* ===== 상단 바 : 로고와 메뉴가 한 줄에 ===== */
+header{ /*header css*/
+    background-color:#2f6f4e;
+    color:white; /*글자색*/
+    padding:15px; 
+    display:flex; /*가로나 세로방향 쉽게 대치*/
+    justify-content:center;/*가운데 정렬*/
+    align-items:center;/*세로기준 중앙*/
+}
+header h1{
+    color:white;
+    margin:0;
+    padding:0 30px;
+}
+nav ul{
+    list-style-type:none; /* 불릿모양 제거*/
+    margin:0;
+    padding:0;
+}
+nav ul li{
+    display:inline; /* 나란히 배열*/
+    margin:0 12px;
+}
+nav ul li a{
+    color:white;
+    text-decoration:none; /* 하이퍼링크 밑줄 제거*/
+}
+nav ul li a:hover{
+    color:#ffd66b;
+}
+/* ===== 소개 영역 : 글은 왼쪽, 사진은 오른쪽 ===== */
+.hero{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:50px;
+    background-color:white;
+}
+.hero-text{
+    width:340px; /*넓이*/
+    padding:20px;
+}
+.hero-text h2{
+    color:#2f6f4e;
+    margin:0;
+    padding:0;
+}
+.hero-text p{
+    color:#666;
+}
+.hero-img{
+    width:200px;
+    height:200px;
+    border-radius:50%;/*테두리 둥글게*/
+    box-shadow:0 5px 15px rgba(0,0,0,0.2);/*뒤에 음영*/
+}
+/* ===== 카드 3개가 가로로 나란히 ===== */
+.cards{
+    display:flex;
+    justify-content:center;
+    padding:40px;
+}
+.card{
+    width:220px;
+    background-color:white;
+    border-radius:12px;
+    padding:20px;
+    margin:0 15px;
+    text-align:center; /*글자나 아미지 가운데 정렬*/
+    box-shadow:0 3px 8px rgba(0,0,0,0.1);
+}
+.card img{
+    width:100px;
+    height:100px;
+    border-radius:50%;
+}
+.card h2{
+    color:#2f6f4e;
+    margin:15px 0 5px;
+}
+.card p{
+    color:#777;
+}
+.btn{
+    display:inline-block;
+    padding:8px 18px;
+    background-color:#2f6f4e;
+    color:white;
+    text-decoration:none;
+    border-radius:20px;
+}
+.btn:hover{
+    background-color:#1d4a33;
+}
+footer{
+    text-align:center;
+    padding:20px;
+    background-color:#2f6f4e;
+    color:white;
+}
+/* ===== 화면이 좁아지면 가로 배치를 세로로 ===== */
+@media screen and (max-width:600px){
+    header{
+        display:block;
+        text-align:center;
+    }
+    header h1{
+        padding:0;
+    }
+    nav ul li{
+        display:inline-block;/* 줄바꿈 x 높이, 여백 지정가능*/
+        margin:10px 8px;
+    }
+    .hero{
+        display:block;
+        text-align:center;
+        padding:30px;
+    }
+    .hero-text{
+        width:260px;
+    }
+    .cards{
+        display:block;
+        padding:20px;
+    }
+    .card{
+        width:220px;
+        margin:15px;
+    }
+}
+</style>
+</head>
+<body>
+<header>
+    <h1>고양이 도감</h1> <!제목>
+    <nav> <!네비게이션 , 링크제공>
+        <ul>
+            <li><a href="#">소개</a></li> <! "소개" 글씨에 하이퍼 링크 생성>
+            <li><a href="#">고양이들</a></li>
+            <li><a href="#">제보하기</a></li>
+        </ul>
+    </nav>
+</header>
+<div class="hero"> <!클래스 "hero" 생성>
+    <div class="hero-text"> <!클래스 내용 작성>
+        <h2>우리 동네 고양이들</h2> <!내용 제목>
+        <p>골목에서 만난 고양이들을 기록하는 페이지입니다. 이름과 성격, 자주 나타나는 자리를 함께 적어 두었습니다.</p> <!글작성>
+        <a href="#" class="btn">제보하기</a>
+    </div>
+    <img src="image.jpg" class="hero-img"> <!이미지 삽입, 삽입이미지 설정, 이미지에 대한 클래스 설정>
+</div>
+<div class="cards">
+    <div class="card">
+        <img src="image.jpg">
+        <h2>치즈</h2>
+        <p>편의점 앞 담장에 자주 앉아 있습니다. 사람을 별로 무서워하지 않습니다.</p>
+    </div>
+    <div class="card">
+        <img src="image.jpg">
+        <h2>까망</h2>
+        <p>주차장 3번 자리 아래가 지정석입니다. 낮에는 거의 자고 있습니다.</p>
+    </div>
+    <div class="card">
+        <img src="image.jpg">
+        <h2>삼색</h2>
+        <p>놀이터 미끄럼틀 근처에 나타납니다. 셋 중 가장 겁이 많습니다.</p>
+    </div>
+</div>
+<footer><!하단에 내용고정>
+    <p>&copy; 2026 고양이 도감</p> <!저작권에대한 내용>
+</footer>
+</body>
+</html>

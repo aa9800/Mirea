@@ -1,0 +1,182 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>모의 수행평가(이력서작성)</title>
+    <style type="text/css">
+      th {color:blue; background-color: yellow;}
+    
+    </style>
+  </head>
+  <body>
+   <form method="post">
+    <table border="1" width="1000px">
+        <tr>
+            <th rowspan="5">인<br>적<br>사<br>항</th>
+            <td rowspan="5">
+                <img src="photo.jpg" width="100px" height="130px">  
+            </td>
+            <th rowspan="3">성명</th>
+            <th>한글</th>
+            <td><input type="text" maxlength="4"></td>
+            <th>업무/지역</th>
+            <td colspan="3">
+                <select>
+                <option value="0">부산</option>
+                <option value="1">서울</option>
+                <option value="2">대전</option>
+                <option value="3">대구</option>
+              </select>
+            </td>
+        </tr>
+        <tr>
+        <th>영문</th>
+        <td><input type="text" maxlength="10"></td>
+        <th>주민등록번호</th>
+        <td colspan="3">
+            <input type="text" maxlength="6">-<input type="text" maxlength="7">
+        </td>
+        </tr>
+        <tr>
+        <th>한자</th>
+        <td><input type="text" maxlength="4"></td>
+        <th>성별</th>
+        <td>
+            
+            <select>
+                <option value="0">남자</option>
+                <option value="1">여자</option>
+            </select>
+        </td>
+        <th>연령</th>
+        <td >
+            <input type="text" size="5" maxlength="2">
+        </td>
+        </tr>
+        <th colspan="2">현주소</th>
+        <td colspan="5">
+            <input type="text" size="60">  
+        </td>
+        </tr>
+        <th colspan="2">휴대번호</th>
+        <td >
+            <input type="text" size="3" maxlength="3">-<input type="text" size="4" maxlength="4">-<input type="text" size="4" maxlength="4">
+        </td>
+        <th>E-mail</th>
+        <td>
+            <input type="text" size="30">           
+        </td>
+        </tr>    
+    </tr>
+    </table>
+    <br><br>
+     
+    <form method="post">
+    <table border="" width="1000px">
+        <tr>
+            <th rowspan="4">학<br>력<br></th>
+        
+        <th>기간(년,월)</th>
+        <th>출신학교</th>
+        <th>전공</th>
+        <th>졸업여부</th>
+        <th>학위</th>
+    </tr>
+    <tr>
+        <td>
+            <input type="date">
+           
+        </td>
+        <td>
+            <input type="text">
+        </td>
+        <td>
+            <input type="text">
+        </td>
+        <td>
+            <input type="text">
+        </td>
+        <td>
+        <input type="text">
+        </td>
+    </tr>
+
+        <tr>
+        <td>
+            <input type="date">
+           
+        </td>
+        <td>
+            <input type="text">
+        </td>
+        <td>
+            <input type="text">
+        </td>
+        <td>
+            <input type="text">
+        </td>
+        <td>
+        <input type="text">
+        </td>
+    </tr>
+
+        <tr>
+        <td>
+            <input type="date">
+           
+        </td>
+        <td>
+            <input type="text">
+        </td>
+        <td>
+            <input type="text">
+        </td>
+        <td>
+            <input type="text">
+        </td>
+        <td>
+        <input type="text">
+        </td>
+    </tr>
+    </table>
+    <br><br>
+
+    <form method="post">
+    <table border="" width="1000px">
+        <tr>
+            <th rowspan="3">병<br>역<br></th>
+            <th>군필</th>
+            <td> <input type="text"> </td>
+            <th colspan="3">면제사유</th>
+            <td> <input type="text"> </td>
+            <th>보훈 대상 여부</th>
+        </tr>
+
+        <tr>
+            <th>군별</th>
+            <td> <input type="text"> </td>
+            <th>계급</th>
+            <td> <select sieze="2">
+                <option value="0">이병</option>
+                <option value="1">일병</option>
+                <option value="2">상병</option>
+                <option value="3" selected>병장</option>
+              </select> </td>
+            <th>병과</th>
+            <td> <input type="text"> </td>
+            <th>비대상</th>
+        </tr>
+
+        <tr>
+            <th colspan="2">복무기간</th>
+            <td colspan="5"> <input type="date">~<input type="date"> </td>
+        </tr>
+    </table>
+    <input type="submit" value="작성완료">
+    <input type="reset" value="재작성">
+<br><br>
+ <a href="index.html">
+    <button type="button">메인으로 가기</button>
+</a>
+
+  </body>   
+</html>

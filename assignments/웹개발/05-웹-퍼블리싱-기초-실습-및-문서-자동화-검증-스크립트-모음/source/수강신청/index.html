@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+    <head>
+       <meta charset="utf-8">
+       <title> 수강신청 </title>
+    </head>
+    <body>
+        <form action="study.jsp" method="post">
+            <fieldset id="subject">
+                <legend>수강과목</legend>
+                <ul>
+                    <li>
+                        <label class="reg" for="sub.j">프로그래밍(초급)</label>
+                        <input type="text" id="sub.j" value="오전 13:00~15:00" readonly>
+                    </li>
+                </ul>
+            </fieldset>
+            <fieldset id="register">
+                <legend> 신청자 </legend>
+                <ul>
+                    <li>
+                        <label class="reg" for="uid">학번</label>
+                        <input type="text" id="uid" placeholder="5자리 숫자로 입력" maxlength="5" required>
+                    </li>
+                    <li>
+                        <label class="reg" for="uname">이름</label>
+                        <input type="text" id="uname" autofocus required>
+                    </li>
+                </ul>
+            </fieldset>
+            <fieldset>
+                <legend> 교재 및 재료 주문 </legend>
+                <ul>
+                    <li>
+                        <label class="reg" for="book"> 교재 </label>
+                        <input type="number" id="book" value="1" min="1" max="3">
+                    </li>
+                    <li>
+                        <label class="reg" for="group"> 재료 </label>
+                        <input type="number" id="group" value="5" min="5" max="50" step="3">
+                    </li>
+                </ul>
+                <button type="submit" value="submit">신청하기</button>
+                <button type="reset" value="reset">재작성</button>
+            </fieldset>
+
+            <select id="class">
+                <optgroup label="공과대학">
+                    <option value="arch" selected>건축공학과</option>
+                    <option value="mech" selected>기계공학과</option>
+                    <option value="elec" selected>전기공학과</option>
+                    <option value="computer" selected>컴퓨터공학과</option>
+                </optgroup>
+                <optgroup label="인문대학">
+                    <option value="korean" selected>국어국문학과</option>
+                    <option value="english" selected>영어영문학과</option>
+                    <option value="history" selected>역사학과</option>
+                </optgroup>
+            </select>
+        </form>
+    </body>

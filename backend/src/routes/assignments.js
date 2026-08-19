@@ -209,7 +209,11 @@ router.post('/', uploadFields, async (req, res) => {
       executionResult: (executionResult || '').trim(),
       executionResultImages,
       favorite: favorite === 'true' || favorite === true,
-      thumbnail: (thumbnail && images.some((i) => i.storedName === thumbnail)) ? thumbnail : (images[0]?.storedName ?? null),
+      // 실행 결과 이미지가 있으면 그게 최우선 대표 이미지 — 일반 이미지는 프레임워크
+      // 기본 아이콘일 수도 있어서, 실제 실행 화면보다 대표성이 떨어진다.
+      thumbnail:
+        executionResultImages[0]?.storedName ??
+        ((thumbnail && images.some((i) => i.storedName === thumbnail)) ? thumbnail : (images[0]?.storedName ?? null)),
       images,
       attachments,
       createdAt: now,
@@ -268,9 +272,13 @@ router.put('/:id', uploadFields, async (req, res) => {
     executionResultImages = executionResultImages.concat(saveFiles(req.files?.executionResultImages, dir, 'images'));
     const sourceFiles = mergeSourceFiles(existing.sourceFiles, saveSourceFiles(req.files?.sourceFiles, dir, sourceFilePaths));
 
-    const resolvedThumbnail = thumbnail && images.some((i) => i.storedName === thumbnail)
-      ? thumbnail
-      : (images.some((i) => i.storedName === existing.thumbnail) ? existing.thumbnail : (images[0]?.storedName ?? null));
+    // 실행 결과 이미지가 있으면 그게 최우선 대표 이미지 — 일반 이미지는 프레임워크
+    // 기본 아이콘일 수도 있어서, 실제 실행 화면보다 대표성이 떨어진다.
+    const resolvedThumbnail =
+      executionResultImages[0]?.storedName ??
+      (thumbnail && images.some((i) => i.storedName === thumbnail)
+        ? thumbnail
+        : (images.some((i) => i.storedName === existing.thumbnail) ? existing.thumbnail : (images[0]?.storedName ?? null)));
 
     const now = new Date().toISOString();
     const meta = {

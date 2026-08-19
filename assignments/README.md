@@ -1,9 +1,10 @@
 # 과제 목록
 
-총 7개 · 과목 6개 · Study Archive에서 자동 생성됨
+총 8개 · 과목 6개 · Study Archive에서 자동 생성됨
 
-## 웹개발 (2)
+## 웹개발 (3)
 
+- **[웹 퍼블리싱 기초 실습 및 문서 자동화 검증 스크립트 모음](./웹개발/05-웹-퍼블리싱-기초-실습-및-문서-자동화-검증-스크립트-모음/)** · 2026-08-19 — `html` `css` `javascript` `python` `웹퍼블리싱`
 - **[Next.js 및 FastAPI 기반 메모 애플리케이션 기초 구축](./웹개발/04-next-js-및-fastapi-기반-메모-애플리케이션-기초-구축/)** · 2026-08-19 — `next.js` `fastapi` `typescript` `python` `sqlite` `tailwindcss`
 - **[나만의 콘텐츠 아카이브 'Moa' 개발 계획서](./웹개발/03-나만의-콘텐츠-아카이브-moa-개발-계획서/)** · 2026-08-14 — `웹개발` `프로젝트기획` `api연동` `localstorage` `javascript`
 

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>School Shop | 온라인 쇼핑몰</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ===== 상단 헤더 ===== -->
+  <header class="header">
+    <div class="header-inner">
+      <a href="#" class="logo" data-target="home">School Shop</a>
+
+      <nav class="nav">
+        <ul>
+          <li><a href="#" class="nav-link active" data-target="home">홈</a></li>
+          <li><a href="#" class="nav-link" data-target="school">학교소개</a></li>
+          <li><a href="#" class="nav-link" data-target="products">상품목록</a></li>
+        </ul>
+      </nav>
+
+      <div class="auth-buttons">
+        <button class="btn btn-outline" id="loginBtn">로그인</button>
+        <button class="btn btn-filled" id="signupBtn">회원가입</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ===== 홈 (메인) 화면 ===== -->
+    <section id="home" class="page active">
+      <div class="slider">
+        <div class="slides" id="slides">
+          <div class="slide slide1">
+            <div class="slide-text">
+              <h2>신학기 맞이 특별 할인</h2>
+              <p>학교 굿즈부터 학용품까지, 지금 만나보세요</p>
+            </div>
+          </div>
+          <div class="slide slide2">
+            <div class="slide-text">
+              <h2>인기 상품 모음전</h2>
+              <p>학생들이 가장 많이 찾는 베스트 아이템</p>
+            </div>
+          </div>
+          <div class="slide slide3">
+            <div class="slide-text">
+              <h2>신상품 입고 안내</h2>
+              <p>이번 주 새롭게 들어온 상품을 확인해보세요</p>
+            </div>
+          </div>
+        </div>
+
+        <button class="slider-btn prev" id="prevBtn">&#10094;</button>
+        <button class="slider-btn next" id="nextBtn">&#10095;</button>
+
+        <div class="slider-dots" id="sliderDots">
+          <span class="dot active" data-index="0"></span>
+          <span class="dot" data-index="1"></span>
+          <span class="dot" data-index="2"></span>
+        </div>
+      </div>
+
+      <div class="intro-section">
+        <h2 class="section-title">School Shop에 오신 것을 환영합니다</h2>
+        <div class="intro-cards">
+          <div class="intro-card">
+            <div class="intro-icon">🚚</div>
+            <h3>빠른 배송</h3>
+            <p>주문 후 1~2일 내 빠르게 배송해드려요</p>
+          </div>
+          <div class="intro-card">
+            <div class="intro-icon">🎓</div>
+            <h3>학교 공식 굿즈</h3>
+            <p>학교와 함께 만든 정품 상품만 판매합니다</p>
+          </div>
+          <div class="intro-card">
+            <div class="intro-icon">💳</div>
+            <h3>간편 결제</h3>
+            <p>다양한 결제 수단으로 편리하게 구매하세요</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 학교소개 화면 ===== -->
+    <section id="school" class="page">
+      <div class="content-wrap">
+        <h2 class="section-title">학교소개</h2>
+        <p class="school-desc">
+          저희 학교는 학생 중심의 교육 환경을 바탕으로 창의적이고 도전적인 인재를 양성하고 있습니다.
+          다양한 동아리 활동과 교류 프로그램을 통해 학생들이 마음껏 꿈을 펼칠 수 있도록 지원하며,
+          School Shop은 이러한 학교 생활을 더욱 풍성하게 만들어줄 공식 상품을 판매하는 온라인 쇼핑몰입니다.
+        </p>
+      </div>
+    </section>
+
+    <!-- ===== 상품목록 화면 ===== -->
+    <section id="products" class="page">
+      <div class="product-layout">
+        <div class="product-main">
+          <h2 class="section-title">상품목록</h2>
+          <div class="product-grid" id="productGrid"></div>
+        </div>
+
+        <!-- 장바구니 패널 -->
+        <aside class="cart-panel">
+          <h3 class="cart-title">🛒 장바구니</h3>
+          <ul class="cart-list" id="cartList">
+            <li class="cart-empty" id="cartEmpty">담은 상품이 없습니다.</li>
+          </ul>
+          <div class="cart-summary">
+            <div class="cart-total-row">
+              <span>총 수량</span>
+              <span id="cartTotalQty">0</span>
+            </div>
+            <div class="cart-total-row cart-total-price">
+              <span>총 금액</span>
+              <span><span id="cartTotalPrice">0</span>원</span>
+            </div>
+            <button class="btn btn-filled cart-order-btn">주문하기</button>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>&copy; 2026 School Shop. All rights reserved.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
