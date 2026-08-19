@@ -1,6 +1,6 @@
 # 과제 목록
 
-총 5개 · 과목 4개 · Study Archive에서 자동 생성됨
+총 6개 · 과목 5개 · Study Archive에서 자동 생성됨
 
 ## 웹개발 (2)
 
@@ -14,6 +14,10 @@
 ## Python (1)
 
 - **[파이썬 기초 문법 및 제어문·2차원 배열 실습](./python/02-파이썬-기초-문법-및-제어문-2차원-배열-실습/)** · 2026-08-14 — `python` `기초문법` `제어문` `리스트` `반복문`
+
+## Python / REST API (1)
+
+- **[Open-Meteo API 활용 날씨 및 대기질 조회 외출 판정 스크립트, 손코딩 vs ai 활용 코드 분석](./python-rest-api/01-open-meteo-api-활용-날씨-및-대기질-조회-외출-판정-스크립트-손코딩-vs-ai-활용-코드-분석/)** · 2026-08-19 — `python` `requests` `open-meteo` `api` `multithreading`
 
 ## React / TypeScript (1)
 
