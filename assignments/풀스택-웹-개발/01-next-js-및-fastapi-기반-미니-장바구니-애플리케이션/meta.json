@@ -1,0 +1,365 @@
+{
+  "id": "풀스택-웹-개발-01-next-js-및-fastapi-기반-미니-장바구니-애플리케이션",
+  "subjectSlug": "풀스택-웹-개발",
+  "leaf": "01-next-js-및-fastapi-기반-미니-장바구니-애플리케이션",
+  "title": "Next.js 및 FastAPI 기반 미니 장바구니 애플리케이션",
+  "subject": "풀스택 웹 개발",
+  "date": "2026-08-19",
+  "description": "Next.js 프론트엔드와 FastAPI 백엔드, SQLite 데이터베이스를 연동하여 구축한 미니 쇼핑몰 장바구니 프로젝트입니다. 백엔드에서는 Pydantic을 활용한 데이터 검증과 SQLite를 통한 상품 및 장바구니 영속성을 관리하며, 중복 상품 추가 시 수량 자동 증가와 수량 변경, 장바구니 전체 비우기와 같은 REST API 엔드포인트를 제공합니다. 프론트엔드에서는 React의 상태 관리 및 비동기 Fetch API를 활용하여 상품 목록과 장바구니 데이터를 실시간으로 동기화하고 총 결제 금액을 자동 계산합니다. Tailwind CSS를 활용해 반응형 UI를 구성하고 개발 서버 및 백엔드 로그 확인까지 포함된 풀스택 실습 과제입니다.",
+  "tags": [
+    "next.js",
+    "fastapi",
+    "sqlite",
+    "react",
+    "python",
+    "typescript"
+  ],
+  "codeBlocks": [
+    {
+      "language": "javascript",
+      "code": "import { defineConfig, globalIgnores } from \"eslint/config\";\nimport nextVitals from \"eslint-config-next/core-web-vitals\";\nimport nextTs from \"eslint-config-next/typescript\";\n\nconst eslintConfig = defineConfig([\n  ...nextVitals,\n  ...nextTs,\n  // Override default ignores of eslint-config-next.\n  globalIgnores([\n    // Default ignores of eslint-config-next:\n    \".next/**\",\n    \"out/**\",\n    \"build/**\",\n    \"next-env.d.ts\",\n  ]),\n]);\n\nexport default eslintConfig;",
+      "filename": "frontend/eslint.config.mjs",
+      "description": "Next.js 및 TypeScript 프로젝트의 코드 스타일과 품질 검사를 위해 ESLint 규칙 및 예외 경로를 설정한 파일입니다."
+    },
+    {
+      "language": "typescript",
+      "code": "/// <reference types=\"next\" />\n/// <reference types=\"next/image-types/global\" />\nimport \"./.next/dev/types/routes.d.ts\";\nimport \"./.next/dev/types/root-params.d.ts\";\n\n// NOTE: This file should not be edited\n// see https://nextjs.org/docs/app/api-reference/config/typescript for more information.",
+      "filename": "frontend/next-env.d.ts",
+      "description": "Next.js 타입 스크립트 지원을 위한 전역 타입 선언 및 개발용 경로 참조 파일입니다."
+    },
+    {
+      "language": "typescript",
+      "code": "import type { NextConfig } from \"next\";\n\nconst nextConfig: NextConfig = {\n  /* config options here */\n};\n\nexport default nextConfig;",
+      "filename": "frontend/next.config.ts",
+      "description": "Next.js 프레임워크의 빌드 및 사용자 정의 설정을 정의하기 위한 TypeScript 세팅 파일입니다."
+    },
+    {
+      "language": "json",
+      "code": "{\n  \"name\": \"frontend\",\n  \"version\": \"0.1.0\",\n  \"private\": true,\n  \"scripts\": {\n    \"dev\": \"next dev\",\n    \"build\": \"next build\",\n    \"start\": \"next start\",\n    \"lint\": \"eslint\"\n  },\n  \"dependencies\": {\n    \"next\": \"16.3.1\",\n    \"react\": \"19.2.8\",\n    \"react-dom\": \"19.2.8\"\n  },\n  \"devDependencies\": {\n    \"@tailwindcss/postcss\": \"^4\",\n    \"@types/node\": \"^20\",\n    \"@types/react\": \"^19\",\n    \"@types/react-dom\": \"^19\",\n    \"eslint\": \"^9\",\n    \"eslint-config-next\": \"16.3.1\",\n    \"tailwindcss\": \"^4\",\n    \"typescript\": \"^5\"\n  }\n}",
+      "filename": "frontend/package.json",
+      "description": "프론트엔드 애플리케이션의 패키지명, 버전을 비롯해 Next.js, React, Tailwind CSS 등의 의존성 및 스크립트를 정의한 구성 파일입니다."
+    },
+    {
+      "language": "javascript",
+      "code": "const config = {\n  plugins: {\n    \"@tailwindcss/postcss\": {},\n  },\n};\n\nexport default config;",
+      "filename": "frontend/postcss.config.mjs",
+      "description": "Tailwind CSS 스타일링 처리를 위해 PostCSS 플러그인 모듈을 등록한 구성 파일입니다."
+    },
+    {
+      "language": "json",
+      "code": "{\n  \"compilerOptions\": {\n    \"target\": \"ES2017\",\n    \"lib\": [\"dom\", \"dom.iterable\", \"esnext\"],\n    \"allowJs\": true,\n    \"skipLibCheck\": true,\n    \"strict\": true,\n    \"noEmit\": true,\n    \"esModuleInterop\": true,\n    \"module\": \"esnext\",\n    \"moduleResolution\": \"bundler\",\n    \"resolveJsonModule\": true,\n    \"isolatedModules\": true,\n    \"jsx\": \"react-jsx\",\n    \"incremental\": true,\n    \"plugins\": [\n      {\n        \"name\": \"next\"\n      }\n    ],\n    \"paths\": {\n      \"@/*\": [\"./*\"]\n    }\n  },\n  \"include\": [\n    \"next-env.d.ts\",\n    \"**/*.ts\",\n    \"**/*.tsx\",\n    \".next/types/**/*.ts\",\n    \".next/dev/types/**/*.ts\",\n    \"**/*.mts\"\n  ],\n  \"exclude\": [\"node_modules\"]\n}",
+      "filename": "frontend/tsconfig.json",
+      "description": "TypeScript 컴파일러의 경로 별칭(@/*), 모듈 해석 방식, strict 모드 등의 옵션을 설정한 파일입니다."
+    },
+    {
+      "language": "css",
+      "code": "@import \"tailwindcss\";\n\n:root {\n  --background: #ffffff;\n  --foreground: #171717;\n}\n\n@theme inline {\n  --color-background: var(--background);\n  --color-foreground: var(--foreground);\n  --font-sans: var(--font-geist-sans);\n  --font-mono: var(--font-geist-mono);\n}\n\n@media (prefers-color-scheme: dark) {\n  :root {\n    --background: #0a0a0a;\n    --foreground: #ededed;\n  }\n}\n\nbody {\n  background: var(--background);\n  color: var(--foreground);\n  font-family: Arial, Helvetica, sans-serif;\n}",
+      "filename": "frontend/app/globals.css",
+      "description": "Tailwind CSS 가져오기 선언 및 라이트/다크 모드 변수와 기본 테마 설정을 담고 있는 전역 CSS 스타일시트입니다."
+    },
+    {
+      "language": "typescript",
+      "code": "import type { Metadata } from \"next\";\nimport { Geist, Geist_Mono } from \"next/font/google\";\nimport \"./globals.css\";\n\nconst geistSans = Geist({\n  variable: \"--font-geist-sans\",\n  subsets: [\"latin\"],\n});\n\nconst geistMono = Geist_Mono({\n  variable: \"--font-geist-mono\",\n  subsets: [\"latin\"],\n});\n\nexport const metadata: Metadata = {\n  title: \"미니 쇼핑몰\",\n  description: \"Next.js + FastAPI + SQLite 미니 장바구니 실습\",\n};\n\nexport default function RootLayout({ children }: LayoutProps<\"/\">) {\n  return (\n    <html\n      lang=\"en\"\n      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}\n    >\n      <body className=\"min-h-full flex flex-col\">{children}</body>\n    </html>\n  );\n}",
+      "filename": "frontend/app/layout.tsx",
+      "description": "Google Geist 폰트를 적용하고 페이지 공통 HTML 구조 및 메타데이터를 정의하는 루트 레이아웃 컴포넌트입니다."
+    },
+    {
+      "language": "typescript",
+      "code": "\"use client\";\n\nimport { useEffect, useState, useCallback } from \"react\";\n\nconst API_URL = process.env.NEXT_PUBLIC_API_URL || \"http://localhost:8000\";\n\ntype Product = {\n  id: number;\n  name: string;\n  price: number;\n};\n\ntype CartItem = {\n  id: number;\n  product_id: number;\n  name: string;\n  price: number;\n  quantity: number;\n};\n\nfunction formatWon(value: number) {\n  return value.toLocaleString(\"ko-KR\") + \"원\";\n}\n\nexport default function Home() {\n  const [products, setProducts] = useState<Product[]>([]);\n  const [cart, setCart] = useState<CartItem[]>([]);\n  const [loading, setLoading] = useState(true);\n  const [error, setError] = useState<string | null>(null);\n\n  const loadProducts = useCallback(async () => {\n    const res = await fetch(`${API_URL}/products`);\n    if (!res.ok) throw new Error(\"상품 목록을 불러오지 못했습니다.\");\n    setProducts(await res.json());\n  }, []);\n\n  const loadCart = useCallback(async () => {\n    const res = await fetch(`${API_URL}/cart`);\n    if (!res.ok) throw new Error(\"장바구니를 불러오지 못했습니다.\");\n    setCart(await res.json());\n  }, []);\n\n  useEffect(() => {\n    (async () => {\n      try {\n        await Promise.all([loadProducts(), loadCart()]);\n      } catch (e) {\n        setError(e instanceof Error ? e.message : \"알 수 없는 오류가 발생했습니다.\");\n      } finally {\n        setLoading(false);\n      }\n    })();\n  }, [loadProducts, loadCart]);\n\n  async function handleAddToCart(productId: number) {\n    try {\n      const res = await fetch(`${API_URL}/cart`, {\n        method: \"POST\",\n        headers: { \"Content-Type\": \"application/json\" },\n        body: JSON.stringify({ product_id: productId, quantity: 1 }),\n      });\n      if (!res.ok) throw new Error(\"장바구니 추가에 실패했습니다.\");\n      await loadCart();\n    } catch (e) {\n      setError(e instanceof Error ? e.message : \"알 수 없는 오류가 발생했습니다.\");\n    }\n  }\n\n  async function handleDelete(cartId: number) {\n    try {\n      const res = await fetch(`${API_URL}/cart/${cartId}`, { method: \"DELETE\" });\n      if (!res.ok) throw new Error(\"삭제에 실패했습니다.\");\n      await loadCart();\n    } catch (e) {\n      setError(e instanceof Error ? e.message : \"알 수 없는 오류가 발생했습니다.\");\n    }\n  }\n\n  async function handleQuantityChange(cartId: number, nextQuantity: number) {\n    if (nextQuantity < 1) return;\n    try {\n      const res = await fetch(`${API_URL}/cart/${cartId}`, {\n        method: \"PATCH\",\n        headers: { \"Content-Type\": \"application/json\" },\n        body: JSON.stringify({ quantity: nextQuantity }),\n      });\n      if (!res.ok) throw new Error(\"수량 변경에 실패했습니다.\");\n      await loadCart();\n    } catch (e) {\n      setError(e instanceof Error ? e.message : \"알 수 없는 오류가 발생했습니다.\");\n    }\n  }\n\n  async function handleClearCart() {\n    try {\n      const res = await fetch(`${API_URL}/cart/clear`, { method: \"DELETE\" });\n      if (!res.ok) throw new Error(\"장바구니 비우기에 실패했습니다.\");\n      await loadCart();\n    } catch (e) {\n      setError(e instanceof Error ? e.message : \"알 수 없는 오류가 발생했습니다.\");\n    }\n  }\n\n  const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);\n\n  return (\n    <div className=\"min-h-screen bg-slate-100 py-10 px-4\">\n      <div className=\"mx-auto max-w-2xl space-y-6\">\n        <h1 className=\"text-center text-3xl font-bold text-slate-800\">\n          🛒 미니 쇼핑몰\n        </h1>\n\n        {error && (\n          <div className=\"rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700\">\n            {error}\n          </div>\n        )}\n\n        {loading ? (\n          <p className=\"text-center text-slate-500\">불러오는 중...</p>\n        ) : (\n          <>\n            {/* 상품 목록 */}\n            <section className=\"rounded-xl bg-white p-6 shadow-sm\">\n              <h2 className=\"mb-4 text-lg font-semibold text-slate-700\">\n                상품 목록\n              </h2>\n              <ul className=\"divide-y divide-slate-100\">\n                {products.map((product) => (\n                  <li\n                    key={product.id}\n                    className=\"flex items-center justify-between py-3\"\n                  >\n                    <span className=\"font-medium text-slate-800\">\n                      {product.name}\n                    </span>\n                    <div className=\"flex items-center gap-4\">\n                      <span className=\"text-slate-600\">\n                        {formatWon(product.price)}\n                      </span>\n                      <button\n                        onClick={() => handleAddToCart(product.id)}\n                        className=\"rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700\"\n                      >\n                        장바구니 담기\n                      </button>\n                    </div>\n                  </li>\n                ))}\n              </ul>\n            </section>\n\n            {/* 장바구니 */}\n            <section className=\"rounded-xl bg-white p-6 shadow-sm\">\n              <div className=\"mb-4 flex items-center justify-between\">\n                <h2 className=\"text-lg font-semibold text-slate-700\">\n                  장바구니\n                </h2>\n                {cart.length > 0 && (\n                  <button\n                    onClick={handleClearCart}\n                    className=\"rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-50\"\n                  >\n                    장바구니 비우기\n                  </button>\n                )}\n              </div>\n\n              {cart.length === 0 ? (\n                <p className=\"py-6 text-center text-slate-400\">\n                  장바구니가 비어 있습니다.\n                </p>\n              ) : (\n                <ul className=\"divide-y divide-slate-100\">\n                  {cart.map((item) => (\n                    <li\n                      key={item.id}\n                      className=\"flex flex-wrap items-center justify-between gap-2 py-3\"\n                    >\n                      <span className=\"font-medium text-slate-800\">\n                        {item.name}\n                      </span>\n                      <span className=\"text-slate-600\">\n                        {formatWon(item.price)}\n                      </span>\n                      <div className=\"flex items-center gap-2\">\n                        <button\n                          onClick={() =>\n                            handleQuantityChange(item.id, item.quantity - 1)\n                          }\n                          className=\"h-7 w-7 rounded border border-slate-300 text-slate-600 hover:bg-slate-50\"\n                        >\n                          −\n                        </button>\n                        <span className=\"w-6 text-center\">\n                          {item.quantity}\n                        </span>\n                        <button\n                          onClick={() =>\n                            handleQuantityChange(item.id, item.quantity + 1)\n                          }\n                          className=\"h-7 w-7 rounded border border-slate-300 text-slate-600 hover:bg-slate-50\"\n                        >\n                          +\n                        </button>\n                      </div>\n                      <button\n                        onClick={() => handleDelete(item.id)}\n                        className=\"rounded-lg bg-red-50 px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-100\"\n                      >\n                        삭제\n                      </button>\n                    </li>\n                  ))}\n                </ul>\n              )}\n\n              <div className=\"mt-4 border-t border-slate-200 pt-4 text-right text-lg font-semibold text-slate-800\">\n                총 상품 금액: {formatWon(totalPrice)}\n              </div>\n            </section>\n          </>\n        )}\n      </div>\n    </div>\n  );\n}",
+      "filename": "frontend/app/page.tsx",
+      "description": "상품 목록 및 장바구니 조회, 장바구니 담기, 수량 조절, 삭제, 전체 비우기 등의 인터랙션과 총금액 계산 로직을 담은 메인 페이지 컴포넌트입니다."
+    },
+    {
+      "language": "python",
+      "code": "import sqlite3\nfrom pathlib import Path\n\nDB_PATH = Path(__file__).parent / \"shop.db\"\n\n# 초기 상품 데이터 (실습 PDF 기준)\nINITIAL_PRODUCTS = [\n    (\"노트북\", 1_200_000),\n    (\"키보드\", 80_000),\n    (\"마우스\", 40_000),\n    (\"헤드셋\", 100_000),\n]\n\n\ndef get_connection():\n    conn = sqlite3.connect(DB_PATH)\n    conn.row_factory = sqlite3.Row\n    return conn\n\n\ndef init_db():\n    conn = get_connection()\n    cur = conn.cursor()\n\n    # products 테이블\n    cur.execute(\n        \"\"\"\n        CREATE TABLE IF NOT EXISTS products (\n            id INTEGER PRIMARY KEY AUTOINCREMENT,\n            name TEXT NOT NULL,\n            price INTEGER NOT NULL\n        )\n        \"\"\"\n    )\n\n    # cart 테이블\n    cur.execute(\n        \"\"\"\n        CREATE TABLE IF NOT EXISTS cart (\n            id INTEGER PRIMARY KEY AUTOINCREMENT,\n            product_id INTEGER NOT NULL,\n            quantity INTEGER NOT NULL DEFAULT 1,\n            FOREIGN KEY (product_id) REFERENCES products (id)\n        )\n        \"\"\"\n    )\n\n    # 상품이 비어있으면 초기 데이터 삽입\n    cur.execute(\"SELECT COUNT(*) FROM products\")\n    count = cur.fetchone()[0]\n    if count == 0:\n        cur.executemany(\n            \"INSERT INTO products (name, price) VALUES (?, ?)\", INITIAL_PRODUCTS\n        )\n\n    conn.commit()\n    conn.close()",
+      "filename": "backend/database.py",
+      "description": "SQLite DB 연결 관리, products 및 cart 테이블 생성, 초기 상품 데이터 시딩(노트북, 키보드 등)을 수행하는 데이터베이스 모듈입니다."
+    },
+    {
+      "language": "python",
+      "code": "from fastapi import FastAPI, HTTPException\nfrom fastapi.middleware.cors import CORSMiddleware\nfrom pydantic import BaseModel\n\nfrom database import get_connection, init_db\n\napp = FastAPI(title=\"미니 장바구니 API\")\n\n# Next.js(개발 서버, 기본 3000번 포트)에서의 요청을 허용\napp.add_middleware(\n    CORSMiddleware,\n    allow_origins=[\"*\"],\n    allow_credentials=True,\n    allow_methods=[\"*\"],\n    allow_headers=[\"*\"],\n)\n\n\n@app.on_event(\"startup\")\ndef on_startup():\n    init_db()\n\n\n# ---------- 요청 바디 스키마 ----------\nclass CartAddRequest(BaseModel):\n    product_id: int\n    quantity: int = 1\n\n\nclass CartUpdateRequest(BaseModel):\n    quantity: int\n\n\n# ---------- 상품 목록 ----------\n@app.get(\"/products\")\ndef get_products():\n    conn = get_connection()\n    rows = conn.execute(\"SELECT id, name, price FROM products\").fetchall()\n    conn.close()\n    return [dict(row) for row in rows]\n\n\n# ---------- 장바구니 조회 ----------\n@app.get(\"/cart\")\ndef get_cart():\n    conn = get_connection()\n    rows = conn.execute(\n        \"\"\"\n        SELECT cart.id AS id,\n               products.id AS product_id,\n               products.name AS name,\n               products.price AS price,\n               cart.quantity AS quantity\n        FROM cart\n        JOIN products ON cart.product_id = products.id\n        ORDER BY cart.id\n        \"\"\"\n    ).fetchall()\n    conn.close()\n    return [dict(row) for row in rows]\n\n\n# ---------- 장바구니에 상품 추가 ----------\n@app.post(\"/cart\")\ndef add_to_cart(item: CartAddRequest):\n    conn = get_connection()\n    cur = conn.cursor()\n\n    # 상품 존재 확인\n    product = cur.execute(\n        \"SELECT id FROM products WHERE id = ?\", (item.product_id,)\n    ).fetchone()\n    if product is None:\n        conn.close()\n        raise HTTPException(status_code=404, detail=\"상품을 찾을 수 없습니다.\")\n\n    # 도전과제 Lv.2: 이미 장바구니에 있는 상품이면 수량만 증가\n    existing = cur.execute(\n        \"SELECT id, quantity FROM cart WHERE product_id = ?\", (item.product_id,)\n    ).fetchone()\n\n    if existing:\n        cur.execute(\n            \"UPDATE cart SET quantity = quantity + ? WHERE id = ?\",\n            (item.quantity, existing[\"id\"]),\n        )\n    else:\n        cur.execute(\n            \"INSERT INTO cart (product_id, quantity) VALUES (?, ?)\",\n            (item.product_id, item.quantity),\n        )\n\n    conn.commit()\n    conn.close()\n    return {\"message\": \"장바구니에 추가되었습니다.\"}\n\n\n# ---------- 장바구니 상품 수량 변경 (도전과제 Lv.1) ----------\n@app.patch(\"/cart/{cart_id}\")\ndef update_cart_item(cart_id: int, item: CartUpdateRequest):\n    if item.quantity < 1:\n        raise HTTPException(status_code=400, detail=\"수량은 1 이상이어야 합니다.\")\n\n    conn = get_connection()\n    cur = conn.cursor()\n    existing = cur.execute(\"SELECT id FROM cart WHERE id = ?\", (cart_id,)).fetchone()\n    if existing is None:\n        conn.close()\n        raise HTTPException(status_code=404, detail=\"장바구니 항목을 찾을 수 없습니다.\")\n\n    cur.execute(\"UPDATE cart SET quantity = ? WHERE id = ?\", (item.quantity, cart_id))\n    conn.commit()\n    conn.close()\n    return {\"message\": \"수량이 변경되었습니다.\"}\n\n\n# ---------- 장바구니 비우기 (도전과제 Lv.3) ----------\n@app.delete(\"/cart/clear\")\ndef clear_cart():\n    conn = get_connection()\n    conn.execute(\"DELETE FROM cart\")\n    conn.commit()\n    conn.close()\n    return {\"message\": \"장바구니를 비웠습니다.\"}\n\n\n# ---------- 장바구니 상품 삭제 ----------\n@app.delete(\"/cart/{cart_id}\")\ndef delete_cart_item(cart_id: int):\n    conn = get_connection()\n    cur = conn.cursor()\n    existing = cur.execute(\"SELECT id FROM cart WHERE id = ?\", (cart_id,)).fetchone()\n    if existing is None:\n        conn.close()\n        raise HTTPException(status_code=404, detail=\"장바구니 항목을 찾을 수 없습니다.\")\n\n    cur.execute(\"DELETE FROM cart WHERE id = ?\", (cart_id,))\n    conn.commit()\n    conn.close()\n    return {\"message\": \"삭제되었습니다.\"}",
+      "filename": "backend/main.py",
+      "description": "FastAPI 애플리케이션 정의, CORS 설정, 데이터 요청 Pydantic 모델 및 상품/장바구니 관련 CRUD REST API 라우터가 포함된 메인 파일입니다."
+    }
+  ],
+  "codeFiles": [
+    {
+      "filename": "eslint.config.mjs",
+      "storedName": "1787121038465-666839191.mjs",
+      "size": 465
+    },
+    {
+      "filename": "next-env.d.ts",
+      "storedName": "1787121038466-17921276.ts",
+      "size": 296
+    },
+    {
+      "filename": "next.config.ts",
+      "storedName": "1787121038466-765409044.ts",
+      "size": 133
+    },
+    {
+      "filename": "package.json",
+      "storedName": "1787121038468-402772024.json",
+      "size": 531
+    },
+    {
+      "filename": "postcss.config.mjs",
+      "storedName": "1787121038468-727336421.mjs",
+      "size": 94
+    },
+    {
+      "filename": "tsconfig.json",
+      "storedName": "1787121038469-314702338.json",
+      "size": 666
+    },
+    {
+      "filename": "globals.css",
+      "storedName": "1787121038470-455909445.css",
+      "size": 488
+    },
+    {
+      "filename": "layout.tsx",
+      "storedName": "1787121038470-435890710.tsx",
+      "size": 716
+    },
+    {
+      "filename": "page.tsx",
+      "storedName": "1787121038471-409152085.tsx",
+      "size": 8136
+    },
+    {
+      "filename": "database.py",
+      "storedName": "1787121038472-60184006.py",
+      "size": 1323
+    },
+    {
+      "filename": "main.py",
+      "storedName": "1787121038473-72768624.py",
+      "size": 4097
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "README.md",
+      "size": 1880
+    },
+    {
+      "path": "frontend/.env.local",
+      "size": 42
+    },
+    {
+      "path": "frontend/.gitignore",
+      "size": 480
+    },
+    {
+      "path": "frontend/AGENTS.md",
+      "size": 678
+    },
+    {
+      "path": "frontend/CLAUDE.md",
+      "size": 11
+    },
+    {
+      "path": "frontend/devserver.log",
+      "size": 1108
+    },
+    {
+      "path": "frontend/eslint.config.mjs",
+      "size": 465
+    },
+    {
+      "path": "frontend/next-env.d.ts",
+      "size": 296
+    },
+    {
+      "path": "frontend/next.config.ts",
+      "size": 133
+    },
+    {
+      "path": "frontend/package.json",
+      "size": 531
+    },
+    {
+      "path": "frontend/postcss.config.mjs",
+      "size": 94
+    },
+    {
+      "path": "frontend/README.md",
+      "size": 1450
+    },
+    {
+      "path": "frontend/tsconfig.json",
+      "size": 666
+    },
+    {
+      "path": "frontend/public/file.svg",
+      "size": 391
+    },
+    {
+      "path": "frontend/public/globe.svg",
+      "size": 1035
+    },
+    {
+      "path": "frontend/public/next.svg",
+      "size": 1375
+    },
+    {
+      "path": "frontend/public/vercel.svg",
+      "size": 128
+    },
+    {
+      "path": "frontend/public/window.svg",
+      "size": 385
+    },
+    {
+      "path": "frontend/app/favicon.ico",
+      "size": 25931
+    },
+    {
+      "path": "frontend/app/globals.css",
+      "size": 488
+    },
+    {
+      "path": "frontend/app/layout.tsx",
+      "size": 716
+    },
+    {
+      "path": "frontend/app/page.tsx",
+      "size": 8136
+    },
+    {
+      "path": "backend/.gitignore",
+      "size": 45
+    },
+    {
+      "path": "backend/database.py",
+      "size": 1323
+    },
+    {
+      "path": "backend/main.py",
+      "size": 4097
+    },
+    {
+      "path": "backend/requirements.txt",
+      "size": 60
+    },
+    {
+      "path": "backend/shop.db",
+      "size": 16384
+    },
+    {
+      "path": "backend/uvicorn.log",
+      "size": 7693
+    }
+  ],
+  "learnings": "Next.js 클라이언트 컴포넌트에서 비동기 fetch를 통해 FastAPI REST API를 호출하고 데이터를 상태로 관리하여 실시간 연동하는 방법을 배웠습니다. 또한 SQLite와 FastAPI를 연동하여 CRUD 로직을 작성하고 CORS 미들웨어 구성 및 데이터베이스 초기 시딩 방식을 학습했습니다.",
+  "difficulties": "프론트엔드와 백엔드 서버 간의 포트 번호 충돌을 해결하고 CORS 설정을 맞추는 과정에 신경을 써야 했습니다. 또한 장바구니 담기 시 기존 상품 유무에 따라 수량을 업데이트할지 새로 추가할지 분기 처리하는 백엔드 SQL 로직 구현에 주의가 필요했습니다.",
+  "executionResult": "Next.js 및 FastAPI 실행 후 http://localhost:3000 접속 시 초기 상품 4종(노트북, 키보드, 마우스, 헤드셋) 목록이 노출되며, [장바구니 담기] 클릭 시 장바구니 목록에 추가되고 수량 조절 및 삭제에 따라 총 금액이 즉시 재계산되어 표시됩니다.",
+  "executionResultImages": [
+    {
+      "filename": "screenshot-root-1787121034798.png",
+      "storedName": "1787121038474-153279690.png",
+      "size": 21215
+    }
+  ],
+  "favorite": false,
+  "thumbnail": "1787121038451-596885455.svg",
+  "images": [
+    {
+      "filename": "file.svg",
+      "storedName": "1787121038451-596885455.svg",
+      "size": 391
+    },
+    {
+      "filename": "globe.svg",
+      "storedName": "1787121038452-417641072.svg",
+      "size": 1035
+    },
+    {
+      "filename": "next.svg",
+      "storedName": "1787121038453-481344645.svg",
+      "size": 1375
+    },
+    {
+      "filename": "vercel.svg",
+      "storedName": "1787121038454-150007035.svg",
+      "size": 128
+    },
+    {
+      "filename": "window.svg",
+      "storedName": "1787121038455-780817581.svg",
+      "size": 385
+    },
+    {
+      "filename": "favicon.ico",
+      "storedName": "1787121038455-21851765.ico",
+      "size": 25931
+    }
+  ],
+  "attachments": [
+    {
+      "filename": "README.md",
+      "storedName": "1787121038456-377895550.md",
+      "size": 1880
+    },
+    {
+      "filename": ".env.local",
+      "storedName": "1787121038457-801987965.local",
+      "size": 42
+    },
+    {
+      "filename": ".gitignore",
+      "storedName": "1787121038458-593391088",
+      "size": 480
+    },
+    {
+      "filename": "AGENTS.md",
+      "storedName": "1787121038459-491166371.md",
+      "size": 678
+    },
+    {
+      "filename": "CLAUDE.md",
+      "storedName": "1787121038460-557813095.md",
+      "size": 11
+    },
+    {
+      "filename": "devserver.log",
+      "storedName": "1787121038460-444461645.log",
+      "size": 1108
+    },
+    {
+      "filename": "README.md",
+      "storedName": "1787121038461-650826257.md",
+      "size": 1450
+    },
+    {
+      "filename": ".gitignore",
+      "storedName": "1787121038462-795575632",
+      "size": 45
+    },
+    {
+      "filename": "requirements.txt",
+      "storedName": "1787121038463-919172946.txt",
+      "size": 60
+    },
+    {
+      "filename": "shop.db",
+      "storedName": "1787121038464-26964801.db",
+      "size": 16384
+    },
+    {
+      "filename": "uvicorn.log",
+      "storedName": "1787121038464-242503622.log",
+      "size": 7693
+    }
+  ],
+  "createdAt": "2026-08-19T06:30:38.500Z",
+  "updatedAt": "2026-08-19T06:30:38.500Z",
+  "github": {
+    "status": "pending",
+    "url": null,
+    "lastSyncedAt": null,
+    "lastError": null
+  }
+}
