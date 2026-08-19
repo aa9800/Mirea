@@ -2,7 +2,7 @@
   "id": "11-임시테스트-삭제예정",
   "leaf": "11-임시테스트-삭제예정",
   "title": "__임시테스트_삭제예정__",
-  "subject": "임시과목A",
+  "subject": "완전히다른과목B",
   "date": "2026-08-19",
   "description": "구조변경 검증용 임시 과제",
   "tags": [],
@@ -18,11 +18,11 @@
   "images": [],
   "attachments": [],
   "createdAt": "2026-08-19T07:39:41.464Z",
-  "updatedAt": "2026-08-19T07:39:41.464Z",
+  "updatedAt": "2026-08-19T07:39:49.305Z",
   "github": {
     "status": "pending",
-    "url": null,
-    "lastSyncedAt": null,
+    "url": "https://github.com/aa9800/Mirea/tree/main/assignments/11-임시테스트-삭제예정",
+    "lastSyncedAt": "2026-08-19T07:39:44.108Z",
     "lastError": null
   }
 }
