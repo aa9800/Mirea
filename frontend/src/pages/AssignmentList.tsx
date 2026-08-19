@@ -48,9 +48,10 @@ export default function AssignmentList() {
 
   return (
     <div className="assignment-list">
-      <div className="section-header">
-        <h2>전체 과제</h2>
-      </div>
+      <header className="page-heading">
+        <div><span className="eyebrow">LIBRARY</span><h1>전체 학습 기록</h1><p>지금까지 쌓아온 과제와 프로젝트를 찾아보세요.</p></div>
+        <span className="page-heading__count">{items.length}<small>개의 기록</small></span>
+      </header>
 
       <div className="filters">
         <SearchBar value={q} onChange={setQ} />

@@ -536,21 +536,16 @@ export default function AssignmentForm({ mode }: Props) {
     setNewExecutionImages((prev) => prev.filter((_, i) => i !== index));
   }
 
-  // 로컬 프로젝트 폴더를 실제로 실행(npm install/run dev)해서 화면을 스크린샷 찍어온다.
+  // 로컬 프로젝트를 실제로 실행(npm install/run dev)해서 화면을 스크린샷 찍어온다.
   // 노트북과 달리 일반 소스코드 폴더에는 "실행하면 이렇게 보인다"는 이미지가 어디에도
   // 저장돼있지 않아서, 직접 실행해서 찍는 방법밖에 없다 — 그래서 시간이 꽤 걸릴 수 있다
-  // (의존성 설치 + 서버 기동 + 촬영). 브라우저는 폴더 선택으로 절대 경로를 안 주기 때문에
-  // 이 기능만 예외적으로 경로를 직접 입력받는다.
-  async function handleCaptureScreenshot() {
-    if (!screenshotPath.trim()) {
-      setScreenshotError('프로젝트 폴더의 전체 경로를 입력해주세요 (예: C:\\Users\\me\\my-app).');
-      return;
-    }
+  // (의존성 설치 + 서버 기동 + 촬영).
+  async function runScreenshot(target: { projectPath: string } | { assignmentId: string }) {
     setScreenshotError(null);
     setScreenshotNotice(null);
     setScreenshotLoading(true);
     try {
-      const { images, failed } = await captureScreenshot(screenshotPath.trim());
+      const { images, failed } = await captureScreenshot(target);
       if (images.length === 0) {
         setScreenshotError('스크린샷을 하나도 찍지 못했습니다.');
         return;
@@ -572,6 +567,23 @@ export default function AssignmentForm({ mode }: Props) {
     } finally {
       setScreenshotLoading(false);
     }
+  }
+
+  // 브라우저는 폴더 선택으로 절대 경로를 안 주기 때문에, 새 프로젝트를 찍으려면
+  // 여전히 경로를 직접 입력받아야 한다.
+  function handleCaptureScreenshot() {
+    if (!screenshotPath.trim()) {
+      setScreenshotError('프로젝트 폴더의 전체 경로를 입력해주세요 (예: C:\\Users\\me\\my-app).');
+      return;
+    }
+    runScreenshot({ projectPath: screenshotPath.trim() });
+  }
+
+  // 이미 "폴더로 분석"으로 저장된 과제라면 원본이 source/ 밑에 서버 디스크에 그대로
+  // 있으므로, 경로 입력 없이 이 과제 자신을 대상으로 바로 찍을 수 있다.
+  function handleCaptureScreenshotFromSource() {
+    if (!assignmentId) return;
+    runScreenshot({ assignmentId });
   }
 
   // Ctrl+V로 클립보드의 이미지를 붙여넣을 수 있도록, 폼이 떠 있는 동안 전역으로 감지한다.
@@ -641,8 +653,11 @@ export default function AssignmentForm({ mode }: Props) {
   if (loading) return <p className="muted">불러오는 중...</p>;
 
   return (
+    <div className="form-page">
+      <header className="page-heading form-page__heading">
+        <div><span className="eyebrow">{mode === 'edit' ? 'EDIT RECORD' : 'NEW RECORD'}</span><h1>{mode === 'edit' ? '학습 기록 수정' : '새 학습 기록'}</h1><p>오늘 배운 내용과 결과물을 하나의 기록으로 정리해보세요.</p></div>
+      </header>
     <form className="assignment-form" onSubmit={handleSubmit}>
-      <h2>{mode === 'edit' ? '과제 수정' : '새 과제 등록'}</h2>
       {error && <p className="error-text">{error}</p>}
 
       <div className="ai-assist">
@@ -946,10 +961,18 @@ export default function AssignmentForm({ mode }: Props) {
         />
         <p className="hint">실행 결과 화면(그래프, 스크린샷 등)이 있다면 이미지로 첨부하세요. 폴더 분석 시 노트북 출력 이미지는 자동으로 여기 들어와요.</p>
 
+        {assignmentId && existingSourceFiles.length > 0 && (
+          <div className="screenshot-capture">
+            <button type="button" onClick={handleCaptureScreenshotFromSource} disabled={screenshotLoading}>
+              {screenshotLoading ? '실행 중... (설치+기동에 몇 분 걸릴 수 있어요)' : '📸 이 과제의 원본으로 스크린샷'}
+            </button>
+            <span className="hint">경로 입력 없이, 이 과제에 보존된 원본 파일(source/)을 그대로 실행해서 찍어요.</span>
+          </div>
+        )}
         <div className="screenshot-capture">
           <input
             className="screenshot-capture__input"
-            placeholder="또는 프로젝트 폴더 전체 경로 입력 (예: C:\Users\me\my-app)"
+            placeholder="또는 다른 프로젝트 폴더 전체 경로 입력 (예: C:\Users\me\my-app)"
             value={screenshotPath}
             onChange={(e) => setScreenshotPath(e.target.value)}
             disabled={screenshotLoading}
@@ -1024,5 +1047,6 @@ export default function AssignmentForm({ mode }: Props) {
 
       {lightbox && <Lightbox src={lightbox.src} alt={lightbox.alt} onClose={() => setLightbox(null)} />}
     </form>
+    </div>
   );
 }

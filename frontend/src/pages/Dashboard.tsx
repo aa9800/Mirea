@@ -27,13 +27,25 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard">
-      <p className="dashboard__intro">지금까지 기록한 학습 과제를 한눈에 확인해보세요.</p>
+      <section className="dashboard-hero">
+        <div>
+          <span className="eyebrow">MY LEARNING SPACE</span>
+          <h1>배운 것을 기록하고,<br />성장을 이어가세요.</h1>
+          <p>흩어진 과제와 코드, 회고를 한곳에서 차곡차곡 모아보세요.</p>
+        </div>
+        <Link to="/assignments/new" className="hero-action">
+          <span className="hero-action__icon">＋</span>
+          <span><strong>새 학습 기록</strong><small>오늘의 배움을 남겨보세요</small></span>
+          <b>→</b>
+        </Link>
+      </section>
 
       <GitConnectionStatus />
 
       {/* 요약 위젯 — 전체 과제 페이지의 검색/필터 바와는 다른, "훑어보기용" 통계 영역 */}
       <section className="dashboard__stats">
         <Link to="/assignments" className="stat-total">
+          <span className="stat-total__icon">▦</span>
           <div className="stat-total__value">{total}</div>
           <div className="stat-total__label">전체 과제</div>
         </Link>
@@ -66,7 +78,7 @@ export default function Dashboard() {
       {/* 최근 과제 — 피드 형태로 훑어보기 (전체 과제 페이지는 카드 그리드로 탐색용) */}
       <section className="dashboard__feed">
         <div className="section-header">
-          <h2>최근 과제</h2>
+          <div><span className="section-kicker">RECENT</span><h2>최근 학습 기록</h2></div>
           <Link to="/assignments">전체 보기 →</Link>
         </div>
 
@@ -89,7 +101,7 @@ export default function Dashboard() {
       {!loading && favorites.length > 0 && (
         <section className="dashboard__feed">
           <div className="section-header">
-            <h2>⭐ 즐겨찾기</h2>
+            <div><span className="section-kicker">FAVORITES</span><h2>즐겨찾는 기록</h2></div>
             <Link to="/assignments?favorite=true">전체 보기 →</Link>
           </div>
 

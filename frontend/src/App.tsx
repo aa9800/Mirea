@@ -9,7 +9,11 @@ export default function App() {
     <div className="app">
       <header className="topbar">
         <Link to="/" className="brand">
-          📚 Study Archive
+          <span className="brand__mark">S</span>
+          <span className="brand__copy">
+            <strong>Study Archive</strong>
+            <small>나만의 학습 기록</small>
+          </span>
         </Link>
         <nav>
           <NavLink to="/" end className={({ isActive }) => (isActive ? 'active' : '')}>
@@ -19,7 +23,7 @@ export default function App() {
             전체 과제
           </NavLink>
           <NavLink to="/assignments/new" className="new-btn">
-            + 새 과제
+            <span>+</span> 새 기록
           </NavLink>
         </nav>
       </header>

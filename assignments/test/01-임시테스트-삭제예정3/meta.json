@@ -1,0 +1,38 @@
+{
+  "id": "test-01-임시테스트-삭제예정3",
+  "subjectSlug": "test",
+  "leaf": "01-임시테스트-삭제예정3",
+  "title": "__임시테스트_삭제예정3__",
+  "subject": "__test__",
+  "date": "2026-08-19",
+  "description": "",
+  "tags": [],
+  "codeBlocks": [],
+  "codeFiles": [],
+  "sourceFiles": [
+    {
+      "path": "package.json",
+      "size": 71
+    },
+    {
+      "path": "server.js",
+      "size": 351
+    }
+  ],
+  "learnings": "",
+  "difficulties": "",
+  "executionResult": "",
+  "executionResultImages": [],
+  "favorite": false,
+  "thumbnail": null,
+  "images": [],
+  "attachments": [],
+  "createdAt": "2026-08-19T06:05:50.757Z",
+  "updatedAt": "2026-08-19T06:05:50.757Z",
+  "github": {
+    "status": "pending",
+    "url": null,
+    "lastSyncedAt": null,
+    "lastError": null
+  }
+}

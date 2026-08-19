@@ -1,4 +1,6 @@
+const path = require('path');
 const express = require('express');
+const store = require('../lib/store');
 const { captureDevServerScreenshot } = require('../lib/screenshot');
 
 const router = express.Router();
@@ -8,18 +10,33 @@ const router = express.Router();
 // 아무 것도 저장하지 않는다 — 프론트가 결과 이미지들을 "실행 결과 이미지" 칸에
 // 넣어주고, 사용자가 저장 버튼을 눌러야 반영된다.
 //
-// 브라우저의 폴더 선택(webkitdirectory)은 절대 경로를 주지 않기 때문에, 이 기능만은
-// 예외적으로 경로 문자열을 직접 입력받는다 — 같은 컴퓨터에서 도는 백엔드이기 때문에
-// 가능한 방식이고, 어차피 사용자가 로컬 터미널에서 npm run dev 치는 것과 같은 일을
-// 대신 해주는 것뿐이라 별도의 자격증명이나 원격 접근이 필요 없다.
+// 브라우저의 폴더 선택(webkitdirectory)은 절대 경로를 주지 않기 때문에, 원래는
+// 예외적으로 경로 문자열을 직접 입력받아야 했다 — 그런데 폴더로 분석해서 이미
+// 저장된 과제라면 원본이 source/ 밑에 서버 디스크에 그대로 있으므로, assignmentId만
+// 주면 경로 입력 없이 바로 그 폴더를 대상으로 쓸 수 있다. projectPath(직접 입력)와
+// assignmentId(저장된 과제 재사용) 둘 중 하나만 오면 된다.
 router.post('/', async (req, res) => {
-  const { projectPath } = req.body || {};
-  if (typeof projectPath !== 'string' || !projectPath.trim()) {
+  const { projectPath, assignmentId } = req.body || {};
+
+  let resolvedPath = typeof projectPath === 'string' ? projectPath.trim() : '';
+
+  if (!resolvedPath && assignmentId) {
+    const entry = store.findById(assignmentId);
+    if (!entry) return res.status(404).json({ error: '과제를 찾을 수 없습니다.' });
+    if (!entry.meta.sourceFiles?.length) {
+      return res.status(400).json({
+        error: '이 과제엔 폴더 분석으로 보존된 원본 파일이 없어요. "폴더로 분석"을 먼저 실행하거나 경로를 직접 입력해주세요.',
+      });
+    }
+    resolvedPath = path.join(entry.dir, 'source');
+  }
+
+  if (!resolvedPath) {
     return res.status(400).json({ error: '프로젝트 폴더 경로를 입력해주세요.' });
   }
 
   try {
-    const shots = await captureDevServerScreenshot(projectPath.trim());
+    const shots = await captureDevServerScreenshot(resolvedPath);
     res.json({
       images: shots
         .filter((s) => s.buffer)

@@ -91,11 +91,14 @@ export interface ScreenshotResult {
   failed: { path: string; error: string }[];
 }
 
-export async function captureScreenshot(projectPath: string): Promise<ScreenshotResult> {
+// projectPath(직접 입력한 절대 경로) 또는 assignmentId(이미 폴더 분석으로 저장돼
+// source/ 밑에 원본이 있는 과제) 둘 중 하나만 넘기면 된다 — assignmentId를 쓰면
+// 브라우저가 절대 경로를 알려줄 수 없는 문제를 완전히 우회할 수 있다.
+export async function captureScreenshot(target: { projectPath: string } | { assignmentId: string }): Promise<ScreenshotResult> {
   const res = await fetch('/api/screenshot', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ projectPath }),
+    body: JSON.stringify(target),
   });
   return handle<ScreenshotResult>(res);
 }
