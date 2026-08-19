@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>회원 라운지 — 문장 도서관</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="topnav" id="topnav"></header>
+  <main>
+    <section class="page-intro"><div><p class="eyebrow">MEMBERSHIP</p><h1>문장 도서관 회원가입</h1><p class="subtitle">회원이 되어 문장 도서관의 책과 더 가까워지세요.</p></div></section>
+    <div id="error-box"></div>
+    <div id="success-box"></div>
+    <div class="membership-layout"><div class="card"><span class="section-kicker">JOIN THE LIBRARY</span><h2>회원 정보 입력</h2>
+      <form class="inline-form" id="member-form">
+        <div class="field">
+          <label>이름 *</label>
+          <input type="text" id="name" placeholder="회원 이름" required />
+        </div>
+        <div class="field">
+          <label>이메일 *</label><input type="email" id="email" placeholder="reader@example.com" required />
+        </div>
+        <div class="field">
+          <label>전화번호</label>
+          <input type="tel" id="phone" placeholder="010-0000-0000" pattern="010-[0-9]{4}-[0-9]{4}" inputmode="tel" />
+        </div>
+        <label class="consent-check"><input type="checkbox" id="privacy-consent" required /><span>회원 등록과 대출 관리를 위한 개인정보 수집 및 이용에 동의합니다. 이름·이메일·전화번호는 도서관 운영 목적으로만 사용됩니다.</span></label>
+        <button type="submit">가입 신청하기</button>
+      </form>
+    </div>
+    <aside class="membership-benefits"><p class="eyebrow">MEMBER BENEFITS</p><h2>회원이 되면</h2><ul><li><strong>편리한 대출</strong><span>도서관에서 간편하게 책을 빌릴 수 있어요.</span></li><li><strong>여유로운 독서</strong><span>기본 14일 동안 책과 충분히 머물러보세요.</span></li><li><strong>새로운 발견</strong><span>매일 새로운 문장과 책을 추천받아보세요.</span></li></ul></aside></div>
+  </main>
+
+  <script type="module" src="js/nav.js"></script>
+  <script type="module" src="js/member-register.js"></script>
+</body>
+</html>

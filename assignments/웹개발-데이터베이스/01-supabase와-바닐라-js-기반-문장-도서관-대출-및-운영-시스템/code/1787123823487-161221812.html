@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>도서 컬렉션 — 문장 도서관</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="topnav" id="topnav"></header>
+  <main>
+    <section class="library-hero">
+      <div>
+        <p class="eyebrow">Library Collection</p>
+        <h1>책이 머무는 곳,<br><span class="accent">지식이 이어지는 곳</span></h1>
+        <p class="subtitle">마음에 머무는 문장을 찾아 문장 도서관의 서가를 천천히 둘러보세요.</p>
+      </div>
+      <div class="hero-meta" aria-label="도서 현황">
+        <div class="mini-stat"><strong id="book-count">—</strong><span>등록 도서</span></div>
+        <div class="mini-stat"><strong id="available-count">—</strong><span>대출 가능</span></div>
+      </div>
+    </section>
+    <div id="error-box"></div>
+
+    <div class="card">
+      <div class="card-header">
+        <div><span class="section-kicker">Collection</span><h2>소장 도서 목록</h2></div>
+        <label class="search-box"><input type="search" id="book-search" placeholder="제목, 저자, 분류 검색" aria-label="도서 검색" /></label>
+      </div>
+      <div class="toolbar">
+        <div class="filter-group" aria-label="대출 상태 필터">
+          <button type="button" class="filter-chip active" data-filter="all">전체</button>
+          <button type="button" class="filter-chip" data-filter="available">대출 가능</button>
+          <button type="button" class="filter-chip" data-filter="low">일부 대출</button>
+          <button type="button" class="filter-chip" data-filter="out">대출 불가</button>
+        </div>
+        <span class="result-count" id="result-count">0권 표시</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>번호</th><th>도서명</th><th>저자</th><th>분류</th><th>출간</th><th>대출 상태</th><th>이용</th></tr>
+          </thead>
+          <tbody id="table-body">
+            <tr class="empty-row"><td colspan="7">불러오는 중...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <dialog class="loan-dialog" id="loan-dialog"><button class="dialog-close" type="button" aria-label="닫기">×</button><p class="eyebrow">BORROWING GUIDE</p><h2 id="dialog-book-title">도서 대출 안내</h2><p id="dialog-book-status"></p><div class="dialog-actions"><a class="primary-link" href="members.html">회원가입</a><button type="button" class="ghost dialog-confirm">확인</button></div></dialog>
+  </main>
+
+  <script type="module" src="js/nav.js"></script>
+  <script type="module" src="js/books.js"></script>
+</body>
+</html>

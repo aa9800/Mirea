@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>문장 도서관 — 책과 머무는 시간</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="topnav" id="topnav"></header>
+  <main class="home-main">
+    <div id="error-box"></div>
+    <section class="home-hero">
+      <div class="home-hero-copy">
+        <p class="eyebrow">MUNJANG LIBRARY</p>
+        <h1>오늘, 어떤 문장을<br>만나고 싶나요?</h1>
+        <p>오래 기억될 이야기부터 새로운 생각을 여는 책까지.<br>문장 도서관의 서가를 천천히 둘러보세요.</p>
+        <div class="hero-tags"><span>오늘의 문장</span><span>감성 큐레이션</span><span>조용한 발견</span></div>
+        <div class="hero-actions">
+          <a class="primary-link" href="books.html">도서 둘러보기 <span>→</span></a>
+          <a class="text-link" href="members.html">도서관 회원가입</a>
+        </div>
+      </div>
+      <div class="book-art" aria-hidden="true">
+        <span class="book book-one"></span><span class="book book-two"></span><span class="book book-three"></span>
+        <span class="book-quote">READ<br>SLOWLY</span>
+      </div>
+    </section>
+
+    <section class="daily-sentence">
+      <div class="sentence-mark">“</div>
+      <div class="sentence-copy"><p class="eyebrow">TODAY'S SENTENCE</p><blockquote id="daily-quote">좋은 문장은 마음속에 작은 방 하나를 만든다.</blockquote><span id="daily-theme">오늘의 문장 · 문장 도서관</span></div>
+      <div class="sentence-actions"><a id="quote-books-link" href="books.html">이 문장과 닮은 책 →</a><a href="books.html?filter=available">대출 가능한 책 보기</a></div>
+    </section>
+
+    <section class="mood-section">
+      <div class="section-heading"><div><p class="eyebrow">PICK YOUR MOOD</p><h2>오늘 마음은 어떤가요?</h2></div><span class="heading-note">기분에 맞는 서가를 골라보세요</span></div>
+      <div class="mood-grid">
+        <a class="mood-card peach" href="books.html?q=한국문학"><span class="mood-icon">☁</span><div><strong>마음이 몽글몽글</strong><small>다정한 한국문학</small></div><b>→</b></a>
+        <a class="mood-card sage" href="books.html?q=에세이"><span class="mood-icon">✿</span><div><strong>잠시 쉬고 싶어</strong><small>천천히 읽는 에세이</small></div><b>→</b></a>
+        <a class="mood-card lilac" href="books.html?q=SF"><span class="mood-icon">✦</span><div><strong>새로운 세계로</strong><small>상상력을 여는 SF</small></div><b>→</b></a>
+        <a class="mood-card butter" href="books.html?q=과학"><span class="mood-icon">◌</span><div><strong>궁금한 게 많아</strong><small>세상을 읽는 과학</small></div><b>→</b></a>
+      </div>
+    </section>
+
+    <section class="home-section">
+      <div class="section-heading"><div><p class="eyebrow">NEW ON THE SHELF</p><h2>새로 들어온 책</h2></div><a href="books.html">전체 보기 →</a></div>
+      <div class="book-grid" id="featured-books"><div class="loading-card">책을 고르는 중...</div></div>
+    </section>
+
+    <section class="home-banner">
+      <div><p class="eyebrow">A QUIET PLACE FOR EVERYONE</p><h2>좋은 책은, 좋은 질문을 남깁니다.</h2><p>문장 도서관에서 당신의 다음 질문을 찾아보세요.</p></div>
+      <a class="light-link" href="members.html">회원 등록하기 →</a>
+    </section>
+  </main>
+  <script type="module" src="js/nav.js"></script>
+  <script type="module" src="js/index.js"></script>
+</body>
+</html>

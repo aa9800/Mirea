@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>대출 데스크 — 문장 도서관</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="auth-pending">
+  <header class="topnav" id="topnav"></header>
+  <main>
+    <section class="page-intro"><div><p class="eyebrow">Circulation Desk</p><h1>대출 · 반납 데스크</h1><p class="subtitle">책과 회원을 연결하고, 대출에서 반납까지의 흐름을 기록합니다.</p></div></section>
+    <div id="error-box"></div>
+    <div class="card"><span class="section-kicker">New checkout</span><h2>새 대출 접수</h2>
+      <form class="inline-form" id="loan-form">
+        <div class="field">
+          <label>도서 *</label>
+          <select id="book_id" required></select>
+        </div>
+        <div class="field">
+          <label>회원 *</label>
+          <select id="member_id" required></select>
+        </div>
+        <div class="field">
+          <label>대출일 *</label>
+          <input type="date" id="loan_date" required />
+        </div>
+        <div class="field">
+          <label>반납예정일 *</label>
+          <input type="date" id="due_date" required />
+        </div>
+        <button type="submit">대출 시작</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <span class="section-kicker">Circulation history</span><h2>대출 기록</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>번호</th><th>도서</th><th>회원</th><th>대출일</th><th>반납 예정</th><th>반납일</th><th>상태</th><th>관리</th></tr>
+          </thead>
+          <tbody id="table-body">
+            <tr class="empty-row"><td colspan="8">불러오는 중...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script type="module" src="js/nav.js"></script>
+  <script type="module" src="js/admin-guard.js"></script>
+  <script type="module" src="js/loans.js"></script>
+</body>
+</html>

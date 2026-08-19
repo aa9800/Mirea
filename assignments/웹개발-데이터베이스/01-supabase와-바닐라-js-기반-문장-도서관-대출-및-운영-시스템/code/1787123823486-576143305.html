@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>저자 아카이브 — 문장 도서관</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="auth-pending">
+  <header class="topnav" id="topnav"></header>
+  <main>
+    <section class="page-intro"><div><p class="eyebrow">Author Archive</p><h1>저자 아카이브</h1><p class="subtitle">책을 만든 사람들의 이름과 이야기를 기록합니다.</p></div></section>
+    <div id="error-box"></div>
+    <div class="content-grid">
+    <div class="card"><span class="section-kicker">New author</span><h2>새 저자 등록</h2>
+      <form class="inline-form" id="author-form">
+        <div class="field">
+          <label>이름 *</label>
+          <input type="text" id="name" placeholder="저자 이름" required />
+        </div>
+        <div class="field">
+          <label>소개</label>
+          <input type="text" id="bio" placeholder="짧은 소개나 주요 작품" />
+        </div>
+        <button type="submit">저자 등록</button>
+      </form>
+    </div>
+
+    <div class="card"><span class="section-kicker">Archive</span><h2>등록된 저자</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>번호</th><th>이름</th><th>소개</th><th>등록일</th><th>관리</th></tr></thead>
+          <tbody id="table-body">
+            <tr class="empty-row"><td colspan="5">불러오는 중...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div></div>
+  </main>
+
+  <script type="module" src="js/nav.js"></script>
+  <script type="module" src="js/admin-guard.js"></script>
+  <script type="module" src="js/authors.js"></script>
+</body>
+</html>

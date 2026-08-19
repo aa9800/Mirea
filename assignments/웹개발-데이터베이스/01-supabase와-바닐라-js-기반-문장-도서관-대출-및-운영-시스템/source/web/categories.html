@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>분류 관리 - 도서관 대출 관리</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="auth-pending">
+  <header class="topnav" id="topnav"></header>
+  <main>
+    <section class="page-intro"><div><p class="eyebrow">Curated Shelves</p><h1>서가 분류</h1><p class="subtitle">컬렉션을 더 쉽게 발견할 수 있도록 도서의 주제와 장르를 정리합니다.</p></div></section>
+    <div id="error-box"></div>
+    <div class="content-grid"><div class="card"><span class="section-kicker">New category</span><h2>새 분류 만들기</h2>
+      <form class="inline-form" id="category-form">
+        <div class="field">
+          <label>분류명 *</label><input type="text" id="name" placeholder="예: 한국문학, 과학, 에세이" required />
+        </div>
+        <button type="submit">분류 추가</button>
+      </form>
+    </div>
+
+    <div class="card"><span class="section-kicker">Shelves</span><h2>등록된 분류</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>번호</th><th>분류명</th><th>등록일</th><th>관리</th></tr></thead>
+          <tbody id="table-body">
+            <tr class="empty-row"><td colspan="4">불러오는 중...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div></div>
+  </main>
+
+  <script type="module" src="js/nav.js"></script>
+  <script type="module" src="js/admin-guard.js"></script>
+  <script type="module" src="js/categories.js"></script>
+</body>
+</html>

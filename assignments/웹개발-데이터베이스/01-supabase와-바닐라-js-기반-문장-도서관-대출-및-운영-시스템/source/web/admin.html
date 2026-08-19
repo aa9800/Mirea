@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>운영 센터 — 문장 도서관</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="auth-pending">
+  <header class="topnav" id="topnav"></header>
+  <main>
+    <section class="page-intro">
+      <div><p class="eyebrow">LIBRARY OPERATIONS</p><h1>도서관 운영</h1><p class="subtitle">오늘의 소장 도서와 회원, 대출 현황을 한눈에 확인하세요.</p></div>
+    </section>
+    <div id="error-box"></div>
+
+    <div class="stat-grid" id="admin-stats">
+      <div class="stat-card"><div class="num">—</div><div class="label">등록 도서</div></div>
+      <div class="stat-card"><div class="num">—</div><div class="label">전체 보유 권수</div></div>
+      <div class="stat-card"><div class="num">—</div><div class="label">등록 회원</div></div>
+      <div class="stat-card"><div class="num">—</div><div class="label">대출 중</div></div>
+      <div class="stat-card"><div class="num">—</div><div class="label">반납 지연</div></div>
+    </div>
+
+    <div class="card">
+      <span class="section-kicker">RETURN STATUS</span><h2>반납이 늦어진 대출</h2>
+      <div class="table-wrap"><table><thead><tr><th>도서</th><th>회원</th><th>연락 이메일</th><th>대출일</th><th>반납 예정</th><th>지연</th></tr></thead><tbody id="overdue-body"><tr class="empty-row"><td colspan="6">불러오는 중...</td></tr></tbody></table></div>
+    </div>
+
+    <div class="card">
+      <span class="section-kicker">QUICK MANAGEMENT</span><h2>빠른 관리</h2>
+      <nav class="quick-links">
+        <a class="quick-link" href="manage-books.html"><strong>도서 관리</strong><span>도서 등록과 재고 확인</span></a>
+        <a class="quick-link" href="authors.html"><strong>저자 관리</strong><span>저자 정보 등록</span></a>
+        <a class="quick-link" href="categories.html"><strong>분류 관리</strong><span>서가 분류 정리</span></a>
+        <a class="quick-link" href="manage-members.html"><strong>회원 관리</strong><span>회원 정보 확인</span></a>
+        <a class="quick-link" href="loans.html"><strong>대출 관리</strong><span>대출과 반납 처리</span></a>
+      </nav>
+    </div>
+  </main>
+  <script type="module" src="js/nav.js"></script><script type="module" src="js/admin-guard.js"></script>
+  <script type="module" src="js/admin.js"></script>
+</body>
+</html>
