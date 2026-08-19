@@ -1,0 +1,305 @@
+{
+  "id": "웹개발-04-next-js-및-fastapi-기반-메모-애플리케이션-기초-구축",
+  "subjectSlug": "웹개발",
+  "leaf": "04-next-js-및-fastapi-기반-메모-애플리케이션-기초-구축",
+  "title": "Next.js 및 FastAPI 기반 메모 애플리케이션 기초 구축",
+  "subject": "웹개발",
+  "date": "2026-08-19",
+  "description": "본 프로젝트는 Next.js App Router를 활용한 프론트엔드 환경과 FastAPI 및 SQLite 기반의 파이썬 백엔드 코드로 구성되어 있습니다. 프론트엔드 측면에서는 TypeScript와 Tailwind CSS v4, ESLint를 적용하여 초기 웹 프로젝트 설정을 갖추고 레이아웃 및 메인 페이지를 정의하였습니다. 백엔드 측면에서는 FastAPI를 사용한 인메모리 메모 CRUD API 예제와 sqlite3 모듈을 활용한 데이터베이스 연동 기초 실습 코드가 포함되어 있습니다. 풀스택 메모 애플리케이션 구축을 위한 프론트엔드 스타터 템플릿과 백엔드 데이터 처리 실습을 종합적으로 다룹니다.",
+  "tags": [
+    "next.js",
+    "fastapi",
+    "typescript",
+    "python",
+    "sqlite",
+    "tailwindcss"
+  ],
+  "codeBlocks": [
+    {
+      "language": "javascript",
+      "code": "import { defineConfig, globalIgnores } from \"eslint/config\";\nimport nextVitals from \"eslint-config-next/core-web-vitals\";\nimport nextTs from \"eslint-config-next/typescript\";\n\nconst eslintConfig = defineConfig([\n  ...nextVitals,\n  ...nextTs,\n  // Override default ignores of eslint-config-next.\n  globalIgnores([\n    // Default ignores of eslint-config-next:\n    \".next/**\",\n    \"out/**\",\n    \"build/**\",\n    \"next-env.d.ts\",\n  ]),\n]);\n\nexport default eslintConfig;",
+      "filename": "eslint.config.mjs",
+      "description": "Next.js 및 TypeScript 프로젝트 규칙과 무시할 파일 경로를 설정한 ESLint 구성 파일입니다."
+    },
+    {
+      "language": "python",
+      "code": "from datetime import datetime\n\nfrom fastapi import FastAPI\nfrom pydantic import BaseModel\n\napp = FastAPI()\n\n\n# 메모 생성 요청 시 들어오는 데이터 양식\nclass MemoCreate(BaseModel):\n    content: str\n\n\n# 서버에 저장되는 메모 (id, 생성 시각 포함)\nclass Memo(BaseModel):\n    id: int\n    content: str\n    created_at: datetime\n\n\n# 메모 저장소 (서버 껐다 켜면 초기화되는 임시 저장소)\nmemos: list[Memo] = []\nnext_id = 1\n\n\n@app.get(\"/\")\ndef root():\n    return \"안녕하세요\"\n\n\n# 메모 목록 조회\n@app.get(\"/memos\")\ndef get_memos():\n    return memos\n\n\n# 메모 저장\n@app.post(\"/memos\")\ndef create_memo(memo: MemoCreate):\n    global next_id\n    new_memo = Memo(id=next_id, content=memo.content, created_at=datetime.now())\n    memos.append(new_memo)\n    next_id += 1\n    return new_memo",
+      "filename": "main.py",
+      "description": "FastAPI와 Pydantic 모델을 사용하여 메모 목록 조회 및 추가 기능을 제공하는 간단한 백엔드 API 서버 파일입니다."
+    },
+    {
+      "language": "typescript",
+      "code": "/// <reference types=\"next\" />\n/// <reference types=\"next/image-types/global\" />\nimport \"./.next/dev/types/routes.d.ts\";\nimport \"./.next/dev/types/root-params.d.ts\";\n\n// NOTE: This file should not be edited\n// see https://nextjs.org/docs/app/api-reference/config/typescript for more information.",
+      "filename": "next-env.d.ts",
+      "description": "Next.js 프로젝트에서 생성되는 TypeScript 타입 선언 참조 파일입니다."
+    },
+    {
+      "language": "typescript",
+      "code": "import type { NextConfig } from \"next\";\n\nconst nextConfig: NextConfig = {\n  /* config options here */\n};\n\nexport default nextConfig;",
+      "filename": "next.config.ts",
+      "description": "Next.js 애플리케이션의 세부 환경을 구성하는 TypeScript 설정 파일입니다."
+    },
+    {
+      "language": "json",
+      "code": "{\n  \"name\": \"my-memo2\",\n  \"version\": \"0.1.0\",\n  \"private\": true,\n  \"scripts\": {\n    \"dev\": \"next dev\",\n    \"build\": \"next build\",\n    \"start\": \"next start\",\n    \"lint\": \"eslint\"\n  },\n  \"dependencies\": {\n    \"next\": \"16.3.1\",\n    \"react\": \"19.2.8\",\n    \"react-dom\": \"19.2.8\"\n  },\n  \"devDependencies\": {\n    \"@tailwindcss/postcss\": \"^4\",\n    \"@types/node\": \"^20\",\n    \"@types/react\": \"^19\",\n    \"@types/react-dom\": \"^19\",\n    \"eslint\": \"^9\",\n    \"eslint-config-next\": \"16.3.1\",\n    \"tailwindcss\": \"^4\",\n    \"typescript\": \"^5\"\n  }\n}",
+      "filename": "package.json",
+      "description": "Next.js, React, Tailwind CSS 등 프로젝트 의존성 패키지와 실행 스크립트 정보를 담고 있는 파일입니다."
+    },
+    {
+      "language": "javascript",
+      "code": "const config = {\n  plugins: {\n    \"@tailwindcss/postcss\": {},\n  },\n};\n\nexport default config;",
+      "filename": "postcss.config.mjs",
+      "description": "Tailwind CSS 플러그인 사용을 위해 설정된 PostCSS 구성 파일입니다."
+    },
+    {
+      "language": "python",
+      "code": "import sqlite3\n\n# DB 파일에 연결 (없으면 자동 생성됨)\nconn = sqlite3.connect(\"memos.db\")\ncursor = conn.cursor()\n\n# memos 표 생성 (이미 있으면 건너뜀)\ncursor.execute(\"\"\"\n    CREATE TABLE IF NOT EXISTS memos (\n        id INTEGER PRIMARY KEY AUTOINCREMENT,\n        content TEXT NOT NULL\n    )\n\"\"\")\n\n# 메모 두 개 삽입\ncursor.executemany(\n    \"INSERT INTO memos (content) VALUES (?)\",\n    [\n        (\"첫 번째 메모입니다.\",),\n        (\"두 번째 메모입니다.\",),\n    ],\n)\nconn.commit()\n\n# 저장된 메모 전체 조회\ncursor.execute(\"SELECT id, content FROM memos\")\nrows = cursor.fetchall()\n\nprint(\"저장된 메모 목록:\")\nfor row in rows:\n    print(f\"- id={row[0]}, content={row[1]}\")\n\nconn.close()",
+      "filename": "sqlite_demo.py",
+      "description": "SQLite3 데이터베이스 파일에 연동하여 메모 테이블을 생성하고 데이터를 데이터베이스에 입력 및 조회하는 데모 스크립트입니다."
+    },
+    {
+      "language": "json",
+      "code": "{\n  \"compilerOptions\": {\n    \"target\": \"ES2017\",\n    \"lib\": [\"dom\", \"dom.iterable\", \"esnext\"],\n    \"allowJs\": true,\n    \"skipLibCheck\": true,\n    \"strict\": true,\n    \"noEmit\": true,\n    \"esModuleInterop\": true,\n    \"module\": \"esnext\",\n    \"moduleResolution\": \"bundler\",\n    \"resolveJsonModule\": true,\n    \"isolatedModules\": true,\n    \"jsx\": \"react-jsx\",\n    \"incremental\": true,\n    \"plugins\": [\n      {\n        \"name\": \"next\"\n      }\n    ],\n    \"paths\": {\n      \"@/*\": [\"./*\"]\n    }\n  },\n  \"include\": [\n    \"next-env.d.ts\",\n    \"**/*.ts\",\n    \"**/*.tsx\",\n    \".next/types/**/*.ts\",\n    \".next/dev/types/**/*.ts\",\n    \"**/*.mts\"\n  ],\n  \"exclude\": [\"node_modules\"]\n}",
+      "filename": "tsconfig.json",
+      "description": "TypeScript 컴파일러 옵션 및 경로 별칭, 포함/제외 경로를 정의한 설정 파일입니다."
+    },
+    {
+      "language": "css",
+      "code": "@import \"tailwindcss\";\n\n:root {\n  --background: #ffffff;\n  --foreground: #171717;\n}\n\n@theme inline {\n  --color-background: var(--background);\n  --color-foreground: var(--foreground);\n  --font-sans: var(--font-geist-sans);\n  --font-mono: var(--font-geist-mono);\n}\n\n@media (prefers-color-scheme: dark) {\n  :root {\n    --background: #0a0a0a;\n    --foreground: #ededed;\n  }\n}\n\nbody {\n  background: var(--background);\n  color: var(--foreground);\n  font-family: Arial, Helvetica, sans-serif;\n}",
+      "filename": "app/globals.css",
+      "description": "Tailwind CSS 가져오기 및 라이트/다크 모드에 따른 기본 테마 변수를 정의한 전역 스타일시트입니다."
+    },
+    {
+      "language": "typescript",
+      "code": "import type { Metadata } from \"next\";\nimport { Geist, Geist_Mono } from \"next/font/google\";\nimport \"./globals.css\";\n\nconst geistSans = Geist({\n  variable: \"--font-geist-sans\",\n  subsets: [\"latin\"],\n});\n\nconst geistMono = Geist_Mono({\n  variable: \"--font-geist-mono\",\n  subsets: [\"latin\"],\n});\n\nexport const metadata: Metadata = {\n  title: \"Create Next App\",\n  description: \"Generated by create next app\",\n};\n\nexport default function RootLayout({ children }: LayoutProps<\"/\">) {\n  return (\n    <html\n      lang=\"en\"\n      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}\n    >\n      <body className=\"min-h-full flex flex-col\">{children}</body>\n    </html>\n  );\n}",
+      "filename": "app/layout.tsx",
+      "description": "Geist 폰트 설정 및 전역 스타일을 적용하는 Next.js App Router의 최상위 루트 레이아웃 파일입니다."
+    },
+    {
+      "language": "typescript",
+      "code": "import Image from \"next/image\";\n\nexport default function Home() {\n  return (\n    <div className=\"flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black\">\n      <main className=\"flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start\">\n        <Image\n          className=\"dark:invert h-5 w-[100px]\"\n          src=\"/next.svg\"\n          alt=\"Next.js logo\"\n          width={100}\n          height={20}\n          priority\n        />\n        <div className=\"flex flex-col items-center gap-6 text-center sm:items-start sm:text-left\">\n          <h1 className=\"max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50\">\n            To get started, edit the{\" \"}\n            <code className=\"rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]\">\n              page.tsx\n            </code>{\" \"}\n            file.\n          </h1>\n          <p className=\"max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400\">\n            Looking for a starting point or more instructions? Head over to{\" \"}\n            <a\n              href=\"https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app\"\n              className=\"font-medium text-zinc-950 dark:text-zinc-50\"\n            >\n              Templates\n            </a>{\" \"}\n            or the{\" \"}\n            <a\n              href=\"https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app\"\n              className=\"font-medium text-zinc-950 dark:text-zinc-50\"\n            >\n              Learning\n            </a>{\" \"}\n            center.\n          </p>\n        </div>\n        <div className=\"flex flex-col gap-4 text-base font-medium sm:flex-row\">\n          <a\n            className=\"flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]\"\n            href=\"https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app\"\n            target=\"_blank\"\n            rel=\"noopener noreferrer\"\n          >\n            <Image\n              className=\"dark:invert h-[14px] w-4\"\n              src=\"/vercel.svg\"\n              alt=\"Vercel logomark\"\n              width={16}\n              height={14}\n            />\n            Deploy Now\n          </a>\n          <a\n            className=\"flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]\"\n            href=\"https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app\"\n            target=\"_blank\"\n            rel=\"noopener noreferrer\"\n          >\n            Documentation\n          </a>\n        </div>\n      </main>\n    </div>\n  );\n}",
+      "filename": "app/page.tsx",
+      "description": "Next.js 애플리케이션 접속 시 첫 화면에 나타나는 기본 랜딩 메인 페이지 컴포넌트입니다."
+    }
+  ],
+  "codeFiles": [
+    {
+      "filename": "eslint.config.mjs",
+      "storedName": "1787121440436-690977508.mjs",
+      "size": 465
+    },
+    {
+      "filename": "main.py",
+      "storedName": "1787121440436-673536293.py",
+      "size": 834
+    },
+    {
+      "filename": "next-env.d.ts",
+      "storedName": "1787121440437-121019007.ts",
+      "size": 296
+    },
+    {
+      "filename": "next.config.ts",
+      "storedName": "1787121440438-725442176.ts",
+      "size": 133
+    },
+    {
+      "filename": "package.json",
+      "storedName": "1787121440439-525994078.json",
+      "size": 531
+    },
+    {
+      "filename": "postcss.config.mjs",
+      "storedName": "1787121440440-243397713.mjs",
+      "size": 94
+    },
+    {
+      "filename": "sqlite_demo.py",
+      "storedName": "1787121440440-879285973.py",
+      "size": 742
+    },
+    {
+      "filename": "tsconfig.json",
+      "storedName": "1787121440441-500587269.json",
+      "size": 666
+    },
+    {
+      "filename": "globals.css",
+      "storedName": "1787121440442-198979298.css",
+      "size": 488
+    },
+    {
+      "filename": "layout.tsx",
+      "storedName": "1787121440443-991615094.tsx",
+      "size": 690
+    },
+    {
+      "filename": "page.tsx",
+      "storedName": "1787121440444-306759418.tsx",
+      "size": 3076
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": ".gitignore",
+      "size": 480
+    },
+    {
+      "path": "AGENTS.md",
+      "size": 678
+    },
+    {
+      "path": "CLAUDE.md",
+      "size": 11
+    },
+    {
+      "path": "eslint.config.mjs",
+      "size": 465
+    },
+    {
+      "path": "main.py",
+      "size": 834
+    },
+    {
+      "path": "memos.db",
+      "size": 12288
+    },
+    {
+      "path": "next-env.d.ts",
+      "size": 296
+    },
+    {
+      "path": "next.config.ts",
+      "size": 133
+    },
+    {
+      "path": "package.json",
+      "size": 531
+    },
+    {
+      "path": "postcss.config.mjs",
+      "size": 94
+    },
+    {
+      "path": "README.md",
+      "size": 1450
+    },
+    {
+      "path": "sqlite_demo.py",
+      "size": 742
+    },
+    {
+      "path": "tsconfig.json",
+      "size": 666
+    },
+    {
+      "path": "public/file.svg",
+      "size": 391
+    },
+    {
+      "path": "public/globe.svg",
+      "size": 1035
+    },
+    {
+      "path": "public/next.svg",
+      "size": 1375
+    },
+    {
+      "path": "public/vercel.svg",
+      "size": 128
+    },
+    {
+      "path": "public/window.svg",
+      "size": 385
+    },
+    {
+      "path": "app/favicon.ico",
+      "size": 25931
+    },
+    {
+      "path": "app/globals.css",
+      "size": 488
+    },
+    {
+      "path": "app/layout.tsx",
+      "size": 690
+    },
+    {
+      "path": "app/page.tsx",
+      "size": 3076
+    }
+  ],
+  "learnings": "Next.js App Router의 기본 구조 및 타입스크립트 환경 설정을 이해하고, FastAPI 및 SQLite3를 활용한 기본적인 메모 데이터 처리 API 구현 방법을 배울 수 있습니다.",
+  "difficulties": "Next.js 16 및 React 19와 같은 최신 라이브러리 버전의 설정 방식과 파이썬 백엔드 API 연동 구조를 함께 파악하는 과정이 생소할 수 있습니다.",
+  "executionResult": "저장된 메모 목록:\r\n- id=1, content=첫 번째 메모입니다.\r\n- id=2, content=두 번째 메모입니다.",
+  "executionResultImages": [],
+  "favorite": false,
+  "thumbnail": "1787121440427-692323508.svg",
+  "images": [
+    {
+      "filename": "file.svg",
+      "storedName": "1787121440427-692323508.svg",
+      "size": 391
+    },
+    {
+      "filename": "globe.svg",
+      "storedName": "1787121440427-989305904.svg",
+      "size": 1035
+    },
+    {
+      "filename": "next.svg",
+      "storedName": "1787121440428-774979536.svg",
+      "size": 1375
+    },
+    {
+      "filename": "vercel.svg",
+      "storedName": "1787121440429-855357752.svg",
+      "size": 128
+    },
+    {
+      "filename": "window.svg",
+      "storedName": "1787121440430-618814172.svg",
+      "size": 385
+    },
+    {
+      "filename": "favicon.ico",
+      "storedName": "1787121440431-739629266.ico",
+      "size": 25931
+    }
+  ],
+  "attachments": [
+    {
+      "filename": ".gitignore",
+      "storedName": "1787121440432-550006114",
+      "size": 480
+    },
+    {
+      "filename": "AGENTS.md",
+      "storedName": "1787121440432-219397669.md",
+      "size": 678
+    },
+    {
+      "filename": "CLAUDE.md",
+      "storedName": "1787121440433-35552590.md",
+      "size": 11
+    },
+    {
+      "filename": "memos.db",
+      "storedName": "1787121440434-190189124.db",
+      "size": 12288
+    },
+    {
+      "filename": "README.md",
+      "storedName": "1787121440435-951968883.md",
+      "size": 1450
+    }
+  ],
+  "createdAt": "2026-08-19T06:37:20.466Z",
+  "updatedAt": "2026-08-19T06:37:20.466Z",
+  "github": {
+    "status": "pending",
+    "url": null,
+    "lastSyncedAt": null,
+    "lastError": null
+  }
+}

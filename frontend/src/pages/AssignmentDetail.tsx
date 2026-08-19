@@ -136,46 +136,28 @@ export default function AssignmentDetail() {
           </section>
         )}
 
-        {assignment.images.length > 0 && (
+        {(assignment.executionResult || assignment.executionResultImages.length > 0) && (
           <section className="doc-section">
-            <h2 className="doc-section__label">이미지</h2>
-            <div className="image-gallery">
-              {assignment.images.map((img) => {
-                const src = fileUrl(assignment.subjectSlug, assignment.leaf, 'images', img.storedName);
-                return (
-                  <figure
-                    key={img.storedName}
-                    className={img.storedName === assignment.thumbnail ? 'is-thumbnail' : ''}
-                  >
-                    <img src={src} alt={img.filename} onClick={() => setLightbox({ src, alt: img.filename })} />
-                    <figcaption>
-                      {img.filename}
-                      {img.storedName === assignment.thumbnail ? ' (대표)' : ''}
-                    </figcaption>
-                  </figure>
-                );
-              })}
-            </div>
-          </section>
-        )}
-
-        {assignment.sourceFiles.length > 0 && (
-          <section className="doc-section">
-            <h2 className="doc-section__label">원본 파일</h2>
-            <p className="doc-section__body">
-              업로드한 프로젝트의 원본 파일 {assignment.sourceFiles.length}개가 폴더 구조 그대로 보존되어 있습니다.
-            </p>
-            <ul className="file-list">
-              {[...assignment.sourceFiles]
-                .sort((a, b) => a.path.localeCompare(b.path))
-                .map((f) => (
-                  <li key={f.path}>
-                    <a href={sourceFileUrl(assignment.subjectSlug, assignment.leaf, f.path)} download>
-                      {f.path}
-                    </a>
-                  </li>
-                ))}
-            </ul>
+            <h2 className="doc-section__label">실행 결과</h2>
+            {assignment.executionResult && (
+              <div className="code-frame">
+                <span className="code-frame__tag">output</span>
+                <pre className="code-block">{assignment.executionResult}</pre>
+              </div>
+            )}
+            {assignment.executionResultImages.length > 0 && (
+              <div className="image-gallery">
+                {assignment.executionResultImages.map((img) => {
+                  const src = fileUrl(assignment.subjectSlug, assignment.leaf, 'images', img.storedName);
+                  return (
+                    <figure key={img.storedName}>
+                      <img src={src} alt={img.filename} onClick={() => setLightbox({ src, alt: img.filename })} />
+                      <figcaption>{img.filename}</figcaption>
+                    </figure>
+                  );
+                })}
+              </div>
+            )}
           </section>
         )}
 
@@ -206,28 +188,46 @@ export default function AssignmentDetail() {
           </section>
         )}
 
-        {(assignment.executionResult || assignment.executionResultImages.length > 0) && (
+        {assignment.sourceFiles.length > 0 && (
           <section className="doc-section">
-            <h2 className="doc-section__label">실행 결과</h2>
-            {assignment.executionResult && (
-              <div className="code-frame">
-                <span className="code-frame__tag">output</span>
-                <pre className="code-block">{assignment.executionResult}</pre>
-              </div>
-            )}
-            {assignment.executionResultImages.length > 0 && (
-              <div className="image-gallery">
-                {assignment.executionResultImages.map((img) => {
-                  const src = fileUrl(assignment.subjectSlug, assignment.leaf, 'images', img.storedName);
-                  return (
-                    <figure key={img.storedName}>
-                      <img src={src} alt={img.filename} onClick={() => setLightbox({ src, alt: img.filename })} />
-                      <figcaption>{img.filename}</figcaption>
-                    </figure>
-                  );
-                })}
-              </div>
-            )}
+            <h2 className="doc-section__label">원본 파일</h2>
+            <p className="doc-section__body">
+              업로드한 프로젝트의 원본 파일 {assignment.sourceFiles.length}개가 폴더 구조 그대로 보존되어 있습니다.
+            </p>
+            <ul className="file-list">
+              {[...assignment.sourceFiles]
+                .sort((a, b) => a.path.localeCompare(b.path))
+                .map((f) => (
+                  <li key={f.path}>
+                    <a href={sourceFileUrl(assignment.subjectSlug, assignment.leaf, f.path)} download>
+                      {f.path}
+                    </a>
+                  </li>
+                ))}
+            </ul>
+          </section>
+        )}
+
+        {assignment.images.length > 0 && (
+          <section className="doc-section">
+            <h2 className="doc-section__label">이미지</h2>
+            <div className="image-gallery">
+              {assignment.images.map((img) => {
+                const src = fileUrl(assignment.subjectSlug, assignment.leaf, 'images', img.storedName);
+                return (
+                  <figure
+                    key={img.storedName}
+                    className={img.storedName === assignment.thumbnail ? 'is-thumbnail' : ''}
+                  >
+                    <img src={src} alt={img.filename} onClick={() => setLightbox({ src, alt: img.filename })} />
+                    <figcaption>
+                      {img.filename}
+                      {img.storedName === assignment.thumbnail ? ' (대표)' : ''}
+                    </figcaption>
+                  </figure>
+                );
+              })}
+            </div>
           </section>
         )}
 
