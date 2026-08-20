@@ -1,0 +1,93 @@
+{
+  "id": "11-아두이노-실습",
+  "leaf": "11-아두이노-실습",
+  "title": "아두이노 실습",
+  "subject": "아두이노",
+  "date": "2026-08-20",
+  "description": "아두이노 디지털 핀에 연결된 빨간색, 노란색, 파란색 LED를 1초 간격으로 순차적으로 켜고 끄는 기본 제어 코드입니다. setup()에서 핀 출력을 설정하고 loop()를 통해 점등 패턴을 무한 반복합니다.",
+  "tags": [
+    "cpp",
+    "arduino",
+    "led",
+    "digitalwrite",
+    "delay"
+  ],
+  "codeBlocks": [
+    {
+      "language": "",
+      "code": "// C++ code\n//\n\nint Red=7;\nint Yellow=6;\nint Blue=5;\n\n\n\nvoid setup()\n{\n  pinMode(Red, OUTPUT);\n  pinMode(Yellow, OUTPUT);\n  pinMode(Blue, OUTPUT);\n}\n\nvoid loop()\n{\n  digitalWrite(Red, HIGH);\n  delay(1000);\n  digitalWrite(Red, LOW);\n\n  digitalWrite(Yellow, HIGH);\n  delay(1000);\n  digitalWrite(Yellow, LOW);\n\n  digitalWrite(Blue, HIGH);\n  delay(1000);\n  digitalWrite(Blue, LOW);\n}",
+      "description": "1번"
+    },
+    {
+      "language": "",
+      "code": "// C++ code\n//\n\n\nint Buzzer = 7;\n\nvoid setup()\n{\n  pinMode(Buzzer, OUTPUT);\n}\n\nvoid loop()\n{\n  tone(Buzzer, 523);\n  delay(500);\n  tone (Buzzer, 587);\n  delay(500);\n  tone(Buzzer, 659);\n  delay(500);\n}",
+      "description": "4번"
+    },
+    {
+      "language": "",
+      "code": "// C++ code\n//\n\n// C++ code\n//\n\nint ledPin = 8;\nint inputPin = 7;\nint val = 0;\n\nvoid setup()\n{\n  pinMode(ledPin, OUTPUT);\n  pinMode(inputPin, INPUT);\n  Serial.begin(9600);\n}\n\nvoid loop()\n{\n  val = digitalRead(inputPin);\n\n  if (val == HIGH) {\n    digitalWrite(ledPin, HIGH);\n    Serial.println(\"Welcome!\");\n  }\n  else {\n    digitalWrite(ledPin, LOW);\n    Serial.println(\"Nothing\");\n  }\n  delay(1000);\n}",
+      "description": "9번"
+    },
+    {
+      "language": "",
+      "code": "const int echoPin = 7;\nconst int trigPin = 8;\nconst int ledPin = 9;\nconst int buzzerPin = 10;\n\nvoid setup() {\n  Serial.begin(9600);\n\n  pinMode(echoPin, INPUT);\n  pinMode(trigPin, OUTPUT);\n  pinMode(ledPin, OUTPUT);\n  pinMode(buzzerPin, OUTPUT);\n\n  digitalWrite(trigPin, LOW);\n  digitalWrite(ledPin, LOW);\n  noTone(buzzerPin);\n}\n\nvoid loop() {\n  // 초음파 발사\n  digitalWrite(trigPin, LOW);\n  delayMicroseconds(2);\n  digitalWrite(trigPin, HIGH);\n  delayMicroseconds(10);\n  digitalWrite(trigPin, LOW);\n\n  // 30ms 안에 반사파가 안 돌아오면 duration = 0 (= 부채꼴 밖, 감지 실패)\n  unsigned long duration = pulseIn(echoPin, HIGH, 30000);\n\n  if (duration == 0) {\n    // 부채꼴 범위 밖 → 꺼짐\n    digitalWrite(ledPin, LOW);\n    noTone(buzzerPin);\n    Serial.println(\"범위 밖\");\n  } else {\n    // 부채꼴 범위 안 → 켜짐\n    digitalWrite(ledPin, HIGH);\n    tone(buzzerPin, 1000);\n    Serial.println(\"범위 안 - 감지됨!\");\n  }\n\n  delay(200);\n}",
+      "description": "11번"
+    }
+  ],
+  "codeFiles": [],
+  "sourceFiles": [
+    {
+      "path": "1.png",
+      "size": 181190
+    },
+    {
+      "path": "11.png",
+      "size": 201154
+    },
+    {
+      "path": "4.png",
+      "size": 130211
+    },
+    {
+      "path": "9.png",
+      "size": 169758
+    }
+  ],
+  "learnings": "pinMode() 함수를 사용한 핀 출력 설정 방법과 digitalWrite(), delay() 함수를 이용한 기본 하드웨어 제어 흐름을 학습할 수 있습니다.",
+  "difficulties": "delay() 함수를 사용할 때 제어 흐름이 멈추는 블로킹 현상과 핀 번호 및 디지털 신호(HIGH/LOW) 매핑 개념을 이해하는 과정이 필요합니다.",
+  "executionResult": "별도의 텍스트 출력은 없으며, 하드웨어 상에서 7번(Red), 6번(Yellow), 5번(Blue) 핀에 연결된 LED가 1초씩 순차적으로 켜졌다 꺼지는 동작을 반복합니다.",
+  "executionResultImages": [],
+  "favorite": false,
+  "thumbnail": "1787212177494-756605857.png",
+  "images": [
+    {
+      "filename": "1.png",
+      "storedName": "1787212177494-756605857.png",
+      "size": 181190
+    },
+    {
+      "filename": "11.png",
+      "storedName": "1787212177495-93735004.png",
+      "size": 201154
+    },
+    {
+      "filename": "4.png",
+      "storedName": "1787212177496-905474328.png",
+      "size": 130211
+    },
+    {
+      "filename": "9.png",
+      "storedName": "1787212177497-930036440.png",
+      "size": 169758
+    }
+  ],
+  "attachments": [],
+  "createdAt": "2026-08-20T07:49:37.503Z",
+  "updatedAt": "2026-08-20T07:49:37.503Z",
+  "github": {
+    "status": "pending",
+    "url": null,
+    "lastSyncedAt": null,
+    "lastError": null
+  }
+}
